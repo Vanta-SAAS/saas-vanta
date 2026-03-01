@@ -1,8 +1,9 @@
+<% controller_name = params[:form_controller] || "purchase-order-form" %>
 <% if @products.any? %>
   <% @products.each do |product| %>
     <button type="button"
       class="w-full px-4 py-2 text-left text-sm hover:bg-muted transition-colors"
-      data-action="click->purchase-order-form#selectProduct"
+      data-action="click-><%= controller_name %>#selectProduct"
       data-product-id="<%= product.id %>"
       data-product-name="<%= product.combobox_display %>"
       data-product-price="<%= product.buy_price %>">

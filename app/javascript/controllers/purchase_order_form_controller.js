@@ -206,7 +206,7 @@ export default class extends Controller {
   async fetchProducts(query) {
     if (!this.selectedProviderId) return
 
-    const url = `/providers/${this.selectedProviderId}/products?q=${encodeURIComponent(query)}`
+    const url = `/providers/${this.selectedProviderId}/products?q=${encodeURIComponent(query)}&form_controller=purchase-order-form`
 
     try {
       const response = await fetch(url, {

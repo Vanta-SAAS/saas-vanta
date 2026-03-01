@@ -32,9 +32,22 @@
           <%= f.text_field :social_reason, class: "form-input" %>
         </div>
 
-        <div class="sm:col-span-6">
+        <div class="sm:col-span-3">
           <%= f.label :address, "Direccion", class: "form-label" %>
           <%= f.text_field :address, class: "form-input" %>
+        </div>
+
+        <div class="sm:col-span-3">
+          <%= render "shared/async_combobox",
+              name: "enterprise[ubigeo_id]",
+              src: ubigeos_path,
+              value: @enterprise.ubigeo_id,
+              display: @enterprise.ubigeo&.combobox_display,
+              label: "Ubigeo",
+              optional: true,
+              placeholder: "Buscar distrito...",
+              hint: "Requerido para facturacion electronica",
+              size: "full" %>
         </div>
 
         <div class="sm:col-span-3">

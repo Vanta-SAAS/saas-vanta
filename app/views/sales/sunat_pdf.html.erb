@@ -1,0 +1,117 @@
+<% content_for :title, "#{@sale.sunat_series}-#{@sale.sunat_number}" %>
+
+<% content_for :head do %>
+  <%= render "shared/documents/pdf_styles" %>
+  <style>
+    .sunat-meta {
+      margin-top: 16px;
+      padding: 12px 16px;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      background-color: #F9FAFB;
+      font-size: 11px;
+      color: #6B7280;
+    }
+    .sunat-meta .meta-row { margin-bottom: 4px; }
+    .sunat-meta .meta-label { font-weight: 600; color: #374151; }
+  </style>
+<% end %>
+
+<% enterprise = @sale.enterprise %>
+<% customer = @sale.customer %>
+<% doc_type_label = @sale.sunat_document_type == "01" ? "FACTURA ELECTRONICA" : "BOLETA DE VENTA ELECTRONICA" %>
+<% serie_correlativo = "#{@sale.sunat_series}-#{@sale.sunat_number}" %>
+
+<div class="doc">
+  <%= render "shared/documents/pdf_header",
+    enterprise: enterprise,
+    document_title: doc_type_label,
+    document_code: serie_correlativo,
+    document_date: @sale.issue_date %>
+
+  <table class="info-grid"><tr>
+    <td>
+      <div class="info-card">
+        <div class="info-card-title">Emisor</div>
+        <div class="info-row"><span class="label">Razon Social</span><span class="value"><%= enterprise.social_reason || enterprise.comercial_name %></span></div>
+        <div class="info-row"><span class="label">RUC</span><span class="value"><%= enterprise.tax_id %></span></div>
+        <% if enterprise.address.present? %>
+          <div class="info-row"><span class="label">Direccion</span><span class="value"><%= enterprise.address %></span></div>
+        <% end %>
+        <% if enterprise.ubigeo.present? %>
+          <div class="info-row"><span class="label">Ubigeo</span><span class="value"><%= enterprise.ubigeo.code %></span></div>
+        <% end %>
+      </div>
+    </td>
+    <td class="spacer"></td>
+    <td>
+      <div class="info-card">
+        <div class="info-card-title">Receptor</div>
+        <div class="info-row"><span class="label">Nombre</span><span class="value"><%= customer.name %></span></div>
+        <div class="info-row">
+          <span class="label"><%= customer.ruc? ? "RUC" : "DNI" %></span>
+          <span class="value"><%= customer.tax_id %></span>
+        </div>
+        <% if customer.address.present? %>
+          <div class="info-row"><span class="label">Direccion</span><span class="value"><%= customer.address %></span></div>
+        <% end %>
+      </div>
+    </td>
+  </tr></table>
+
+  <table class="items-table">
+    <thead>
+      <tr>
+        <th style="width:40%">Descripcion</th>
+        <th class="r">Cant.</th>
+        <th class="r">Unidad</th>
+        <th class="r">P. Unit.</th>
+        <th class="r">Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @sale.items.includes(:product).each_with_index do |item, i| %>
+        <tr class="<%= i.even? ? 'even' : '' %>">
+          <td>
+            <div class="item-name"><%= item.product.name %></div>
+            <% if item.product.sku.present? %>
+              <div class="item-sku">SKU: <%= item.product.sku %></div>
+            <% end %>
+          </td>
+          <td class="r"><%= item.quantity %></td>
+          <td class="r"><%= item.unit_label %></td>
+          <td class="r">S/ <%= number_with_precision(item.unit_price, precision: 2, delimiter: ",") %></td>
+          <td class="r">S/ <%= number_with_precision(item.total, precision: 2, delimiter: ",") %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <%= render "shared/documents/pdf_totals",
+    subtotal: @sale.subtotal,
+    tax: @sale.tax,
+    total: @sale.total %>
+
+  <div class="sunat-meta">
+    <div class="meta-row">
+      <span class="meta-label">Comprobante:</span> <%= doc_type_label %> <%= serie_correlativo %>
+    </div>
+    <% if @sale.sunat_hash.present? %>
+      <div class="meta-row">
+        <span class="meta-label">Hash:</span> <%= @sale.sunat_hash %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @qr_file_path.present? %>
+    <div style="text-align: center; margin-top: 16px;">
+      <img src="file:///<%= @qr_file_path %>" style="width: 260px; height: 260px;" />
+      <p style="font-size: 10px; color: #6B7280; margin-top: 4px;">
+        Representacion impresa de la <%= @sale.sunat_document_type == "01" ? "Factura Electronica" : "Boleta de Venta Electronica" %>
+      </p>
+    </div>
+  <% end %>
+
+  <%= render "shared/documents/pdf_footer",
+    notes: @sale.notes %>
+</div>

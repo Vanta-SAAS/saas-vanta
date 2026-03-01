@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_07_000005) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_01_035142) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -124,6 +124,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_07_000005) do
     t.datetime "created_at", null: false
     t.boolean "dropshipping_enabled", default: false, null: false
     t.bigint "enterprise_id", null: false
+    t.string "sunat_api_key"
+    t.boolean "sunat_certificate_uploaded", default: false, null: false
+    t.integer "sunat_next_boleta_number"
+    t.string "sunat_next_boleta_series"
+    t.integer "sunat_next_factura_number"
+    t.string "sunat_next_factura_series"
+    t.string "sunat_series_boleta", default: "B001"
+    t.string "sunat_series_factura", default: "F001"
+    t.string "sunat_sol_password"
+    t.string "sunat_sol_user"
     t.datetime "updated_at", null: false
     t.boolean "use_stock", default: true
     t.index ["enterprise_id"], name: "index_enterprise_settings_on_enterprise_id", unique: true
@@ -141,10 +151,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_07_000005) do
     t.string "status", null: false
     t.string "subdomain", null: false
     t.bigint "tax_id"
+    t.bigint "ubigeo_id"
     t.datetime "updated_at", null: false
     t.index ["status"], name: "index_enterprises_on_status"
     t.index ["subdomain"], name: "index_enterprises_on_subdomain", unique: true
     t.index ["tax_id"], name: "idx_enterprises_on_tax_id_unq_not_null", unique: true, where: "(tax_id IS NOT NULL)"
+    t.index ["ubigeo_id"], name: "index_enterprises_on_ubigeo_id"
   end
 
   create_table "products", force: :cascade do |t|
@@ -260,6 +272,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_07_000005) do
     t.string "sourceable_type"
     t.string "status", default: "pending", null: false
     t.decimal "subtotal", precision: 10, scale: 2, default: "0.0"
+    t.string "sunat_cdr_code"
+    t.text "sunat_cdr_description"
+    t.string "sunat_document_type"
+    t.string "sunat_hash"
+    t.integer "sunat_number"
+    t.text "sunat_qr_image"
+    t.jsonb "sunat_response_data"
+    t.string "sunat_series"
+    t.string "sunat_status"
+    t.string "sunat_uuid"
+    t.text "sunat_xml"
     t.decimal "tax", precision: 10, scale: 2, default: "0.0"
     t.decimal "total", precision: 10, scale: 2, default: "0.0"
     t.datetime "updated_at", null: false
@@ -272,6 +295,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_07_000005) do
     t.index ["seller_id"], name: "index_sales_on_seller_id"
     t.index ["sourceable_type", "sourceable_id"], name: "index_sales_on_sourceable"
     t.index ["status"], name: "index_sales_on_status"
+    t.index ["sunat_status"], name: "index_sales_on_sunat_status"
+    t.index ["sunat_uuid"], name: "index_sales_on_sunat_uuid", unique: true, where: "(sunat_uuid IS NOT NULL)"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -352,6 +377,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_07_000005) do
   add_foreign_key "customers", "enterprises"
   add_foreign_key "customers", "ubigeos"
   add_foreign_key "enterprise_settings", "enterprises"
+  add_foreign_key "enterprises", "ubigeos"
   add_foreign_key "products", "enterprises"
   add_foreign_key "products", "providers"
   add_foreign_key "providers", "enterprises"

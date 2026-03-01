@@ -64,6 +64,13 @@ gem "aws-sdk-s3", "~> 1.213", require: false
 # Mailer
 gem "resend", "~> 1.0"
 
+# HTTP client for external APIs
+gem "faraday", "~> 2.12"
+gem "faraday-multipart", "~> 1.1"
+
+# QR code generation
+gem "rqrcode", "~> 3.2"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"

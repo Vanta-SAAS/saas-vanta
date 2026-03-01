@@ -11,6 +11,7 @@ class Enterprise < ApplicationRecord
   has_many :purchase_orders, dependent: :destroy
   has_many :customer_quotes, dependent: :destroy
   has_many :sales, dependent: :destroy
+  belongs_to :ubigeo, optional: true
   has_one :settings, class_name: "EnterpriseSetting", dependent: :destroy
   accepts_nested_attributes_for :settings, update_only: true
 

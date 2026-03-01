@@ -37,6 +37,32 @@ class Sale < ApplicationRecord
     confirmed? && purchase_orders.empty? && enterprise.settings&.dropshipping_enabled?
   end
 
+  def can_emit_document?
+    confirmed? && sunat_uuid.blank? && enterprise.settings&.sunat_api_key.present? && enterprise.settings&.sunat_certificate_uploaded?
+  end
+
+  def can_retry_document?
+    sunat_uuid.present? && sunat_status.in?(%w[ERROR REJECTED])
+  end
+
+  def sunat_status_badge_class
+    case sunat_status
+    when "ACCEPTED" then "badge-success"
+    when "REJECTED" then "badge-destructive"
+    when "ERROR" then "badge-destructive"
+    when "SIGNED", "CREATED" then "badge-secondary"
+    else "badge-secondary"
+    end
+  end
+
+  def sunat_document_type_label
+    case sunat_document_type
+    when "01" then "Factura"
+    when "03" then "Boleta"
+    else sunat_document_type
+    end
+  end
+
   def confirm!
     return false unless can_confirm?
 

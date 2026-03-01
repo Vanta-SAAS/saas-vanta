@@ -51,8 +51,20 @@ Rails.application.routes.draw do
       patch :confirm
       patch :cancel
       post :generate_purchase_orders
+      post :emit_document
+      post :retry_document
+      get :check_sunat_status
       get :pdf
+      get :sunat_pdf
+      get :sunat_xml
     end
+  end
+
+  resource :sunat, only: [ :show ], controller: "sunat" do
+    post :register
+    post :upload_certificate
+    patch :update_settings
+    patch :update_sol_credentials
   end
 
   resources :purchase_orders do
