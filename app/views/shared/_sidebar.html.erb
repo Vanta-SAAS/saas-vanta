@@ -68,6 +68,10 @@
       <%= sidebar_link_to "Mi Empresa", edit_enterprise_path(current_enterprise), icon: "building-2" %>
     <% end %>
 
+    <% if current_enterprise.present? && current_enterprise.formal? && policy(current_enterprise).sunat? %>
+      <%= sidebar_link_to "Facturacion", sunat_path, icon: "file-text" %>
+    <% end %>
+
     <div class="sidebar-user">
       <div class="sidebar-user-avatar">
         <span class="text-sm font-semibold text-white">

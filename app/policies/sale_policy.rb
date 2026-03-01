@@ -30,4 +30,12 @@ class SalePolicy < ApplicationPolicy
   def generate_purchase_orders?
     platform_super_admin? || belongs_to_enterprise?
   end
+
+  def emit_document?
+    platform_super_admin? || enterprise_admin?
+  end
+
+  def retry_document?
+    platform_super_admin? || enterprise_admin?
+  end
 end

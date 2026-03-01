@@ -2,7 +2,7 @@ class SalesController < ApplicationController
   include PdfExportable
 
   before_action :require_enterprise_selected
-  before_action :set_sale, only: %i[show edit update destroy confirm cancel pdf generate_purchase_orders]
+  before_action :set_sale, only: %i[show edit update destroy confirm cancel pdf sunat_pdf sunat_xml generate_purchase_orders emit_document check_sunat_status retry_document]
 
   def index
     authorize Sale
@@ -127,10 +127,78 @@ class SalesController < ApplicationController
     redirect_to @sale, alert: e.message
   end
 
+  def emit_document
+    authorize @sale
+
+    service = Sunat::EmitDocumentService.new(sale: @sale)
+    service.call
+
+    if service.valid?
+      doc_type = @sale.sunat_document_type == "01" ? "Factura" : "Boleta"
+      redirect_to @sale, notice: "#{doc_type} emitida exitosamente. Estado: #{@sale.sunat_status}"
+    else
+      redirect_to @sale, alert: service.errors_message
+    end
+  end
+
+  def check_sunat_status
+    authorize @sale, :show?
+
+    service = Sunat::CheckStatusService.new(sale: @sale)
+    service.call
+
+    if service.valid?
+      redirect_to @sale, notice: "Estado actualizado: #{@sale.sunat_status}"
+    else
+      redirect_to @sale, alert: service.errors_message
+    end
+  end
+
+  def retry_document
+    authorize @sale
+
+    service = Sunat::RetryDocumentService.new(sale: @sale)
+    service.call
+
+    if service.valid?
+      redirect_to @sale, notice: "Reintento enviado. Estado: #{@sale.sunat_status}"
+    else
+      redirect_to @sale, alert: service.errors_message
+    end
+  end
+
   def pdf
     authorize @sale, :show?
 
     generate_pdf(@sale, template: "sales/pdf")
+  end
+
+  def sunat_pdf
+    authorize @sale, :show?
+
+    qr_text = @sale.sunat_response_data&.dig("qr_text")
+    if qr_text.present?
+      qr = RQRCode::QRCode.new(qr_text, level: :l)
+      png = qr.as_png(size: 600, border_modules: 1)
+      @qr_tempfile = Tempfile.new([ "qr", ".png" ])
+      @qr_tempfile.binmode
+      @qr_tempfile.write(png.to_s)
+      @qr_tempfile.close
+      @qr_file_path = @qr_tempfile.path
+    end
+
+    generate_pdf(@sale, template: "sales/sunat_pdf", filename: "#{@sale.sunat_series}-#{@sale.sunat_number}.pdf")
+  ensure
+    @qr_tempfile&.unlink
+  end
+
+  def sunat_xml
+    authorize @sale, :show?
+
+    send_data @sale.sunat_xml,
+      filename: "#{@sale.sunat_series}-#{@sale.sunat_number}.xml",
+      type: "application/xml",
+      disposition: "attachment"
   end
 
   private

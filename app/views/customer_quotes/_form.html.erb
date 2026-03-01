@@ -3,7 +3,7 @@
               local: true,
               data: {
                 controller: "customer-quote-form",
-                customer_quote_form_products_url_value: search_products_path,
+                customer_quote_form_products_url_value: search_products_path(form_controller: "customer-quote-form"),
                 customer_quote_form_prefill_url_value: prefill_customer_quotes_path
               } do |f| %>
 

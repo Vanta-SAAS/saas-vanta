@@ -154,7 +154,8 @@ export default class extends Controller {
   }
 
   async fetchProducts(query) {
-    const url = `${this.productsUrlValue}?q=${encodeURIComponent(query)}`
+    const separator = this.productsUrlValue.includes("?") ? "&" : "?"
+    const url = `${this.productsUrlValue}${separator}q=${encodeURIComponent(query)}`
 
     try {
       const response = await fetch(url, {

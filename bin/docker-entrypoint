@@ -4,6 +4,9 @@ set -e
 # Ensure we can find the installed gems
 export PATH="/usr/local/bundle/bin:$PATH"
 
+# Install any missing gems (handles Gemfile changes without rebuilding image)
+bundle check || bundle install
+
 # If running the rails server then create or migrate existing database
 if [ "${1}" == "./bin/rails" ] && [ "${2}" == "server" ]; then
   # Remove any existing server.pid file to prevent "server already running" errors
@@ -11,9 +14,7 @@ if [ "${1}" == "./bin/rails" ] && [ "${2}" == "server" ]; then
   
   # Prepare all databases (primary + cache/queue/cable)
   ./bin/rails db:prepare
-  ./bin/rails db:schema:load:cache 2>/dev/null || true
-  ./bin/rails db:schema:load:queue 2>/dev/null || true
-  ./bin/rails db:schema:load:cable 2>/dev/null || true
+  ./bin/rails db:schema:load 2>/dev/null || true
   ./bin/rails db:seed
 fi
 

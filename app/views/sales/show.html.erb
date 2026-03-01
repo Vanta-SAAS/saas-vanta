@@ -31,6 +31,14 @@
             data: { turbo_confirm: "Se generaran ordenes de compra agrupadas por proveedor. Continuar?" } %>
       <% end %>
 
+      <% if @sale.can_emit_document? && policy(@sale).emit_document? %>
+        <% doc_type = @sale.customer.ruc? ? "Factura" : "Boleta" %>
+        <%= button_to "Emitir #{doc_type}", emit_document_sale_path(@sale),
+            method: :post,
+            class: "btn-primary",
+            data: { turbo_confirm: "Se emitira una #{doc_type} electronica a SUNAT. Continuar?" } %>
+      <% end %>
+
       <% if @sale.can_cancel? && policy(@sale).cancel? %>
         <%= button_to "Cancelar", cancel_sale_path(@sale),
             method: :patch,
@@ -135,6 +143,60 @@
     <div class="card mb-8">
       <h3 class="text-lg font-medium text-foreground mb-2">Notas</h3>
       <p class="text-foreground whitespace-pre-wrap"><%= @sale.notes %></p>
+    </div>
+  <% end %>
+
+  <% if @sale.sunat_uuid.present? %>
+    <div class="card mb-8">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-medium text-foreground">Comprobante Electronico</h3>
+        <span class="<%= @sale.sunat_status_badge_class %>"><%= @sale.sunat_status %></span>
+      </div>
+      <dl class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+        <div>
+          <dt class="text-muted-foreground">Tipo</dt>
+          <dd class="font-medium text-foreground"><%= @sale.sunat_document_type_label %></dd>
+        </div>
+        <% if @sale.sunat_series.present? %>
+          <div>
+            <dt class="text-muted-foreground">Serie - Numero</dt>
+            <dd class="font-medium text-foreground"><%= @sale.sunat_series %>-<%= @sale.sunat_number %></dd>
+          </div>
+        <% end %>
+        <div>
+          <dt class="text-muted-foreground">UUID</dt>
+          <dd class="font-medium text-foreground text-xs"><%= @sale.sunat_uuid %></dd>
+        </div>
+      </dl>
+
+      <% if @sale.sunat_cdr_code.present? %>
+        <div class="mt-4 p-3 bg-muted rounded-lg text-sm">
+          <span class="text-muted-foreground">Respuesta SUNAT:</span>
+          <span class="font-medium text-foreground"><%= @sale.sunat_cdr_code %></span>
+          <% if @sale.sunat_cdr_description.present? %>
+            <span class="text-muted-foreground">- <%= @sale.sunat_cdr_description %></span>
+          <% end %>
+        </div>
+      <% end %>
+
+      <div class="mt-4 flex flex-wrap gap-3">
+        <%= link_to "Consultar Estado", check_sunat_status_sale_path(@sale),
+            class: "btn-secondary text-sm" %>
+
+        <% if @sale.can_retry_document? && policy(@sale).retry_document? %>
+          <%= button_to "Reintentar Envio", retry_document_sale_path(@sale),
+              method: :post,
+              class: "btn-secondary text-sm",
+              data: { turbo_confirm: "Reintentar el envio del comprobante a SUNAT?" } %>
+        <% end %>
+
+        <% if @sale.sunat_status == "ACCEPTED" && @sale.sunat_xml.present? %>
+          <%= link_to "Descargar Comprobante PDF", sunat_pdf_sale_path(@sale),
+              class: "btn-primary text-sm", data: { turbo: false } %>
+          <%= link_to "Descargar XML", sunat_xml_sale_path(@sale),
+              class: "btn-secondary text-sm", data: { turbo: false } %>
+        <% end %>
+      </div>
     </div>
   <% end %>
 

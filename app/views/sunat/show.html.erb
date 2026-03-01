@@ -1,0 +1,195 @@
+<% sunat_confirm = "Estas seguro que quieres cambiar esta configuracion? Realizarlo puede generar una discrepancia o errores al momento de generar un documento con SUNAT." %>
+<div class="max-w-4xl mx-auto py-8 px-4">
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-foreground">Facturacion Electronica</h1>
+    <p class="mt-1 text-sm text-muted-foreground">Configuracion de integracion con SUNAT para emitir comprobantes electronicos.</p>
+  </div>
+
+  <div class="card mb-6">
+    <h3 class="text-lg font-medium text-foreground mb-4">Estado de la Integracion</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="flex items-center gap-3">
+        <% if @enterprise.formal? %>
+          <span class="inline-flex h-3 w-3 rounded-full bg-green-500"></span>
+          <span class="text-sm text-foreground">RUC registrado: <%= @enterprise.tax_id %></span>
+        <% else %>
+          <span class="inline-flex h-3 w-3 rounded-full bg-red-500"></span>
+          <span class="text-sm text-muted-foreground">Empresa sin RUC</span>
+        <% end %>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <% if @settings.sunat_api_key.present? %>
+          <span class="inline-flex h-3 w-3 rounded-full bg-green-500"></span>
+          <span class="text-sm text-foreground">Registrada en servicio</span>
+        <% else %>
+          <span class="inline-flex h-3 w-3 rounded-full bg-yellow-500"></span>
+          <span class="text-sm text-muted-foreground">Pendiente de registro</span>
+        <% end %>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <% if @settings.sunat_certificate_uploaded? %>
+          <span class="inline-flex h-3 w-3 rounded-full bg-green-500"></span>
+          <span class="text-sm text-foreground">Certificado cargado</span>
+        <% else %>
+          <span class="inline-flex h-3 w-3 rounded-full bg-yellow-500"></span>
+          <span class="text-sm text-muted-foreground">Certificado pendiente</span>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <% unless @enterprise.formal? %>
+    <div class="alert-error mb-6">
+      <p class="text-sm">La empresa debe tener un RUC registrado para emitir comprobantes electronicos.
+        <%= link_to "Editar empresa", edit_enterprise_path(@enterprise), class: "underline font-medium" %>.
+      </p>
+    </div>
+  <% end %>
+
+  <% if @enterprise.formal? && policy(@enterprise).manage? %>
+    <% unless @settings.sunat_api_key.present? %>
+      <div class="card mb-6">
+        <h3 class="text-lg font-medium text-foreground mb-2">Paso 1: Registrar Empresa</h3>
+        <p class="text-sm text-muted-foreground mb-4">
+          Ingrese las credenciales SOL de SUNAT para registrar su empresa en el servicio de facturacion.
+        </p>
+
+        <%= form_with url: register_sunat_path, method: :post, class: "space-y-4", data: { turbo_confirm: sunat_confirm } do |f| %>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <%= f.label :sol_user, "Usuario SOL", class: "form-label" %>
+              <%= f.text_field :sol_user, class: "form-input", required: true, placeholder: "MODDATOS" %>
+            </div>
+            <div>
+              <%= f.label :sol_password, "Clave SOL", class: "form-label" %>
+              <%= f.password_field :sol_password, class: "form-input", required: true %>
+            </div>
+          </div>
+          <%= f.submit "Registrar en SUNAT", class: "btn-primary cursor-pointer" %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <% if @settings.sunat_api_key.present? && !@settings.sunat_certificate_uploaded? %>
+      <div class="card mb-6">
+        <h3 class="text-lg font-medium text-foreground mb-2">Paso 2: Subir Certificado Digital</h3>
+        <p class="text-sm text-muted-foreground mb-4">
+          Suba su certificado digital (.pfx o .p12) emitido por SUNAT.
+        </p>
+
+        <%= form_with url: upload_certificate_sunat_path, method: :post, multipart: true, class: "space-y-4", data: { turbo_confirm: sunat_confirm } do |f| %>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <%= f.label :certificate, "Certificado (.pfx o .p12)", class: "form-label" %>
+              <%= f.file_field :certificate, class: "block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 file:cursor-pointer", required: true, accept: ".pfx,.p12" %>
+            </div>
+            <div>
+              <%= f.label :certificate_password, "Clave del certificado", class: "form-label" %>
+              <%= f.password_field :certificate_password, class: "form-input", required: true %>
+            </div>
+          </div>
+          <%= f.submit "Subir Certificado", class: "btn-primary cursor-pointer" %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <% if @settings.sunat_api_key.present? %>
+      <div class="card mb-6">
+        <h3 class="text-lg font-medium text-foreground mb-2">Factura</h3>
+        <p class="text-sm text-muted-foreground mb-4">
+          Configure la serie y correlativo para facturas.
+        </p>
+
+        <%= form_with model: @settings, url: update_settings_sunat_path, method: :patch, class: "space-y-4", data: { turbo_confirm: sunat_confirm } do |f| %>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <%= f.label :sunat_series_factura, "Serie", class: "form-label" %>
+              <%= f.text_field :sunat_series_factura, class: "form-input", placeholder: "F001", maxlength: 4 %>
+            </div>
+            <div>
+              <%= f.label :sunat_next_factura_number, "Correlativo", class: "form-label" %>
+              <%= f.number_field :sunat_next_factura_number, class: "form-input", placeholder: "1", min: 1 %>
+            </div>
+          </div>
+
+          <% unless @enterprise.ubigeo.present? %>
+            <p class="text-sm text-amber-600">
+              La empresa no tiene ubigeo asignado. Configurelo en
+              <%= link_to "Editar Empresa", edit_enterprise_path(@enterprise), class: "underline font-medium" %>.
+            </p>
+          <% end %>
+
+          <%= f.submit "Guardar Factura", class: "btn-primary cursor-pointer" %>
+        <% end %>
+      </div>
+
+      <div class="card mb-6">
+        <h3 class="text-lg font-medium text-foreground mb-2">Boleta</h3>
+        <p class="text-sm text-muted-foreground mb-4">
+          Configure la serie y correlativo para boletas.
+        </p>
+
+        <%= form_with model: @settings, url: update_settings_sunat_path, method: :patch, class: "space-y-4", data: { turbo_confirm: sunat_confirm } do |f| %>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <%= f.label :sunat_series_boleta, "Serie", class: "form-label" %>
+              <%= f.text_field :sunat_series_boleta, class: "form-input", placeholder: "B001", maxlength: 4 %>
+            </div>
+            <div>
+              <%= f.label :sunat_next_boleta_number, "Correlativo", class: "form-label" %>
+              <%= f.number_field :sunat_next_boleta_number, class: "form-input", placeholder: "1", min: 1 %>
+            </div>
+          </div>
+
+          <%= f.submit "Guardar Boleta", class: "btn-primary cursor-pointer" %>
+        <% end %>
+      </div>
+
+      <div class="card mb-6">
+        <h3 class="text-lg font-medium text-foreground mb-2">Credenciales SOL</h3>
+        <p class="text-sm text-muted-foreground mb-4">
+          Actualice su usuario y clave SOL de SUNAT.
+        </p>
+
+        <%= form_with url: update_sol_credentials_sunat_path, method: :patch, class: "space-y-4", data: { turbo_confirm: sunat_confirm } do |f| %>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <%= f.label :sol_user, "Usuario SOL", class: "form-label" %>
+              <%= f.text_field :sol_user, value: @settings.sunat_sol_user, class: "form-input", required: true, placeholder: "MODDATOS" %>
+            </div>
+            <div>
+              <%= f.label :sol_password, "Clave SOL", class: "form-label" %>
+              <%= f.password_field :sol_password, class: "form-input", required: true %>
+            </div>
+          </div>
+          <%= f.submit "Actualizar Credenciales SOL", class: "btn-secondary cursor-pointer" %>
+        <% end %>
+      </div>
+
+      <% if @settings.sunat_certificate_uploaded? %>
+        <div class="card mb-6">
+          <h3 class="text-lg font-medium text-foreground mb-2">Actualizar Certificado Digital</h3>
+          <p class="text-sm text-muted-foreground mb-4">
+            Si necesita actualizar su certificado digital (.pfx o .p12), subalo aqui.
+          </p>
+
+          <%= form_with url: upload_certificate_sunat_path, method: :post, multipart: true, class: "space-y-4", data: { turbo_confirm: sunat_confirm } do |f| %>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <%= f.label :certificate, "Certificado (.pfx o .p12)", class: "form-label" %>
+                <%= f.file_field :certificate, class: "block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 file:cursor-pointer", required: true, accept: ".pfx,.p12" %>
+              </div>
+              <div>
+                <%= f.label :certificate_password, "Clave del certificado", class: "form-label" %>
+                <%= f.password_field :certificate_password, class: "form-input", required: true %>
+              </div>
+            </div>
+            <%= f.submit "Actualizar Certificado", class: "btn-secondary cursor-pointer" %>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

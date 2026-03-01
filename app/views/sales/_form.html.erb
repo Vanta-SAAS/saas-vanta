@@ -3,7 +3,7 @@
               local: true,
               data: {
                 controller: "sale-form",
-                sale_form_products_url_value: search_products_path
+                sale_form_products_url_value: search_products_path(form_controller: "sale-form")
               } do |f| %>
 
   <% if sale.errors.any? %>
