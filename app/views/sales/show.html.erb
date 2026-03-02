@@ -160,7 +160,7 @@
         <% if @sale.sunat_series.present? %>
           <div>
             <dt class="text-muted-foreground">Serie - Numero</dt>
-            <dd class="font-medium text-foreground"><%= @sale.sunat_series %>-<%= @sale.sunat_number %></dd>
+            <dd class="font-medium text-foreground"><%= @sale.sunat_formatted_number %></dd>
           </div>
         <% end %>
         <div>

@@ -1,4 +1,4 @@
-<% content_for :title, "#{@sale.sunat_series}-#{@sale.sunat_number}" %>
+<% content_for :title, @sale.sunat_formatted_number %>
 
 <% content_for :head do %>
   <%= render "shared/documents/pdf_styles" %>
@@ -20,7 +20,7 @@
 <% enterprise = @sale.enterprise %>
 <% customer = @sale.customer %>
 <% doc_type_label = @sale.sunat_document_type == "01" ? "FACTURA ELECTRONICA" : "BOLETA DE VENTA ELECTRONICA" %>
-<% serie_correlativo = "#{@sale.sunat_series}-#{@sale.sunat_number}" %>
+<% serie_correlativo = @sale.sunat_formatted_number %>
 
 <div class="doc">
   <%= render "shared/documents/pdf_header",

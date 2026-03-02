@@ -55,6 +55,12 @@ class Sale < ApplicationRecord
     end
   end
 
+  def sunat_formatted_number
+    return nil unless sunat_series.present? && sunat_number.present?
+
+    "#{sunat_series}-#{sunat_number.to_s.rjust(8, '0')}"
+  end
+
   def sunat_document_type_label
     case sunat_document_type
     when "01" then "Factura"

@@ -187,7 +187,7 @@ class SalesController < ApplicationController
       @qr_file_path = @qr_tempfile.path
     end
 
-    generate_pdf(@sale, template: "sales/sunat_pdf", filename: "#{@sale.sunat_series}-#{@sale.sunat_number}.pdf")
+    generate_pdf(@sale, template: "sales/sunat_pdf", filename: "#{@sale.sunat_formatted_number}.pdf")
   ensure
     @qr_tempfile&.unlink
   end
@@ -196,7 +196,7 @@ class SalesController < ApplicationController
     authorize @sale, :show?
 
     send_data @sale.sunat_xml,
-      filename: "#{@sale.sunat_series}-#{@sale.sunat_number}.xml",
+      filename: "#{@sale.sunat_formatted_number}.xml",
       type: "application/xml",
       disposition: "attachment"
   end
