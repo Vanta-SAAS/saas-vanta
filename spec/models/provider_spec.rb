@@ -6,7 +6,7 @@ RSpec.describe Provider, type: :model do
       it 'requires name to be present' do
         provider = build(:provider, name: nil)
         expect(provider).not_to be_valid
-        expect(provider.errors[:name]).to include("can't be blank")
+        expect(provider.errors[:name]).to include("no puede estar vacio")
       end
 
       it 'allows valid name' do
@@ -24,7 +24,7 @@ RSpec.describe Provider, type: :model do
       it 'rejects invalid email format' do
         provider = build(:provider, email: 'invalid-email')
         expect(provider).not_to be_valid
-        expect(provider.errors[:email]).to include("is invalid")
+        expect(provider.errors[:email]).to include("no es valido")
       end
 
       it 'allows blank email' do

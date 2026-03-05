@@ -1,10 +1,16 @@
 <%# Shared PDF styles for documents %>
+<%
+  primary_color = enterprise_pdf_primary_color
+  secondary_color = enterprise_pdf_secondary_color
+  primary_light = primary_color  # used for total row
+  header_bg = secondary_color    # header uses secondary color
+%>
 <style>
   .doc { width: 100%; }
 
   /* Header */
   .header {
-    background-color: #1F2937;
+    background-color: <%= header_bg %>;
     color: #fff;
     padding: 20px 24px;
     display: table;
@@ -53,7 +59,7 @@
   /* Items table */
   .items-table { width: 100%; border-collapse: collapse; margin-top: 18px; font-size: 13px; }
   .items-table th {
-    background-color: #1F2937;
+    background-color: <%= header_bg %>;
     color: #fff;
     padding: 10px 14px;
     text-align: left;
@@ -78,7 +84,7 @@
   .totals-row:last-child { border-bottom: none; }
   .totals-row .label { color: #6B7280; }
   .totals-row .value { font-weight: 600; color: #111827; float: right; }
-  .totals-row.total { background-color: #10B981; color: #fff; }
+  .totals-row.total { background-color: <%= primary_color %>; color: #fff; }
   .totals-row.total .label, .totals-row.total .value { color: #fff; font-weight: 700; font-size: 15px; }
 
   /* Notes */
@@ -104,7 +110,7 @@
   }
   .footer-left, .footer-right { display: table-cell; vertical-align: middle; }
   .footer-right { text-align: right; }
-  .footer a { color: #10B981; font-weight: 700; text-decoration: none; }
+  .footer a { color: <%= primary_color %>; font-weight: 700; text-decoration: none; }
 
   /* Clear floats */
   .clearfix::after { content: ""; display: table; clear: both; }

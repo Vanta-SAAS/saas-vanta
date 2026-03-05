@@ -8,6 +8,10 @@ class Product < ApplicationRecord
 
   # Normalizations
   normalizes :sku, with: ->(value) { value.strip.presence }
+
+  # Defaults
+  before_validation :set_default_unit
+
   validates :units_per_package, numericality: { greater_than: 0 }, allow_nil: true
 
   # Validations
@@ -81,5 +85,9 @@ class Product < ApplicationRecord
     return unless source_type == "purchased"
 
     errors.add(:base, "Proveedor es obligatorio para productos comprados") if provider.nil?
+  end
+
+  def set_default_unit
+    self.unit ||= "un"
   end
 end

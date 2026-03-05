@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_05_155720) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_05_172649) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -202,6 +202,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_05_155720) do
     t.datetime "created_at", null: false
     t.boolean "dropshipping_enabled", default: false, null: false
     t.bigint "enterprise_id", null: false
+    t.string "primary_color"
+    t.string "secondary_color"
     t.string "sunat_api_key"
     t.boolean "sunat_certificate_uploaded", default: false, null: false
     t.integer "sunat_next_boleta_number"

@@ -1,3 +1,67 @@
+
+<%
+  current_primary = f.object.settings&.primary_color.presence || "#059669"
+  current_secondary = f.object.settings&.secondary_color.presence || "#374151"
+%>
+<div class="card" data-controller="color-picker"
+     data-color-picker-default-primary-value="#059669"
+     data-color-picker-default-secondary-value="#374151">
+  <h3 class="text-sm font-semibold text-foreground">Colores de Marca</h3>
+  <p class="mt-1 text-sm text-muted-foreground">Personaliza los colores de la interfaz y documentos PDF de tu empresa.</p>
+
+  <%= f.fields_for :settings do |sf| %>
+    <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+
+      <div class="sm:col-span-3">
+        <%= sf.label :primary_color, "Color Primario", class: "form-label" %>
+        <div class="flex items-center gap-3">
+          <%= sf.color_field :primary_color,
+              value: current_primary,
+              class: "w-12 h-11 rounded-lg border border-border cursor-pointer p-1",
+              data: { color_picker_target: "primaryInput", action: "input->color-picker#updatePrimaryPreview" } %>
+          <div class="flex items-center gap-2 flex-1">
+            <div data-color-picker-target="primaryPreview"
+                 class="w-8 h-8 rounded-md border border-border"
+                 style="background-color: <%= current_primary %>"></div>
+            <span class="text-sm text-muted-foreground font-mono" data-color-picker-target="primaryHex"><%= current_primary %></span>
+          </div>
+          <button type="button"
+                  class="text-xs text-muted-foreground hover:text-destructive transition-colors <%= 'hidden' if current_primary == '#059669' %>"
+                  data-color-picker-target="primaryReset"
+                  data-action="click->color-picker#resetPrimary">
+            Restablecer
+          </button>
+        </div>
+        <p class="mt-1 text-xs text-muted-foreground">Se usa en botones, enlaces, iconos activos y acentos del sistema.</p>
+      </div>
+
+      <div class="sm:col-span-3">
+        <%= sf.label :secondary_color, "Color Secundario", class: "form-label" %>
+        <div class="flex items-center gap-3">
+          <%= sf.color_field :secondary_color,
+              value: current_secondary,
+              class: "w-12 h-11 rounded-lg border border-border cursor-pointer p-1",
+              data: { color_picker_target: "secondaryInput", action: "input->color-picker#updateSecondaryPreview" } %>
+          <div class="flex items-center gap-2 flex-1">
+            <div data-color-picker-target="secondaryPreview"
+                 class="w-8 h-8 rounded-md border border-border"
+                 style="background-color: <%= current_secondary %>"></div>
+            <span class="text-sm text-muted-foreground font-mono" data-color-picker-target="secondaryHex"><%= current_secondary %></span>
+          </div>
+          <button type="button"
+                  class="text-xs text-muted-foreground hover:text-destructive transition-colors <%= 'hidden' if current_secondary == '#374151' %>"
+                  data-color-picker-target="secondaryReset"
+                  data-action="click->color-picker#resetSecondary">
+            Restablecer
+          </button>
+        </div>
+        <p class="mt-1 text-xs text-muted-foreground">Se usa en encabezados de documentos y elementos secundarios.</p>
+      </div>
+
+    </div>
+  <% end %>
+</div>
+
 <div class="card">
   <h3 class="text-sm font-semibold text-foreground">Configuracion</h3>
   <p class="mt-1 text-sm text-muted-foreground">Opciones de funcionamiento de la empresa.</p>

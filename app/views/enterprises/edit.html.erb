@@ -20,19 +20,31 @@
       <h3 class="text-sm font-semibold text-foreground">Datos de la Empresa</h3>
       <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
 
+        <% formalized = @enterprise.tax_id.present? %>
+
         <div class="sm:col-span-6">
           <%= f.label :comercial_name, "Nombre Comercial", class: "form-label" %>
           <%= f.text_field :comercial_name, class: "form-input" %>
         </div>
 
-        <div class="sm:col-span-6">
+        <div class="sm:col-span-3">
+          <%= f.label :tax_id, "RUC", class: "form-label" %>
+          <%= f.text_field :tax_id, class: "form-input", disabled: formalized, placeholder: "20123456789" %>
+          <% if formalized %>
+            <p class="mt-1 text-xs text-muted-foreground">El RUC no puede modificarse una vez registrado</p>
+          <% else %>
+            <p class="mt-1 text-xs text-muted-foreground">11 digitos, empieza con 10 o 20</p>
+          <% end %>
+        </div>
+
+        <div class="sm:col-span-3">
           <%= f.label :social_reason, "Razon Social", class: "form-label" %>
-          <%= f.text_field :social_reason, class: "form-input" %>
+          <%= f.text_field :social_reason, class: "form-input", disabled: formalized %>
         </div>
 
         <div class="sm:col-span-3">
           <%= f.label :address, "Direccion", class: "form-label" %>
-          <%= f.text_field :address, class: "form-input" %>
+          <%= f.text_field :address, class: "form-input", disabled: formalized %>
         </div>
 
         <div class="sm:col-span-3">
