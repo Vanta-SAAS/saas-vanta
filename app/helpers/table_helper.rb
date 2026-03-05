@@ -11,7 +11,7 @@ module TableHelper
     end
 
     def td_class(align = :left)
-      base = "px-6 py-4 whitespace-nowrap text-sm"
+      base = "px-5 py-3.5 whitespace-nowrap text-sm"
       align_class = case align
       when :center then "text-center"
       when :right then "text-right"
@@ -25,7 +25,7 @@ module TableHelper
       when :show
         view.link_to(
           view.polymorphic_path(record),
-          class: "p-1.5 rounded-lg hover:bg-muted transition-colors",
+          class: "table-action-btn",
           title: options[:title] || "Ver"
         ) do
           icon(:eye)
@@ -33,7 +33,7 @@ module TableHelper
       when :edit
         view.link_to(
           view.polymorphic_path([ :edit, record ]),
-          class: "p-1.5 rounded-lg hover:bg-muted transition-colors",
+          class: "table-action-btn",
           title: options[:title] || "Editar"
         ) do
           icon(:edit)
@@ -42,7 +42,7 @@ module TableHelper
         view.button_to(
           view.polymorphic_path(record),
           method: :delete,
-          class: "p-1.5 rounded-lg hover:bg-destructive/10 transition-colors",
+          class: "table-action-btn-danger",
           title: options[:title] || "Eliminar",
           data: { turbo_confirm: options[:confirm] || "¿Estás seguro?" }
         ) do
@@ -83,7 +83,7 @@ module TableHelper
     else "text-left"
     end
 
-    base_class = "px-6 py-4 whitespace-nowrap text-sm #{align_class} #{css_class}"
+    base_class = "px-5 py-3.5 whitespace-nowrap text-sm #{align_class} #{css_class}"
 
     content = case type
     when :currency
@@ -102,7 +102,7 @@ module TableHelper
   end
 
   def table_cell_primary(title, subtitle = nil, link_path = nil)
-    content_tag(:td, class: "px-6 py-4 whitespace-nowrap") do
+    content_tag(:td, class: "px-5 py-3.5 whitespace-nowrap") do
       content_tag(:div, class: "flex items-center") do
         content_tag(:div) do
           title_content = if link_path
@@ -124,7 +124,7 @@ module TableHelper
   end
 
   def table_cell_stock(stock, unit)
-    content_tag(:td, class: "px-6 py-4 whitespace-nowrap text-center") do
+    content_tag(:td, class: "px-5 py-3.5 whitespace-nowrap text-center") do
       if stock.present?
         badge_class = stock > 10 ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
         content_tag(:span, "#{stock} #{unit}", class: "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium #{badge_class}")
@@ -135,7 +135,7 @@ module TableHelper
   end
 
   def table_cell_code(value)
-    content_tag(:td, class: "px-6 py-4 whitespace-nowrap") do
+    content_tag(:td, class: "px-5 py-3.5 whitespace-nowrap") do
       content_tag(:span, value.presence || "-", class: "text-sm text-muted-foreground font-mono")
     end
   end

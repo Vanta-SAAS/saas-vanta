@@ -16,18 +16,10 @@
 
 <% content_for :page_title, "Importar #{resource_label}" %>
 
-<div class="max-w-3xl mx-auto py-8 px-4">
-  <div class="mb-8">
-    <h1 class="text-2xl font-bold text-foreground">
-      Importar <%= resource_label %>
-    </h1>
-    <p class="mt-1 text-sm text-muted-foreground">
-      Carga masiva desde un archivo Excel o CSV.
-    </p>
-  </div>
+<div class="max-w-3xl mx-auto space-y-6">
 
   <%# Download template card %>
-  <div class="card mb-6">
+  <div class="card">
     <div class="flex items-start gap-4">
       <div class="flex-shrink-0">
         <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
@@ -37,7 +29,7 @@
         </div>
       </div>
       <div class="flex-1">
-        <h3 class="text-lg font-medium text-foreground">Paso 1: Descargar plantilla</h3>
+        <h3 class="text-sm font-semibold text-foreground">Paso 1: Descargar plantilla</h3>
         <p class="mt-1 text-sm text-muted-foreground">
           Descarga la plantilla Excel con las columnas correctas y ejemplos de como llenarla.
           Las filas de ejemplo seran ignoradas automaticamente.
@@ -67,7 +59,7 @@
         </div>
       </div>
       <div class="flex-1">
-        <h3 class="text-lg font-medium text-foreground">Paso 2: Subir archivo</h3>
+        <h3 class="text-sm font-semibold text-foreground">Paso 2: Subir archivo</h3>
         <p class="mt-1 text-sm text-muted-foreground">
           Sube tu archivo Excel (.xlsx) o CSV con los datos a importar.
           Maximo 10MB.

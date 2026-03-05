@@ -1,4 +1,4 @@
-<div class="min-h-screen flex relative">
+<div class="min-h-screen flex items-center justify-center bg-background p-6">
   <button
     id="theme-toggle"
     class="absolute top-6 right-6 theme-toggle z-10"
@@ -12,105 +12,43 @@
     </svg>
   </button>
 
-  <div class="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 bg-background">
-    <div class="w-full max-w-md">
-      <div class="flex flex-col items-center lg:items-start mb-8">
-        <img src="/logo-vanta.png" alt="VANTA Logo" class="h-16 w-auto mb-6">
-        <h1 class="text-3xl font-bold text-foreground mb-2">Nueva contraseña</h1>
-        <p class="text-muted-foreground">Ingresa tu nueva contraseña para continuar</p>
-      </div>
+  <div class="w-full max-w-sm">
+    <div class="flex flex-col items-center mb-8">
+      <img src="/logo-vanta.png" alt="VANTA" class="h-12 w-auto mb-6">
+      <h1 class="text-xl font-semibold text-foreground">Nueva contrasena</h1>
+      <p class="mt-1 text-sm text-muted-foreground">Ingresa tu nueva contrasena para continuar</p>
+    </div>
 
-      <%= render "shared/flash_messages" %>
+    <%= render "shared/flash_messages" %>
 
+    <div class="card">
       <%= form_with url: password_path(params[:token]), method: :put, class: "space-y-5" do |form| %>
         <%= render "shared/password_field",
             form: form,
             field: :password,
-            label: "Nueva contraseña",
+            label: "Nueva contrasena",
             autofocus: true,
             autocomplete: "new-password" %>
 
         <%= render "shared/password_field",
             form: form,
             field: :password_confirmation,
-            label: "Confirmar contraseña",
+            label: "Confirmar contrasena",
             autocomplete: "new-password" %>
 
         <div>
-          <%= form.submit "Actualizar contraseña", class: "w-full btn-primary h-12 cursor-pointer" %>
+          <%= form.submit "Actualizar contrasena", class: "w-full btn-primary h-11 cursor-pointer" %>
         </div>
       <% end %>
-
-      <div class="mt-6 text-center">
-        <%= link_to login_path, class: "inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors" do %>
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-          </svg>
-          Volver al inicio de sesion
-        <% end %>
-      </div>
     </div>
-  </div>
 
-  <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary via-primary to-secondary relative overflow-hidden">
-    <div
-      class="absolute inset-0 bg-cover bg-center opacity-20"
-      style="background-image: url('https://images.unsplash.com/photo-1633265486064-086b219458ec?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzZWN1cml0eSUyMGxvY2t8ZW58MXx8fHwxNzY4NTMzNDI2fDA&ixlib=rb-4.1.0&q=80&w=1080');"
-    ></div>
-
-    <div class="relative z-10 flex flex-col justify-center p-12 lg:p-16 text-white">
-      <div class="mb-12">
-        <h2 class="text-4xl font-bold mb-4">Crea tu nueva contraseña</h2>
-        <p class="text-xl opacity-90 leading-relaxed">
-          Elige una contraseña segura que no hayas
-          usado anteriormente para proteger tu cuenta.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 gap-6">
-        <div class="card-glass flex items-start gap-4">
-          <div class="icon-container">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-          </div>
-          <div>
-            <h3 class="font-semibold text-lg mb-1">Minimo 8 caracteres</h3>
-            <p class="text-sm opacity-90">Usa una contraseña lo suficientemente larga</p>
-          </div>
-        </div>
-
-        <div class="card-glass flex items-start gap-4">
-          <div class="icon-container">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-          </div>
-          <div>
-            <h3 class="font-semibold text-lg mb-1">Combina caracteres</h3>
-            <p class="text-sm opacity-90">Mezcla letras, numeros y simbolos</p>
-          </div>
-        </div>
-
-        <div class="card-glass flex items-start gap-4">
-          <div class="icon-container">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-          </div>
-          <div>
-            <h3 class="font-semibold text-lg mb-1">Evita datos personales</h3>
-            <p class="text-sm opacity-90">No uses nombres, fechas o datos obvios</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="mt-12 pt-8 border-t border-white/20">
-        <p class="text-sm opacity-75">
-          Una contraseña segura es tu primera linea de defensa
-          para proteger tu informacion y la de tu empresa.
-        </p>
-      </div>
+    <div class="mt-6 text-center">
+      <%= link_to login_path, class: "inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors" do %>
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        Volver al inicio de sesion
+      <% end %>
     </div>
   </div>
 </div>

@@ -35,7 +35,7 @@ RSpec.describe Carrier, type: :model do
       enterprise = create(:enterprise)
       active = create(:carrier, enterprise: enterprise, status: :active)
       create(:carrier, enterprise: enterprise, status: :inactive)
-      expect(Carrier.active).to eq([ active ])
+      expect(enterprise.carriers.active).to eq([ active ])
     end
   end
 

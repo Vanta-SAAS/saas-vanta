@@ -1,13 +1,11 @@
-<div class="container mx-auto py-8 px-4">
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-    <div>
-      <h1 class="text-2xl font-bold text-foreground">Ventas</h1>
-      <p class="mt-1 text-sm text-muted-foreground">Gestiona las ventas a clientes</p>
-    </div>
+<% content_for :page_title, "Ventas" %>
+
+<div class="max-w-7xl mx-auto">
+  <div class="flex items-center justify-end gap-3 mb-6">
     <% if policy(Sale).create? %>
       <%= link_to new_sale_path, class: "btn-primary" do %>
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
         </svg>
         Nueva Venta
       <% end %>
@@ -15,66 +13,77 @@
   </div>
 
   <% if @sales.any? %>
-    <div class="card overflow-hidden">
+    <div class="card overflow-hidden p-0">
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-border">
-          <thead class="bg-muted/50">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Codigo</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Cliente</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Vendedor</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Fecha</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Total</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">Estado</th>
-              <th class="relative px-6 py-3"><span class="sr-only">Acciones</span></th>
+          <thead>
+            <tr class="bg-muted/40">
+              <th class="table-th text-left">Codigo</th>
+              <th class="table-th text-left">Cliente</th>
+              <th class="table-th text-left">Vendedor</th>
+              <th class="table-th text-left">Fecha</th>
+              <th class="table-th text-right">Total</th>
+              <th class="table-th text-center">Estado</th>
+              <th class="table-th"><span class="sr-only">Acciones</span></th>
             </tr>
           </thead>
-          <tbody class="bg-card divide-y divide-border">
+          <tbody class="divide-y divide-border">
             <% @sales.each do |sale| %>
               <tr class="hover:bg-muted/30 transition-colors">
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="text-sm font-medium text-foreground"><%= sale.code %></span>
+                <td class="px-5 py-3.5 whitespace-nowrap">
+                  <span class="text-sm font-medium text-foreground font-mono"><%= sale.code %></span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="text-sm text-foreground"><%= sale.customer.name %></span>
+                <td class="px-5 py-3.5 whitespace-nowrap">
+                  <span class="text-sm font-medium text-foreground"><%= sale.customer.name %></span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="text-sm text-muted-foreground"><%= sale.seller.combobox_display %></span>
+                <td class="px-5 py-3.5 whitespace-nowrap">
+                  <span class="text-sm text-muted-foreground"><%= sale.seller.first_name %></span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-5 py-3.5 whitespace-nowrap">
                   <span class="text-sm text-muted-foreground"><%= l(sale.issue_date, format: :short) %></span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="text-sm font-medium text-foreground">S/ <%= number_with_precision(sale.total, precision: 2, delimiter: ",") %></span>
+                <td class="px-5 py-3.5 whitespace-nowrap text-right">
+                  <span class="text-sm font-medium text-foreground tabular-nums">S/ <%= number_with_precision(sale.total, precision: 2, delimiter: ",") %></span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-5 py-3.5 whitespace-nowrap text-center">
                   <span class="<%= sale.status_badge_class %>"><%= sale.status_label %></span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <%= link_to "Ver", sale, class: "text-primary hover:underline" %>
+                <td class="px-5 py-3.5 whitespace-nowrap text-right">
+                  <div class="flex items-center justify-end gap-1">
+                    <%= link_to sale, class: "table-action-btn", title: "Ver" do %>
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    <% end %>
+                    <% if sale.can_edit? && policy(sale).update? %>
+                      <%= link_to edit_sale_path(sale), class: "table-action-btn", title: "Editar" do %>
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      <% end %>
+                    <% end %>
+                  </div>
                 </td>
               </tr>
             <% end %>
           </tbody>
         </table>
       </div>
-    </div>
 
-    <div class="mt-6">
-      <%== pagy_nav(@pagy) if @pagy.pages > 1 %>
-    </div>
-  <% else %>
-    <div class="card text-center py-12">
-      <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-      </svg>
-      <h3 class="mt-4 text-lg font-medium text-foreground">No hay ventas</h3>
-      <p class="mt-2 text-sm text-muted-foreground">Comienza creando tu primera venta.</p>
-      <% if policy(Sale).create? %>
-        <div class="mt-6">
-          <%= link_to "Nueva Venta", new_sale_path, class: "btn-primary" %>
+      <% if @pagy.pages > 1 %>
+        <div class="px-5 py-3.5 border-t border-border">
+          <%= render "shared/table/pagination", pagy: @pagy %>
         </div>
       <% end %>
     </div>
+  <% else %>
+    <%= render "shared/table/empty_state",
+      icon: :document,
+      title: "No hay ventas",
+      description: "Comienza creando tu primera venta.",
+      action_path: new_sale_path,
+      action_label: "Nueva Venta",
+      show_action: policy(Sale).create? %>
   <% end %>
 </div>

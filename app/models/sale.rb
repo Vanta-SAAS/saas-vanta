@@ -70,6 +70,10 @@ class Sale < ApplicationRecord
     end
   end
 
+  def has_goods?
+    items.joins(:product).where(products: { product_type: :good }).exists?
+  end
+
   def confirm!
     return false unless can_confirm?
 
@@ -147,6 +151,8 @@ class Sale < ApplicationRecord
 
   def update_product_stock!
     items.includes(:product).find_each do |item|
+      next if item.product.service?
+
       product = item.product
       current_stock = product.stock || 0
       new_stock = current_stock - item.quantity

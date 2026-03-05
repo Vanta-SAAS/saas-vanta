@@ -1,94 +1,96 @@
-<div class="max-w-4xl mx-auto py-8 px-4">
-  <div class="flex items-center justify-between mb-8">
-    <div>
-      <div class="flex items-center gap-3">
-        <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-          <span class="text-lg font-semibold text-primary">
-            <%= @user.first_name&.first&.upcase %><%= @user.first_last_name&.first&.upcase %>
-          </span>
-        </div>
-        <div>
-          <h1 class="text-2xl font-bold text-foreground"><%= @user.first_name %> <%= @user.first_last_name %> <%= @user.second_last_name %></h1>
-          <p class="text-sm text-muted-foreground"><%= @user.email_address %></p>
-        </div>
+<% content_for :page_title, "#{@user.first_name} #{@user.first_last_name}" %>
+
+<div class="max-w-5xl mx-auto space-y-6">
+  <%# Header %>
+  <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+        <span class="text-sm font-semibold text-primary">
+          <%= @user.first_name&.first&.upcase %><%= @user.first_last_name&.first&.upcase %>
+        </span>
+      </div>
+      <div>
+        <h1 class="text-xl font-semibold text-foreground"><%= @user.first_name %> <%= @user.first_last_name %> <%= @user.second_last_name %></h1>
+        <p class="text-sm text-muted-foreground"><%= @user.email_address %></p>
       </div>
     </div>
-    <div class="flex gap-3">
+    <div class="flex flex-wrap gap-2">
       <%= link_to "Volver", users_path, class: "btn-secondary" %>
       <% if policy(@user).edit? %>
-        <%= link_to "Editar", edit_user_path(@user), class: "btn-primary" %>
+        <%= link_to "Editar", edit_user_path(@user), class: "btn-secondary" %>
       <% end %>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <div class="lg:col-span-2 space-y-6">
+  <%# Info Cards %>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div class="lg:col-span-2 space-y-4">
       <div class="card">
-        <h3 class="text-lg font-medium text-foreground mb-4">Información Personal</h3>
+        <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Informacion Personal</h3>
         <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <dt class="text-sm font-medium text-muted-foreground">Nombre</dt>
-            <dd class="mt-1 text-sm text-foreground"><%= @user.first_name %></dd>
+            <dt class="text-xs text-muted-foreground">Nombre</dt>
+            <dd class="text-sm font-medium text-foreground mt-0.5"><%= @user.first_name %></dd>
           </div>
           <div>
-            <dt class="text-sm font-medium text-muted-foreground">Apellido Paterno</dt>
-            <dd class="mt-1 text-sm text-foreground"><%= @user.first_last_name %></dd>
+            <dt class="text-xs text-muted-foreground">Apellido Paterno</dt>
+            <dd class="text-sm font-medium text-foreground mt-0.5"><%= @user.first_last_name %></dd>
           </div>
           <div>
-            <dt class="text-sm font-medium text-muted-foreground">Apellido Materno</dt>
-            <dd class="mt-1 text-sm text-foreground"><%= @user.second_last_name.presence || "-" %></dd>
+            <dt class="text-xs text-muted-foreground">Apellido Materno</dt>
+            <dd class="text-sm font-medium text-foreground mt-0.5"><%= @user.second_last_name.presence || "-" %></dd>
           </div>
           <div>
-            <dt class="text-sm font-medium text-muted-foreground">Teléfono</dt>
-            <dd class="mt-1 text-sm text-foreground"><%= @user.phone_number.presence || "-" %></dd>
+            <dt class="text-xs text-muted-foreground">Telefono</dt>
+            <dd class="text-sm font-medium text-foreground mt-0.5"><%= @user.phone_number.presence || "-" %></dd>
           </div>
           <div>
-            <dt class="text-sm font-medium text-muted-foreground">Email</dt>
-            <dd class="mt-1 text-sm text-foreground"><%= @user.email_address %></dd>
+            <dt class="text-xs text-muted-foreground">Email</dt>
+            <dd class="text-sm font-medium text-foreground mt-0.5"><%= @user.email_address %></dd>
           </div>
         </dl>
       </div>
 
       <div class="card">
-        <h3 class="text-lg font-medium text-foreground mb-4">Información de la Cuenta</h3>
+        <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Informacion de la Cuenta</h3>
         <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <dt class="text-sm font-medium text-muted-foreground">Fecha de Registro</dt>
-            <dd class="mt-1 text-sm text-foreground"><%= @user.created_at.strftime("%d/%m/%Y %H:%M") %></dd>
+            <dt class="text-xs text-muted-foreground">Fecha de Registro</dt>
+            <dd class="text-sm font-medium text-foreground mt-0.5"><%= @user.created_at.strftime("%d/%m/%Y %H:%M") %></dd>
           </div>
           <div>
-            <dt class="text-sm font-medium text-muted-foreground">Última Actualización</dt>
-            <dd class="mt-1 text-sm text-foreground"><%= @user.updated_at.strftime("%d/%m/%Y %H:%M") %></dd>
+            <dt class="text-xs text-muted-foreground">Ultima Actualizacion</dt>
+            <dd class="text-sm font-medium text-foreground mt-0.5"><%= @user.updated_at.strftime("%d/%m/%Y %H:%M") %></dd>
           </div>
           <% if @user.invitation_accepted_at.present? %>
             <div>
-              <dt class="text-sm font-medium text-muted-foreground">Invitación Aceptada</dt>
-              <dd class="mt-1 text-sm text-foreground"><%= @user.invitation_accepted_at.strftime("%d/%m/%Y %H:%M") %></dd>
+              <dt class="text-xs text-muted-foreground">Invitacion Aceptada</dt>
+              <dd class="text-sm font-medium text-foreground mt-0.5"><%= @user.invitation_accepted_at.strftime("%d/%m/%Y %H:%M") %></dd>
             </div>
           <% elsif @user.invitation_sent_at.present? %>
             <div>
-              <dt class="text-sm font-medium text-muted-foreground">Invitación Enviada</dt>
-              <dd class="mt-1 text-sm text-foreground"><%= @user.invitation_sent_at.strftime("%d/%m/%Y %H:%M") %></dd>
+              <dt class="text-xs text-muted-foreground">Invitacion Enviada</dt>
+              <dd class="text-sm font-medium text-foreground mt-0.5"><%= @user.invitation_sent_at.strftime("%d/%m/%Y %H:%M") %></dd>
             </div>
           <% end %>
         </dl>
       </div>
     </div>
 
-    <div class="space-y-6">
+    <div class="space-y-4">
       <div class="card">
-        <h3 class="text-lg font-medium text-foreground mb-4">Estado</h3>
-        <div class="text-center p-4 bg-muted/30 rounded-lg">
+        <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Estado</h3>
+        <div class="text-center p-3 bg-muted/30 rounded-lg">
           <%= render_user_status_badge(@user.status, size: :lg) %>
           <% if @user.pending? %>
-            <p class="text-sm text-muted-foreground mt-2">Pendiente de aceptar invitación</p>
+            <p class="text-xs text-muted-foreground mt-1.5">Pendiente de aceptar invitacion</p>
           <% end %>
         </div>
       </div>
 
       <div class="card">
-        <h3 class="text-lg font-medium text-foreground mb-4">Rol en la Empresa</h3>
-        <div class="text-center p-4 bg-muted/30 rounded-lg">
+        <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Rol en la Empresa</h3>
+        <div class="text-center p-3 bg-muted/30 rounded-lg">
           <% role = @user.roles_for(current_enterprise).first %>
           <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium <%= role_badge_class(role) %>">
             <%= role_label(role) %>
@@ -98,21 +100,21 @@
 
       <% if policy(@user).toggle_status? && !@user.pending? %>
         <div class="card">
-          <h3 class="text-lg font-medium text-foreground mb-4">Acciones</h3>
+          <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Acciones</h3>
           <% if @user.active? %>
             <%= button_to "Desactivar Usuario",
                 toggle_status_user_path(@user),
                 method: :patch,
                 class: "w-full btn-destructive",
-                data: { turbo_confirm: "¿Estás seguro de desactivar a este usuario? No podrá acceder al sistema." } %>
-            <p class="text-xs text-muted-foreground mt-2 text-center">El usuario no podrá iniciar sesión</p>
+                data: { turbo_confirm: "Estas seguro de desactivar a este usuario? No podra acceder al sistema." } %>
+            <p class="text-xs text-muted-foreground mt-1.5 text-center">El usuario no podra iniciar sesion</p>
           <% else %>
             <%= button_to "Activar Usuario",
                 toggle_status_user_path(@user),
                 method: :patch,
                 class: "w-full btn-primary",
-                data: { turbo_confirm: "¿Estás seguro de activar a este usuario?" } %>
-            <p class="text-xs text-muted-foreground mt-2 text-center">El usuario podrá iniciar sesión nuevamente</p>
+                data: { turbo_confirm: "Estas seguro de activar a este usuario?" } %>
+            <p class="text-xs text-muted-foreground mt-1.5 text-center">El usuario podra iniciar sesion nuevamente</p>
           <% end %>
         </div>
       <% end %>

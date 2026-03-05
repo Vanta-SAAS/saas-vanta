@@ -22,7 +22,7 @@
     <div class="card overflow-hidden p-0">
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-border">
-          <thead class="bg-muted/50">
+          <thead class="bg-muted/40">
             <tr>
               <th class="table-th text-left">Proveedor</th>
               <th class="table-th text-left">RUC/DNI</th>
@@ -31,14 +31,14 @@
               <th class="table-th"><span class="sr-only">Acciones</span></th>
             </tr>
           </thead>
-          <tbody class="bg-card divide-y divide-border">
+          <tbody class="divide-y divide-border">
             <% @providers.each do |provider| %>
               <tr class="hover:bg-muted/30 transition-colors">
                 <%= table_cell_primary(provider.name, nil, provider) %>
                 <%= table_cell_code(provider.tax_id) %>
                 <%= table_cell(provider.email.presence || "-") %>
                 <%= table_cell(provider.phone_number.presence || "-") %>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <td class="px-5 py-3.5 whitespace-nowrap text-right text-sm font-medium">
                   <div class="flex items-center justify-end gap-1">
                     <%= link_to provider, class: "table-action-btn", title: "Ver" do %>
                       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -69,7 +69,7 @@
       </div>
 
       <% if @pagy.pages > 1 %>
-        <div class="px-6 py-4 border-t border-border bg-muted/30">
+        <div class="px-5 py-3.5 border-t border-border">
           <%= render "shared/table/pagination", pagy: @pagy %>
         </div>
       <% end %>

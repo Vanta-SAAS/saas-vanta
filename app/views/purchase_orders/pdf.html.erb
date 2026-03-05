@@ -71,7 +71,7 @@
             <% end %>
           </td>
           <td class="r"><%= item.quantity %></td>
-          <td class="r"><%= item.product.units_per_package %> <%= item.product.unit %></td>
+          <td class="r"><%= item.product.capacity_label || item.product.unit %></td>
           <td class="r">S/ <%= number_with_precision(item.unit_price, precision: 2, delimiter: ",") %></td>
           <td class="r">S/ <%= number_with_precision(item.total, precision: 2, delimiter: ",") %></td>
         </tr>

@@ -1,36 +1,38 @@
-<div class="max-w-4xl mx-auto py-8 px-4">
-  <div class="flex items-center justify-between mb-8">
-    <div>
-      <div class="flex items-center gap-3">
-        <h1 class="text-2xl font-bold text-foreground"><%= @customer.name %></h1>
-      </div>
-      <p class="mt-1 text-sm text-muted-foreground">
+<% content_for :page_title, @customer.name %>
+
+<div class="max-w-5xl mx-auto space-y-6">
+  <%# Header %>
+  <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+    <div class="space-y-1">
+      <h1 class="text-xl font-semibold text-foreground"><%= @customer.name %></h1>
+      <p class="text-sm text-muted-foreground">
         <% if @customer.tax_id.present? %>
-          <%= @customer.tax_id_type.upcase %>: <%= @customer.tax_id %> |
+          <%= @customer.tax_id_type.upcase %>: <%= @customer.tax_id %> &middot;
         <% end %>
         Registrado <%= time_ago_in_words(@customer.created_at) %> atras
       </p>
     </div>
-    <div class="flex gap-3">
+    <div class="flex flex-wrap gap-2">
       <%= link_to "Volver", customers_path, class: "btn-secondary" %>
       <% if policy(@customer).update? %>
-        <%= link_to "Editar", edit_customer_path(@customer), class: "btn-primary" %>
+        <%= link_to "Editar", edit_customer_path(@customer), class: "btn-secondary" %>
       <% end %>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <div class="lg:col-span-2 space-y-6">
+  <%# Info Cards %>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div class="lg:col-span-2 space-y-4">
       <div class="card">
-        <h3 class="text-lg font-medium text-foreground mb-4">Informacion General</h3>
+        <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Informacion General</h3>
         <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <dt class="text-sm font-medium text-muted-foreground">Nombre</dt>
-            <dd class="mt-1 text-sm text-foreground"><%= @customer.name %></dd>
+            <dt class="text-xs text-muted-foreground">Nombre</dt>
+            <dd class="text-sm font-medium text-foreground mt-0.5"><%= @customer.name %></dd>
           </div>
           <div>
-            <dt class="text-sm font-medium text-muted-foreground">Tipo de Documento</dt>
-            <dd class="mt-1 text-sm text-foreground">
+            <dt class="text-xs text-muted-foreground">Tipo de Documento</dt>
+            <dd class="text-sm font-medium text-foreground mt-0.5">
               <% if @customer.no_document? %>
                 <span class="text-muted-foreground">Sin documento</span>
               <% else %>
@@ -39,38 +41,38 @@
             </dd>
           </div>
           <div>
-            <dt class="text-sm font-medium text-muted-foreground">Numero de Documento</dt>
-            <dd class="mt-1 text-sm text-foreground font-mono"><%= @customer.tax_id.presence || "-" %></dd>
+            <dt class="text-xs text-muted-foreground">Numero de Documento</dt>
+            <dd class="text-sm font-medium text-foreground mt-0.5 font-mono"><%= @customer.tax_id.presence || "-" %></dd>
           </div>
           <div>
-            <dt class="text-sm font-medium text-muted-foreground">Direccion</dt>
-            <dd class="mt-1 text-sm text-foreground"><%= @customer.address.presence || "-" %></dd>
+            <dt class="text-xs text-muted-foreground">Direccion</dt>
+            <dd class="text-sm font-medium text-foreground mt-0.5"><%= @customer.address.presence || "-" %></dd>
           </div>
           <div>
-            <dt class="text-sm font-medium text-muted-foreground">Ubicacion</dt>
-            <dd class="mt-1 text-sm text-foreground"><%= @customer.ubigeo&.full_path.presence || "-" %></dd>
+            <dt class="text-xs text-muted-foreground">Ubicacion</dt>
+            <dd class="text-sm font-medium text-foreground mt-0.5"><%= @customer.ubigeo&.full_path.presence || "-" %></dd>
           </div>
         </dl>
       </div>
 
       <div class="card">
-        <h3 class="text-lg font-medium text-foreground mb-4">Contacto</h3>
+        <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Contacto</h3>
         <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <dt class="text-sm font-medium text-muted-foreground">Email</dt>
-            <dd class="mt-1 text-sm text-foreground">
+            <dt class="text-xs text-muted-foreground">Email</dt>
+            <dd class="text-sm font-medium text-foreground mt-0.5">
               <% if @customer.email.present? %>
-                <%= mail_to @customer.email, @customer.email, class: "text-primary hover:underline" %>
+                <%= mail_to @customer.email, @customer.email, class: "link-primary" %>
               <% else %>
                 -
               <% end %>
             </dd>
           </div>
           <div>
-            <dt class="text-sm font-medium text-muted-foreground">Telefono</dt>
-            <dd class="mt-1 text-sm text-foreground">
+            <dt class="text-xs text-muted-foreground">Telefono</dt>
+            <dd class="text-sm font-medium text-foreground mt-0.5">
               <% if @customer.phone_number.present? %>
-                <%= link_to @customer.phone_number, "tel:#{@customer.phone_number}", class: "text-primary hover:underline" %>
+                <%= link_to @customer.phone_number, "tel:#{@customer.phone_number}", class: "link-primary" %>
               <% else %>
                 -
               <% end %>
@@ -80,27 +82,27 @@
       </div>
     </div>
 
-    <div class="space-y-6">
+    <div class="space-y-4">
       <div class="card">
-        <h3 class="text-lg font-medium text-foreground mb-4">Condiciones Comerciales</h3>
-        <dl class="space-y-4">
+        <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Condiciones Comerciales</h3>
+        <dl class="space-y-3">
           <div>
-            <dt class="text-sm font-medium text-muted-foreground">Limite de Credito</dt>
-            <dd class="mt-1 text-2xl font-bold text-foreground">
+            <dt class="text-xs text-muted-foreground">Limite de Credito</dt>
+            <dd class="text-lg font-semibold text-foreground mt-0.5 tabular-nums">
               <% if @customer.credit_limit > 0 %>
                 S/ <%= number_with_precision(@customer.credit_limit, precision: 2, delimiter: ",") %>
               <% else %>
-                <span class="text-muted-foreground text-base">Sin credito</span>
+                <span class="text-muted-foreground text-sm">Sin credito</span>
               <% end %>
             </dd>
           </div>
           <div>
-            <dt class="text-sm font-medium text-muted-foreground">Dias de Credito</dt>
-            <dd class="mt-1 text-lg font-semibold text-foreground">
+            <dt class="text-xs text-muted-foreground">Dias de Credito</dt>
+            <dd class="text-lg font-semibold text-foreground mt-0.5">
               <% if @customer.payment_terms > 0 %>
                 <%= @customer.payment_terms %> dias
               <% else %>
-                <span class="text-muted-foreground text-base">Solo contado</span>
+                <span class="text-muted-foreground text-sm">Solo contado</span>
               <% end %>
             </dd>
           </div>
@@ -109,7 +111,7 @@
 
       <% if policy(@customer).destroy? %>
         <div class="card">
-          <h3 class="text-lg font-medium text-foreground mb-4">Zona de Peligro</h3>
+          <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Zona de Peligro</h3>
           <%= button_to "Eliminar Cliente",
               @customer,
               method: :delete,

@@ -10,13 +10,7 @@
 <% content_for :page_title, "Historial de Importaciones" %>
 
 <div class="max-w-7xl mx-auto">
-  <div class="flex items-center justify-between mb-6">
-    <div>
-      <h1 class="text-2xl font-bold text-foreground">Historial de Importaciones</h1>
-      <p class="mt-1 text-sm text-muted-foreground">
-        <%= resource_label %>
-      </p>
-    </div>
+  <div class="flex items-center justify-end gap-3 mb-6">
     <%= link_to new_bulk_import_path(resource_type: @resource_type),
                 class: "btn-primary inline-flex items-center gap-2" do %>
       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -48,7 +42,7 @@
     <div class="card overflow-hidden p-0">
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-border">
-          <thead class="bg-muted/50">
+          <thead class="bg-muted/40">
             <tr>
               <th class="table-th text-left">Fecha</th>
               <th class="table-th text-left">Usuario</th>
@@ -59,32 +53,32 @@
               <th class="table-th"><span class="sr-only">Acciones</span></th>
             </tr>
           </thead>
-          <tbody class="bg-card divide-y divide-border">
+          <tbody class="divide-y divide-border">
             <% @bulk_imports.each do |import| %>
               <tr class="hover:bg-muted/30 transition-colors">
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-foreground">
+                <td class="px-5 py-3.5 whitespace-nowrap text-sm text-foreground">
                   <%= import.created_at.strftime("%d/%m/%Y %H:%M") %>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-foreground">
+                <td class="px-5 py-3.5 whitespace-nowrap text-sm text-foreground">
                   <%= import.user.first_name %> <%= import.user.first_last_name %>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
+                <td class="px-5 py-3.5 whitespace-nowrap text-sm text-muted-foreground">
                   <%= import.original_filename || "Sin nombre" %>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-center">
+                <td class="px-5 py-3.5 whitespace-nowrap text-center">
                   <%= render_import_status_badge(import.status) %>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                <td class="px-5 py-3.5 whitespace-nowrap text-sm text-center">
                   <span class="text-green-600 dark:text-green-400 font-medium">
                     <%= import.successful_rows %>
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                <td class="px-5 py-3.5 whitespace-nowrap text-sm text-center">
                   <span class="<%= import.failed_rows > 0 ? 'text-red-600 dark:text-red-400 font-medium' : 'text-muted-foreground' %>">
                     <%= import.failed_rows %>
                   </span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                <td class="px-5 py-3.5 whitespace-nowrap text-right text-sm">
                   <%= link_to bulk_import_path(import), class: "table-action-btn", title: "Ver detalles" do %>
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -99,7 +93,7 @@
       </div>
 
       <% if @pagy.pages > 1 %>
-        <div class="px-6 py-4 border-t border-border bg-muted/30">
+        <div class="px-5 py-3.5 border-t border-border bg-muted/30">
           <%= render "shared/table/pagination", pagy: @pagy %>
         </div>
       <% end %>

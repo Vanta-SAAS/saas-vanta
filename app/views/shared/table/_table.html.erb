@@ -10,8 +10,8 @@
 <div class="card overflow-hidden p-0">
   <div class="overflow-x-auto">
     <table class="min-w-full divide-y divide-border">
-      <thead class="bg-muted/50">
-        <tr>
+      <thead>
+        <tr class="bg-muted/40">
           <% columns.each do |col| %>
             <%
               align = col[:align] || :left
@@ -21,24 +21,24 @@
                 else "text-left"
               end
             %>
-            <th scope="col" class="px-6 py-3 <%= align_class %> text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <th scope="col" class="table-th <%= align_class %>">
               <%= col[:label] %>
             </th>
           <% end %>
           <% if show_actions %>
-            <th scope="col" class="relative px-6 py-3">
+            <th scope="col" class="table-th">
               <span class="sr-only">Acciones</span>
             </th>
           <% end %>
         </tr>
       </thead>
-      <tbody class="bg-card divide-y divide-border">
+      <tbody class="divide-y divide-border">
         <% records.each do |record| %>
           <tr class="hover:bg-muted/30 transition-colors">
             <%= yield(table_helper, record) %>
             <% if show_actions %>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <div class="flex items-center justify-end gap-2">
+              <td class="px-5 py-3.5 whitespace-nowrap text-right text-sm font-medium">
+                <div class="flex items-center justify-end gap-1">
                   <%= table_helper.render_actions(record) %>
                 </div>
               </td>
@@ -50,7 +50,7 @@
   </div>
 
   <% if pagy && pagy.pages > 1 %>
-    <div class="px-6 py-4 border-t border-border bg-muted/30">
+    <div class="px-5 py-3.5 border-t border-border">
       <%= render "shared/table/pagination", pagy: pagy %>
     </div>
   <% end %>

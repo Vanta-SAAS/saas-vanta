@@ -16,31 +16,47 @@
         type="button"
         data-action="click->sidebar#toggle"
         class="sidebar-collapse-btn"
-        title="Colapsar/Expandir menú"
+        title="Colapsar/Expandir menu"
       >
         <span data-sidebar-target="collapseIcon">
-          <%= sidebar_icon("chevrons-left", class: "w-[18px] h-[18px]") %>
+          <%= sidebar_icon("chevrons-left", class: "w-4 h-4") %>
         </span>
         <span data-sidebar-target="expandIcon" class="hidden">
-          <%= sidebar_icon("chevrons-right", class: "w-[18px] h-[18px]") %>
+          <%= sidebar_icon("chevrons-right", class: "w-4 h-4") %>
         </span>
       </button>
     </div>
 
     <nav class="sidebar-nav">
+      <% if current_enterprise.present? %>
+        <div class="sidebar-nav-section">
+          <span class="sidebar-nav-section-label" data-sidebar-target="collapsible">General</span>
+        </div>
+      <% end %>
+
       <%= sidebar_link_to "Dashboard", root_path, icon: "layout-dashboard" %>
 
       <% if current_enterprise.present? %>
-        <%= sidebar_link_to "Proveedores", providers_path, icon: "truck" %>
-        <%= sidebar_link_to "Clientes", customers_path, icon: "users" %>
-        <%= sidebar_link_to "Productos", products_path, icon: "package" %>
-        <%= sidebar_link_to "Importaciones", bulk_imports_path, icon: "upload" %>
-        <%= sidebar_link_to "Ordenes de compra", purchase_orders_path, icon: "package" %>
+        <div class="sidebar-nav-section mt-5">
+          <span class="sidebar-nav-section-label" data-sidebar-target="collapsible">Operaciones</span>
+        </div>
         <%= sidebar_link_to "Cotizaciones", customer_quotes_path, icon: "file-text" %>
         <%= sidebar_link_to "Ventas", sales_path, icon: "shopping-cart" %>
+        <%= sidebar_link_to "Ordenes de compra", purchase_orders_path, icon: "package" %>
+
+        <div class="sidebar-nav-section mt-5">
+          <span class="sidebar-nav-section-label" data-sidebar-target="collapsible">Catalogo</span>
+        </div>
+        <%= sidebar_link_to "Productos", products_path, icon: "package" %>
+        <%= sidebar_link_to "Clientes", customers_path, icon: "users" %>
+        <%= sidebar_link_to "Proveedores", providers_path, icon: "truck" %>
+        <%= sidebar_link_to "Importaciones", bulk_imports_path, icon: "upload" %>
       <% end %>
 
       <% if current_enterprise.present? && policy(User).index? %>
+        <div class="sidebar-nav-section mt-5">
+          <span class="sidebar-nav-section-label" data-sidebar-target="collapsible">Configuracion</span>
+        </div>
         <%= sidebar_link_to "Usuarios", users_path, icon: "users" %>
       <% end %>
 
@@ -53,10 +69,10 @@
   <div class="sidebar-bottom">
     <button type="button" class="sidebar-theme-toggle" id="theme-toggle" title="Cambiar tema">
       <span class="theme-icon-dark">
-        <%= sidebar_icon("moon", class: "w-5 h-5 flex-shrink-0") %>
+        <%= sidebar_icon("moon", class: "w-4 h-4 flex-shrink-0") %>
       </span>
       <span class="theme-icon-light hidden">
-        <%= sidebar_icon("sun", class: "w-5 h-5 flex-shrink-0") %>
+        <%= sidebar_icon("sun", class: "w-4 h-4 flex-shrink-0") %>
       </span>
       <span class="sidebar-theme-toggle-text" data-sidebar-target="collapsible">
         <span class="theme-text-dark">Tema Oscuro</span>
@@ -74,7 +90,7 @@
 
     <div class="sidebar-user">
       <div class="sidebar-user-avatar">
-        <span class="text-sm font-semibold text-white">
+        <span class="text-xs font-semibold text-white">
           <%= Current.user&.first_name&.first&.upcase %><%= Current.user&.first_last_name&.first&.upcase %>
         </span>
       </div>
@@ -84,10 +100,9 @@
           <%= Current.user&.super_admin? ? "Super Admin" : "Usuario" %>
         </span>
       </div>
-      <%= link_to session_path, data: { turbo_method: :delete }, class: "sidebar-logout-btn", title: "Cerrar sesión" do %>
-        <%= sidebar_icon("log-out", class: "w-[18px] h-[18px]", stroke: "#EF4444") %>
+      <%= link_to session_path, data: { turbo_method: :delete }, class: "sidebar-logout-btn", title: "Cerrar sesion" do %>
+        <%= sidebar_icon("log-out", class: "w-4 h-4") %>
       <% end %>
     </div>
-
   </div>
 </aside>

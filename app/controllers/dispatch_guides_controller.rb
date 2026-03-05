@@ -28,7 +28,14 @@ class DispatchGuidesController < ApplicationController
       transport_modality: "private"
     )
 
-    prefill_from_sale if params[:sale_id].present?
+    if params[:sale_id].present?
+      sale = current_enterprise.sales.find_by(id: params[:sale_id])
+      if sale && !sale.has_goods?
+        redirect_to sale, alert: "No se puede crear una guia de remision para ventas que solo contienen servicios."
+        return
+      end
+      prefill_from_sale
+    end
 
     load_form_data
   end
@@ -234,6 +241,8 @@ class DispatchGuidesController < ApplicationController
     @dispatch_guide.departure_ubigeo = current_enterprise.ubigeo
 
     sale.items.includes(:product).each do |sale_item|
+      next if sale_item.product.service?
+
       @dispatch_guide.items.build(
         description: sale_item.product.name,
         quantity: sale_item.quantity,

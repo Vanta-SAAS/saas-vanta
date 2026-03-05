@@ -16,7 +16,7 @@
     <div class="card overflow-hidden p-0">
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-border">
-          <thead class="bg-muted/50">
+          <thead class="bg-muted/40">
             <tr>
               <th class="table-th text-left">RUC</th>
               <th class="table-th text-left">Nombre</th>
@@ -24,15 +24,15 @@
               <th class="table-th"><span class="sr-only">Acciones</span></th>
             </tr>
           </thead>
-          <tbody class="bg-card divide-y divide-border">
+          <tbody class="divide-y divide-border">
             <% @carriers.each do |carrier| %>
               <tr class="hover:bg-muted/30 transition-colors">
-                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground"><%= carrier.ruc %></td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-foreground"><%= carrier.name %></td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-5 py-3.5 whitespace-nowrap text-sm font-medium text-foreground"><%= carrier.ruc %></td>
+                <td class="px-5 py-3.5 whitespace-nowrap text-sm text-foreground"><%= carrier.name %></td>
+                <td class="px-5 py-3.5 whitespace-nowrap">
                   <span class="<%= carrier.active? ? 'badge-success' : 'badge-secondary' %>"><%= carrier.active? ? 'Activo' : 'Inactivo' %></span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <td class="px-5 py-3.5 whitespace-nowrap text-right text-sm font-medium">
                   <div class="flex items-center justify-end gap-1">
                     <% if policy(carrier).update? %>
                       <%= link_to edit_carrier_path(carrier), class: "table-action-btn", title: "Editar" do %>
@@ -57,7 +57,7 @@
       </div>
 
       <% if @pagy.pages > 1 %>
-        <div class="px-6 py-4 border-t border-border bg-muted/30">
+        <div class="px-5 py-3.5 border-t border-border bg-muted/30">
           <%= render "shared/table/pagination", pagy: @pagy %>
         </div>
       <% end %>

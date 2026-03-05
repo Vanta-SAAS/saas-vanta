@@ -14,25 +14,37 @@
 
   <%# Informacion basica %>
   <div class="card">
-    <h3 class="text-lg font-medium leading-6 text-foreground">Informacion del Producto</h3>
+    <h3 class="text-sm font-semibold text-foreground">Informacion General</h3>
     <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
 
+      <div class="sm:col-span-2">
+        <%= f.label :product_type, "Tipo", class: "form-label" %>
+        <%= f.select :product_type,
+            options_for_select([
+              ["Producto", "good"],
+              ["Servicio", "service"]
+            ], product.product_type || "good"),
+            {},
+            class: "form-input",
+            data: { product_form_target: "productType", action: "change->product-form#toggleProductType" } %>
+      </div>
+
       <div class="sm:col-span-4">
-        <%= f.label :name, "Nombre del Producto", class: "form-label" %>
+        <%= f.label :name, "Nombre", class: "form-label" %>
         <%= f.text_field :name, class: "form-input", required: true %>
       </div>
 
-      <div class="sm:col-span-2">
+      <div class="sm:col-span-2" data-product-form-target="goodsOnly">
         <%= f.label :sku, "SKU (Codigo)", class: "form-label" %>
         <%= f.text_field :sku, class: "form-input", placeholder: "Opcional" %>
       </div>
 
       <div class="sm:col-span-6">
         <%= f.label :description, "Descripcion", class: "form-label" %>
-        <%= f.text_area :description, class: "form-input", rows: 3, placeholder: "Descripcion del producto (opcional)" %>
+        <%= f.text_area :description, class: "form-input", rows: 3, placeholder: "Descripcion (opcional)" %>
       </div>
 
-      <div class="sm:col-span-2">
+      <div class="sm:col-span-2" data-product-form-target="goodsOnly">
         <%= f.label :source_type, "Tipo de Origen", class: "form-label" %>
         <%= f.select :source_type,
             options_for_select([
@@ -45,27 +57,49 @@
             data: { product_form_target: "sourceType", action: "change->product-form#toggleProvider" } %>
       </div>
 
-      <div class="sm:col-span-2">
-        <%= f.label :unit, "Unidad de Medida", class: "form-label" %>
-        <%= f.select :unit,
-            options_for_select([
-              ["Kilogramo (kg)", "kg"],
-              ["Gramo (g)", "g"],
-              ["Litro (lt)", "lt"],
-              ["Mililitro (ml)", "ml"],
-              ["Unidad (un)", "un"],
-              ["Centilitro (cl)", "cl"]
-            ], product.unit || "un"),
-            {},
-            class: "form-input" %>
+      <% has_unit_data = product.unit.present? && product.unit != "un" || product.capacity.present? && product.capacity > 0 || product.units_per_package.present? && product.units_per_package > 0 %>
+      <div class="sm:col-span-6" data-product-form-target="goodsOnly">
+        <label class="inline-flex items-center gap-2 cursor-pointer">
+          <input type="checkbox"
+                 class="form-checkbox rounded border-border text-primary focus:ring-primary"
+                 data-product-form-target="unitToggle"
+                 data-action="change->product-form#toggleUnitFields"
+                 <%= "checked" if has_unit_data %>>
+          <span class="text-sm text-foreground">Configurar unidad de medida, capacidad y empaque</span>
+        </label>
       </div>
 
-      <div class="sm:col-span-2">
-        <%= f.label :units_per_package, "Unidades por Paquete", class: "form-label" %>
-        <%= f.number_field :units_per_package, class: "form-input", min: 1, step: 0.1, placeholder: "Opcional" %>
+      <div class="sm:col-span-6 <%= 'hidden' unless has_unit_data %>" data-product-form-target="unitFields goodsOnly">
+        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+          <div class="sm:col-span-2">
+            <%= f.label :unit, "Unidad de Medida", class: "form-label" %>
+            <%= f.select :unit,
+                options_for_select([
+                  ["Kilogramo (kg)", "kg"],
+                  ["Gramo (g)", "g"],
+                  ["Litro (lt)", "lt"],
+                  ["Mililitro (ml)", "ml"],
+                  ["Unidad (un)", "un"],
+                  ["Centilitro (cl)", "cl"]
+                ], product.unit || "un"),
+                {},
+                class: "form-input",
+                data: { product_form_target: "unitSelect" } %>
+          </div>
+
+          <div class="sm:col-span-2">
+            <%= f.label :capacity, "Capacidad", class: "form-label" %>
+            <%= f.number_field :capacity, class: "form-input", step: 0.01, min: 0, placeholder: "Ej: 3.2" %>
+          </div>
+
+          <div class="sm:col-span-2">
+            <%= f.label :units_per_package, "Und x Paquete", class: "form-label" %>
+            <%= f.number_field :units_per_package, class: "form-input", min: 1, step: 1, placeholder: "Ej: 12" %>
+          </div>
+        </div>
       </div>
 
-      <div class="sm:col-span-3" data-product-form-target="providerContainer">
+      <div class="sm:col-span-3" data-product-form-target="providerContainer goodsOnly">
         <%= f.label :provider_id, "Proveedor", class: "form-label" %>
         <%= f.select :provider_id,
             options_for_select(
@@ -94,32 +128,32 @@
 
   <%# Precios %>
   <div class="card">
-    <h3 class="text-lg font-medium leading-6 text-foreground">Precios</h3>
-    <p class="mt-1 text-sm text-muted-foreground">Configura los precios de compra y venta del producto.</p>
+    <h3 class="text-sm font-semibold text-foreground">Precios</h3>
+    <p class="mt-1 text-sm text-muted-foreground">Configura los precios de compra y venta.</p>
 
     <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
 
-      <div class="sm:col-span-2">
+      <div class="sm:col-span-2" data-product-form-target="goodsOnly purchasedOnly">
         <%= f.label :buy_price, "Precio de Compra", class: "form-label" %>
-        <div class="relative">
-          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">S/</span>
-          <%= f.number_field :buy_price, class: "form-input pl-8", step: 0.01, min: 0, required: true %>
+        <div class="flex rounded-lg">
+          <span class="inline-flex items-center px-3 border border-r-0 border-border bg-muted text-muted-foreground text-sm rounded-lg rounded-r-none">S/</span>
+          <%= f.number_field :buy_price, class: "form-input !rounded-l-none", step: 0.01, min: 0, required: true %>
         </div>
       </div>
 
       <div class="sm:col-span-2">
         <%= f.label :sell_cash_price, "Precio Venta Contado", class: "form-label" %>
-        <div class="relative">
-          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">S/</span>
-          <%= f.number_field :sell_cash_price, class: "form-input pl-8", step: 0.01, min: 0, required: true %>
+        <div class="flex rounded-lg">
+          <span class="inline-flex items-center px-3 border border-r-0 border-border bg-muted text-muted-foreground text-sm rounded-lg rounded-r-none">S/</span>
+          <%= f.number_field :sell_cash_price, class: "form-input !rounded-l-none", step: 0.01, min: 0, required: true %>
         </div>
       </div>
 
       <div class="sm:col-span-2">
         <%= f.label :sell_credit_price, "Precio Venta Credito", class: "form-label" %>
-        <div class="relative">
-          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">S/</span>
-          <%= f.number_field :sell_credit_price, class: "form-input pl-8", step: 0.01, min: 0, required: true %>
+        <div class="flex rounded-lg">
+          <span class="inline-flex items-center px-3 border border-r-0 border-border bg-muted text-muted-foreground text-sm rounded-lg rounded-r-none">S/</span>
+          <%= f.number_field :sell_credit_price, class: "form-input !rounded-l-none", step: 0.01, min: 0, required: true %>
         </div>
       </div>
 
@@ -127,9 +161,9 @@
   </div>
 
   <% if current_enterprise.use_stock? %>
-    <%# Inventario %>
-    <div class="card">
-      <h3 class="text-lg font-medium leading-6 text-foreground">Inventario</h3>
+    <%# Inventario - solo para productos %>
+    <div class="card" data-product-form-target="goodsOnly">
+      <h3 class="text-sm font-semibold text-foreground">Inventario</h3>
       <p class="mt-1 text-sm text-muted-foreground">Opcional - Configura el stock inicial del producto.</p>
 
       <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
@@ -145,7 +179,8 @@
 
   <%# Acciones %>
   <div class="flex justify-end gap-3">
-    <%= link_to "Cancelar", products_path, class: "btn-secondary" %>
-    <%= f.submit product.persisted? ? "Actualizar Producto" : "Crear Producto", class: "btn-primary cursor-pointer" %>
+    <%= link_to "Cancelar", products_path(product_type: product.product_type), class: "btn-secondary" %>
+    <% label = product.service? ? "Servicio" : "Producto" %>
+    <%= f.submit product.persisted? ? "Actualizar #{label}" : "Crear #{label}", class: "btn-primary cursor-pointer" %>
   </div>
 <% end %>

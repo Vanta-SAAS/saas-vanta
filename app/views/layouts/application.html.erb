@@ -143,19 +143,18 @@
     </script>
 
     <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        // Only apply collapsed state on desktop
-        const isMobile = window.innerWidth <= 768;
+      (function() {
+        var isMobile = window.innerWidth <= 768;
         if (!isMobile) {
-          const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-          const mainContent = document.querySelector('.main-with-sidebar');
-          const sidebar = document.querySelector('.sidebar');
+          var isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
           if (isCollapsed) {
+            var mainContent = document.querySelector('.main-with-sidebar');
+            var sidebar = document.querySelector('.sidebar');
             if (mainContent) mainContent.classList.add('sidebar-is-collapsed');
             if (sidebar) sidebar.classList.add('sidebar-collapsed');
           }
         }
-      });
+      })();
     </script>
 
     <div data-controller="toast" data-toast-position-value="bottom-right" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm">

@@ -1,84 +1,86 @@
-<div class="max-w-4xl mx-auto py-8 px-4">
-  <div class="flex items-center justify-between mb-8">
-    <div>
-      <div class="flex items-center gap-3">
-        <h1 class="text-2xl font-bold text-foreground"><%= @provider.name %></h1>
-      </div>
-      <p class="mt-1 text-sm text-muted-foreground">
+<% content_for :page_title, @provider.name %>
+
+<div class="max-w-5xl mx-auto space-y-6">
+  <%# Header %>
+  <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+    <div class="space-y-1">
+      <h1 class="text-xl font-semibold text-foreground"><%= @provider.name %></h1>
+      <p class="text-sm text-muted-foreground">
         <% if @provider.tax_id.present? %>
-          <%= format_tax_id(@provider.tax_id) %> |
+          <%= format_tax_id(@provider.tax_id) %> &middot;
         <% end %>
         Registrado <%= time_ago_in_words(@provider.created_at) %> atras
       </p>
     </div>
-    <div class="flex gap-3">
+    <div class="flex flex-wrap gap-2">
       <%= link_to "Volver", providers_path, class: "btn-secondary" %>
       <% if policy(@provider).update? %>
-        <%= link_to "Editar", edit_provider_path(@provider), class: "btn-primary" %>
+        <%= link_to "Editar", edit_provider_path(@provider), class: "btn-secondary" %>
       <% end %>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <div class="lg:col-span-2 space-y-6">
+  <%# Info Cards %>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div class="lg:col-span-2 space-y-4">
       <div class="card">
-        <h3 class="text-lg font-medium text-foreground mb-4">Informacion General</h3>
+        <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Informacion General</h3>
         <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <dt class="text-sm font-medium text-muted-foreground">Nombre</dt>
-            <dd class="mt-1 text-sm text-foreground"><%= @provider.name %></dd>
+            <dt class="text-xs text-muted-foreground">Nombre</dt>
+            <dd class="text-sm font-medium text-foreground mt-0.5"><%= @provider.name %></dd>
           </div>
           <div>
-            <dt class="text-sm font-medium text-muted-foreground">RUC/DNI</dt>
-            <dd class="mt-1 text-sm text-foreground"><%= @provider.tax_id.presence || "-" %></dd>
+            <dt class="text-xs text-muted-foreground">RUC/DNI</dt>
+            <dd class="text-sm font-medium text-foreground mt-0.5 font-mono"><%= @provider.tax_id.presence || "-" %></dd>
+          </div>
+          <div>
+            <dt class="text-xs text-muted-foreground">Ubicacion</dt>
+            <dd class="text-sm font-medium text-foreground mt-0.5"><%= @provider.ubigeo&.full_path.presence || "-" %></dd>
           </div>
         </dl>
       </div>
 
       <div class="card">
-        <h3 class="text-lg font-medium text-foreground mb-4">Contacto</h3>
+        <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Contacto</h3>
         <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <dt class="text-sm font-medium text-muted-foreground">Email</dt>
-            <dd class="mt-1 text-sm text-foreground">
+            <dt class="text-xs text-muted-foreground">Email</dt>
+            <dd class="text-sm font-medium text-foreground mt-0.5">
               <% if @provider.email.present? %>
-                <%= mail_to @provider.email, @provider.email, class: "text-primary hover:underline" %>
+                <%= mail_to @provider.email, @provider.email, class: "link-primary" %>
               <% else %>
                 -
               <% end %>
             </dd>
           </div>
           <div>
-            <dt class="text-sm font-medium text-muted-foreground">Telefono</dt>
-            <dd class="mt-1 text-sm text-foreground">
+            <dt class="text-xs text-muted-foreground">Telefono</dt>
+            <dd class="text-sm font-medium text-foreground mt-0.5">
               <% if @provider.phone_number.present? %>
-                <%= link_to @provider.phone_number, "tel:#{@provider.phone_number}", class: "text-primary hover:underline" %>
+                <%= link_to @provider.phone_number, "tel:#{@provider.phone_number}", class: "link-primary" %>
               <% else %>
                 -
               <% end %>
             </dd>
-          </div>
-          <div class="sm:col-span-2">
-            <dt class="text-sm font-medium text-muted-foreground">Ubicacion</dt>
-            <dd class="mt-1 text-sm text-foreground"><%= @provider.ubigeo&.full_path.presence || "-" %></dd>
           </div>
         </dl>
       </div>
     </div>
 
-    <div class="space-y-6">
+    <div class="space-y-4">
       <div class="card">
-        <h3 class="text-lg font-medium text-foreground mb-4">Productos Asociados</h3>
+        <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Productos Asociados</h3>
         <% products_count = @provider.products.count rescue 0 %>
-        <div class="text-center p-4 bg-muted/30 rounded-lg">
-          <span class="text-3xl font-bold text-foreground"><%= products_count %></span>
-          <p class="text-sm text-muted-foreground mt-1">productos</p>
+        <div class="text-center p-3 bg-muted/30 rounded-lg">
+          <span class="text-2xl font-bold text-foreground tabular-nums"><%= products_count %></span>
+          <p class="text-xs text-muted-foreground mt-0.5">productos</p>
         </div>
       </div>
 
       <% if policy(@provider).destroy? %>
         <div class="card">
-          <h3 class="text-lg font-medium text-foreground mb-4">Zona de Peligro</h3>
+          <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Zona de Peligro</h3>
           <%= button_to "Eliminar Proveedor",
               @provider,
               method: :delete,

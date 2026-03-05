@@ -4,7 +4,11 @@ class ProductsController < ApplicationController
 
   def index
     authorize Product
-    products = current_enterprise.products.includes(:provider).order(created_at: :desc)
+    @product_type = params[:product_type].presence || "good"
+    products = current_enterprise.products
+                                 .where(product_type: @product_type)
+                                 .includes(:provider)
+                                 .order(created_at: :desc)
     @pagy, @products = pagy(products)
   end
 
@@ -33,7 +37,7 @@ class ProductsController < ApplicationController
 
   def new
     authorize Product
-    @product = current_enterprise.products.build
+    @product = current_enterprise.products.build(product_type: params[:product_type] || "good")
     @providers = current_enterprise.providers
   end
 
@@ -42,7 +46,8 @@ class ProductsController < ApplicationController
     @product = current_enterprise.products.build(product_params)
 
     if @product.save
-      redirect_to @product, notice: "Producto creado exitosamente."
+      label = @product.service? ? "Servicio" : "Producto"
+      redirect_to @product, notice: "#{label} creado exitosamente."
     else
       @providers = current_enterprise.providers
       render :new, status: :unprocessable_entity
@@ -58,7 +63,8 @@ class ProductsController < ApplicationController
     authorize @product
 
     if @product.update(product_params)
-      redirect_to @product, notice: "Producto actualizado exitosamente."
+      label = @product.service? ? "Servicio" : "Producto"
+      redirect_to @product, notice: "#{label} actualizado exitosamente."
     else
       @providers = current_enterprise.providers
       render :edit, status: :unprocessable_entity
@@ -67,8 +73,10 @@ class ProductsController < ApplicationController
 
   def destroy
     authorize @product
+    label = @product.service? ? "Servicio" : "Producto"
+    product_type = @product.product_type
     @product.destroy
-    redirect_to products_path, notice: "Producto eliminado exitosamente."
+    redirect_to products_path(product_type: product_type), notice: "#{label} eliminado exitosamente."
   end
 
   private
@@ -91,12 +99,14 @@ class ProductsController < ApplicationController
       :source_type,
       :unit,
       :units_per_package,
+      :capacity,
       :buy_price,
       :sell_cash_price,
       :sell_credit_price,
       :stock,
       :status,
-      :provider_id
+      :provider_id,
+      :product_type
     )
   end
 end

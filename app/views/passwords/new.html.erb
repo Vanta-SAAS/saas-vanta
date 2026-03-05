@@ -1,4 +1,4 @@
-<div class="min-h-screen flex relative">
+<div class="min-h-screen flex items-center justify-center bg-background p-6">
   <button
     id="theme-toggle"
     class="absolute top-6 right-6 theme-toggle z-10"
@@ -12,18 +12,18 @@
     </svg>
   </button>
 
-  <div class="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 bg-background">
-    <div class="w-full max-w-md">
-      <div class="flex flex-col items-center lg:items-start mb-8">
-        <img src="/logo-vanta.png" alt="VANTA Logo" class="h-16 w-auto mb-6">
-        <h1 class="text-3xl font-bold text-foreground mb-2">Recuperar contraseña</h1>
-        <p class="text-muted-foreground">Ingresa tu correo y te enviaremos instrucciones</p>
-      </div>
+  <div class="w-full max-w-sm">
+    <div class="flex flex-col items-center mb-8">
+      <img src="/logo-vanta.png" alt="VANTA" class="h-12 w-auto mb-6">
+      <h1 class="text-xl font-semibold text-foreground">Recuperar contrasena</h1>
+      <p class="mt-1 text-sm text-muted-foreground">Te enviaremos instrucciones por correo</p>
+    </div>
 
-      <%= render "shared/flash_messages" %>
+    <%= render "shared/flash_messages" %>
 
+    <div class="card">
       <%= form_with url: passwords_path, class: "space-y-5" do |form| %>
-        <div class="space-y-2">
+        <div class="space-y-1.5">
           <label for="email_address" class="form-label">Correo electronico</label>
           <%= form.email_field :email_address,
               id: "email_address",
@@ -36,80 +36,18 @@
         </div>
 
         <div>
-          <%= form.submit "Enviar instrucciones", class: "w-full btn-primary h-12 cursor-pointer" %>
+          <%= form.submit "Enviar instrucciones", class: "w-full btn-primary h-11 cursor-pointer" %>
         </div>
       <% end %>
-
-      <div class="mt-6 text-center">
-        <%= link_to login_path, class: "inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors" do %>
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-          </svg>
-          Volver al inicio de sesion
-        <% end %>
-      </div>
     </div>
-  </div>
 
-  <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary via-primary to-secondary relative overflow-hidden">
-    <div
-      class="absolute inset-0 bg-cover bg-center opacity-20"
-      style="background-image: url('https://images.unsplash.com/photo-1633265486064-086b219458ec?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzZWN1cml0eSUyMGxvY2t8ZW58MXx8fHwxNzY4NTMzNDI2fDA&ixlib=rb-4.1.0&q=80&w=1080');"
-    ></div>
-
-    <div class="relative z-10 flex flex-col justify-center p-12 lg:p-16 text-white">
-      <div class="mb-12">
-        <h2 class="text-4xl font-bold mb-4">Recupera tu acceso</h2>
-        <p class="text-xl opacity-90 leading-relaxed">
-          No te preocupes, te ayudaremos a recuperar
-          el acceso a tu cuenta de forma segura y rapida.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 gap-6">
-        <div class="card-glass flex items-start gap-4">
-          <div class="icon-container">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-            </svg>
-          </div>
-          <div>
-            <h3 class="font-semibold text-lg mb-1">Revisa tu correo</h3>
-            <p class="text-sm opacity-90">Te enviaremos un enlace de recuperacion</p>
-          </div>
-        </div>
-
-        <div class="card-glass flex items-start gap-4">
-          <div class="icon-container">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-            </svg>
-          </div>
-          <div>
-            <h3 class="font-semibold text-lg mb-1">Crea nueva contraseña</h3>
-            <p class="text-sm opacity-90">Elige una contraseña segura y unica</p>
-          </div>
-        </div>
-
-        <div class="card-glass flex items-start gap-4">
-          <div class="icon-container">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
-            </svg>
-          </div>
-          <div>
-            <h3 class="font-semibold text-lg mb-1">Acceso restaurado</h3>
-            <p class="text-sm opacity-90">Vuelve a usar tu cuenta con normalidad</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="mt-12 pt-8 border-t border-white/20">
-        <p class="text-sm opacity-75">
-          El enlace de recuperacion expirara en 15 minutos por seguridad.
-          Si no recibes el correo, revisa tu carpeta de spam.
-        </p>
-      </div>
+    <div class="mt-6 text-center">
+      <%= link_to login_path, class: "inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors" do %>
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        Volver al inicio de sesion
+      <% end %>
     </div>
   </div>
 </div>

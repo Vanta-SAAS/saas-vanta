@@ -1,17 +1,27 @@
-<div class="max-w-5xl mx-auto py-8 px-4">
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-    <div>
+<% content_for :page_title, @sale.code %>
+
+<div class="max-w-5xl mx-auto space-y-6">
+  <%# Header %>
+  <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+    <div class="space-y-3">
       <div class="flex items-center gap-3">
-        <h1 class="text-2xl font-bold text-foreground"><%= @sale.code %></h1>
-        <span class="<%= @sale.status_badge_class %>"><%= @sale.status_label %></span>
+        <h1 class="text-xl font-semibold text-foreground font-mono"><%= @sale.code %></h1>
       </div>
-      <p class="mt-1 text-sm text-muted-foreground">
+      <p class="text-sm text-muted-foreground">
         Creada por <%= @sale.created_by.first_name %> el <%= l(@sale.created_at, format: :long) %>
       </p>
+      <%# Status Bar — Signature Element %>
+      <%= render "shared/documents/status_bar",
+          steps: [
+            { key: "pending", label: "Pendiente" },
+            { key: "confirmed", label: "Confirmada" }
+          ],
+          current: @sale.status,
+          cancelled: @sale.cancelled? %>
     </div>
-    <div class="flex flex-wrap gap-3">
+    <div class="flex flex-wrap gap-2">
       <%= link_to "Volver", sales_path, class: "btn-secondary" %>
-      <%= link_to "Descargar PDF", pdf_sale_path(@sale), class: "btn-secondary", data: { turbo: false } %>
+      <%= link_to "PDF", pdf_sale_path(@sale), class: "btn-secondary", data: { turbo: false } %>
 
       <% if @sale.can_edit? && policy(@sale).update? %>
         <%= link_to "Editar", edit_sale_path(@sale), class: "btn-secondary" %>
@@ -19,126 +29,115 @@
 
       <% if @sale.can_confirm? && policy(@sale).confirm? %>
         <%= button_to "Confirmar", confirm_sale_path(@sale),
-            method: :patch,
-            class: "btn-primary",
+            method: :patch, class: "btn-primary",
             data: { turbo_confirm: "Confirmar esta venta? Se descontara el stock." } %>
       <% end %>
 
       <% if @sale.can_generate_purchase_orders? && policy(@sale).generate_purchase_orders? %>
         <%= button_to "Generar OC", generate_purchase_orders_sale_path(@sale),
-            method: :post,
-            class: "btn-secondary",
+            method: :post, class: "btn-secondary",
             data: { turbo_confirm: "Se generaran ordenes de compra agrupadas por proveedor. Continuar?" } %>
       <% end %>
 
       <% if @sale.can_emit_document? && policy(@sale).emit_document? %>
         <% doc_type = @sale.customer.ruc? ? "Factura" : "Boleta" %>
         <%= button_to "Emitir #{doc_type}", emit_document_sale_path(@sale),
-            method: :post,
-            class: "btn-primary",
+            method: :post, class: "btn-primary",
             data: { turbo_confirm: "Se emitira una #{doc_type} electronica a SUNAT. Continuar?" } %>
       <% end %>
 
-      <% if @sale.confirmed? && policy(DispatchGuide).create? %>
-        <%= link_to "Generar Guia de Remision",
-            new_dispatch_guide_path(sale_id: @sale.id, guide_type: "grr"),
-            class: "btn-secondary" %>
+      <% if @sale.confirmed? && @sale.has_goods? && policy(DispatchGuide).create? %>
+        <%= link_to "Guia de Remision", new_dispatch_guide_path(sale_id: @sale.id, guide_type: "grr"), class: "btn-secondary" %>
       <% end %>
 
       <% if @sale.can_cancel? && policy(@sale).cancel? %>
         <%= button_to "Cancelar", cancel_sale_path(@sale),
-            method: :patch,
-            class: "btn-destructive",
+            method: :patch, class: "btn-destructive",
             data: { turbo_confirm: "Cancelar esta venta? Esta accion no se puede deshacer." } %>
       <% end %>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+  <%# Info Cards %>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
     <div class="card">
-      <h3 class="text-sm font-medium text-muted-foreground mb-2">Cliente</h3>
-      <p class="text-lg font-semibold text-foreground"><%= @sale.customer.name %></p>
+      <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Cliente</h3>
+      <p class="text-sm font-semibold text-foreground"><%= @sale.customer.name %></p>
       <% if @sale.customer.tax_id.present? %>
-        <p class="text-sm text-muted-foreground">RUC: <%= @sale.customer.tax_id %></p>
+        <p class="text-xs text-muted-foreground mt-0.5"><%= @sale.customer.tax_id_type.upcase %>: <%= @sale.customer.tax_id %></p>
       <% end %>
     </div>
 
     <div class="card">
-      <h3 class="text-sm font-medium text-muted-foreground mb-2">Vendedor</h3>
-      <p class="text-foreground font-medium"><%= @sale.seller.combobox_display %></p>
+      <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Vendedor</h3>
+      <p class="text-sm font-medium text-foreground"><%= @sale.seller.combobox_display %></p>
       <% if @sale.seller.phone_number.present? %>
-        <p class="text-sm text-muted-foreground">Tel: <%= @sale.seller.phone_number %></p>
+        <p class="text-xs text-muted-foreground mt-0.5">Tel: <%= @sale.seller.phone_number %></p>
       <% end %>
     </div>
 
     <div class="card">
-      <h3 class="text-sm font-medium text-muted-foreground mb-2">Fecha</h3>
-      <p class="text-foreground">
-        <span class="font-medium">Emision:</span> <%= l(@sale.issue_date, format: :long) %>
-      </p>
+      <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Fecha de Emision</h3>
+      <p class="text-sm font-medium text-foreground"><%= l(@sale.issue_date, format: :long) %></p>
     </div>
   </div>
 
   <% if @sale.destination.present? %>
-    <div class="card mb-8">
-      <h3 class="text-sm font-medium text-muted-foreground mb-2">Destino</h3>
-      <p class="text-foreground"><%= @sale.destination.full_path %></p>
+    <div class="card">
+      <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Destino</h3>
+      <p class="text-sm text-foreground"><%= @sale.destination.full_path %></p>
     </div>
   <% end %>
 
-  <div class="card mb-8">
-    <h3 class="text-lg font-medium text-foreground mb-4">Items</h3>
-
+  <%# Items Table %>
+  <div class="card p-0">
+    <div class="px-5 py-4 border-b border-border">
+      <h3 class="text-sm font-semibold text-foreground">Items</h3>
+    </div>
     <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-border">
-        <thead class="bg-muted/50">
-          <tr>
-            <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">N</th>
-            <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Producto</th>
-            <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Cantidad</th>
-            <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Precio Unit.</th>
-            <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Total</th>
+        <thead>
+          <tr class="bg-muted/40">
+            <th class="px-5 py-2.5 text-left text-xs font-medium text-muted-foreground uppercase w-10">#</th>
+            <th class="px-5 py-2.5 text-left text-xs font-medium text-muted-foreground uppercase">Producto</th>
+            <th class="px-5 py-2.5 text-right text-xs font-medium text-muted-foreground uppercase">Cantidad</th>
+            <th class="px-5 py-2.5 text-right text-xs font-medium text-muted-foreground uppercase">Precio Unit.</th>
+            <th class="px-5 py-2.5 text-right text-xs font-medium text-muted-foreground uppercase">Total</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-border">
           <% @sale.items.includes(:product).each_with_index do |item, index| %>
             <tr>
-              <td class="px-4 py-3 text-sm text-muted-foreground"><%= index + 1 %></td>
-              <td class="px-4 py-3">
+              <td class="px-5 py-3 text-sm text-muted-foreground"><%= index + 1 %></td>
+              <td class="px-5 py-3">
                 <p class="text-sm font-medium text-foreground"><%= item.product.name %></p>
                 <% if item.product.sku.present? %>
-                  <p class="text-xs text-muted-foreground">SKU: <%= item.product.sku %></p>
+                  <p class="text-xs text-muted-foreground font-mono">SKU: <%= item.product.sku %></p>
                 <% end %>
               </td>
-              <td class="px-4 py-3 text-sm text-foreground text-right">
-                <%= item.quantity %> <%= item.unit_label %>
-              </td>
-              <td class="px-4 py-3 text-sm text-foreground text-right">
-                S/ <%= number_with_precision(item.unit_price, precision: 2, delimiter: ",") %>
-              </td>
-              <td class="px-4 py-3 text-sm font-medium text-foreground text-right">
-                S/ <%= number_with_precision(item.total, precision: 2, delimiter: ",") %>
-              </td>
+              <td class="px-5 py-3 text-sm text-foreground text-right tabular-nums"><%= item.quantity %> <%= item.unit_label %></td>
+              <td class="px-5 py-3 text-sm text-foreground text-right tabular-nums">S/ <%= number_with_precision(item.unit_price, precision: 2, delimiter: ",") %></td>
+              <td class="px-5 py-3 text-sm font-medium text-foreground text-right tabular-nums">S/ <%= number_with_precision(item.total, precision: 2, delimiter: ",") %></td>
             </tr>
           <% end %>
         </tbody>
       </table>
     </div>
 
-    <div class="mt-6 border-t border-border pt-4">
+    <div class="px-5 py-4 border-t border-border">
       <div class="flex justify-end">
-        <dl class="space-y-2 text-sm w-64">
+        <dl class="space-y-1.5 text-sm w-56">
           <div class="flex justify-between">
             <dt class="text-muted-foreground">Subtotal</dt>
-            <dd class="font-medium text-foreground">S/ <%= number_with_precision(@sale.subtotal, precision: 2, delimiter: ",") %></dd>
+            <dd class="font-medium text-foreground tabular-nums">S/ <%= number_with_precision(@sale.subtotal, precision: 2, delimiter: ",") %></dd>
           </div>
           <div class="flex justify-between">
             <dt class="text-muted-foreground">IGV (<%= (PeruTax::IGV_RATE * 100).to_i %>%)</dt>
-            <dd class="font-medium text-foreground">S/ <%= number_with_precision(@sale.tax, precision: 2, delimiter: ",") %></dd>
+            <dd class="font-medium text-foreground tabular-nums">S/ <%= number_with_precision(@sale.tax, precision: 2, delimiter: ",") %></dd>
           </div>
-          <div class="flex justify-between border-t border-border pt-2">
+          <div class="flex justify-between border-t border-border pt-1.5">
             <dt class="font-semibold text-foreground">Total</dt>
-            <dd class="font-bold text-foreground text-lg">S/ <%= number_with_precision(@sale.total, precision: 2, delimiter: ",") %></dd>
+            <dd class="font-bold text-foreground text-base tabular-nums">S/ <%= number_with_precision(@sale.total, precision: 2, delimiter: ",") %></dd>
           </div>
         </dl>
       </div>
@@ -146,32 +145,33 @@
   </div>
 
   <% if @sale.notes.present? %>
-    <div class="card mb-8">
-      <h3 class="text-lg font-medium text-foreground mb-2">Notas</h3>
-      <p class="text-foreground whitespace-pre-wrap"><%= @sale.notes %></p>
+    <div class="card">
+      <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Notas</h3>
+      <p class="text-sm text-foreground whitespace-pre-wrap"><%= @sale.notes %></p>
     </div>
   <% end %>
 
+  <%# SUNAT Section %>
   <% if @sale.sunat_uuid.present? %>
-    <div class="card mb-8">
+    <div class="card">
       <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-medium text-foreground">Comprobante Electronico</h3>
+        <h3 class="text-sm font-semibold text-foreground">Comprobante Electronico</h3>
         <span class="<%= @sale.sunat_status_badge_class %>"><%= @sale.sunat_status %></span>
       </div>
       <dl class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
         <div>
-          <dt class="text-muted-foreground">Tipo</dt>
-          <dd class="font-medium text-foreground"><%= @sale.sunat_document_type_label %></dd>
+          <dt class="text-xs text-muted-foreground uppercase tracking-wide">Tipo</dt>
+          <dd class="font-medium text-foreground mt-0.5"><%= @sale.sunat_document_type_label %></dd>
         </div>
         <% if @sale.sunat_series.present? %>
           <div>
-            <dt class="text-muted-foreground">Serie - Numero</dt>
-            <dd class="font-medium text-foreground"><%= @sale.sunat_formatted_number %></dd>
+            <dt class="text-xs text-muted-foreground uppercase tracking-wide">Serie - Numero</dt>
+            <dd class="font-medium text-foreground mt-0.5 font-mono"><%= @sale.sunat_formatted_number %></dd>
           </div>
         <% end %>
         <div>
-          <dt class="text-muted-foreground">UUID</dt>
-          <dd class="font-medium text-foreground text-xs"><%= @sale.sunat_uuid %></dd>
+          <dt class="text-xs text-muted-foreground uppercase tracking-wide">UUID</dt>
+          <dd class="font-medium text-foreground mt-0.5 text-xs font-mono"><%= @sale.sunat_uuid %></dd>
         </div>
       </dl>
 
@@ -185,49 +185,45 @@
         </div>
       <% end %>
 
-      <div class="mt-4 flex flex-wrap gap-3">
-        <%= link_to "Consultar Estado", check_sunat_status_sale_path(@sale),
-            class: "btn-secondary text-sm" %>
-
+      <div class="mt-4 flex flex-wrap gap-2">
+        <%= link_to "Consultar Estado", check_sunat_status_sale_path(@sale), class: "btn-secondary" %>
         <% if @sale.can_retry_document? && policy(@sale).retry_document? %>
           <%= button_to "Reintentar Envio", retry_document_sale_path(@sale),
-              method: :post,
-              class: "btn-secondary text-sm",
+              method: :post, class: "btn-secondary",
               data: { turbo_confirm: "Reintentar el envio del comprobante a SUNAT?" } %>
         <% end %>
-
         <% if @sale.sunat_status == "ACCEPTED" && @sale.sunat_xml.present? %>
-          <%= link_to "Descargar Comprobante PDF", sunat_pdf_sale_path(@sale),
-              class: "btn-primary text-sm", data: { turbo: false } %>
-          <%= link_to "Descargar XML", sunat_xml_sale_path(@sale),
-              class: "btn-secondary text-sm", data: { turbo: false } %>
+          <%= link_to "Comprobante PDF", sunat_pdf_sale_path(@sale), class: "btn-primary", data: { turbo: false } %>
+          <%= link_to "XML", sunat_xml_sale_path(@sale), class: "btn-secondary", data: { turbo: false } %>
         <% end %>
       </div>
     </div>
   <% end %>
 
   <% if @sale.sourceable.present? %>
-    <div class="card mb-8">
-      <h3 class="text-sm font-medium text-muted-foreground mb-2">Origen</h3>
-      <p class="text-foreground">
+    <div class="card">
+      <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Origen</h3>
+      <p class="text-sm text-foreground">
         Generada desde cotizacion
-        <%= link_to @sale.sourceable.code, customer_quote_path(@sale.sourceable), class: "text-primary hover:underline font-medium" %>
+        <%= link_to @sale.sourceable.code, customer_quote_path(@sale.sourceable), class: "link-primary font-medium font-mono" %>
       </p>
     </div>
   <% end %>
 
   <% if @sale.purchase_orders.any? %>
-    <div class="card">
-      <h3 class="text-lg font-medium text-foreground mb-4">Ordenes de Compra</h3>
+    <div class="card p-0">
+      <div class="px-5 py-4 border-b border-border">
+        <h3 class="text-sm font-semibold text-foreground">Ordenes de Compra</h3>
+      </div>
       <div class="divide-y divide-border">
         <% @sale.purchase_orders.includes(:provider).each do |po| %>
-          <div class="flex items-center justify-between py-3">
-            <div>
-              <%= link_to po.code, purchase_order_path(po), class: "text-primary hover:underline font-medium" %>
-              <span class="text-sm text-muted-foreground ml-2"><%= po.provider.name %></span>
+          <div class="flex items-center justify-between px-5 py-3">
+            <div class="flex items-center gap-3">
+              <%= link_to po.code, purchase_order_path(po), class: "text-sm link-primary font-medium font-mono" %>
+              <span class="text-sm text-muted-foreground"><%= po.provider.name %></span>
             </div>
             <div class="flex items-center gap-3">
-              <span class="text-sm font-medium text-foreground">S/ <%= number_with_precision(po.total, precision: 2, delimiter: ",") %></span>
+              <span class="text-sm font-medium text-foreground tabular-nums">S/ <%= number_with_precision(po.total, precision: 2, delimiter: ",") %></span>
               <span class="<%= po.status_badge_class %>"><%= po.status_label %></span>
             </div>
           </div>

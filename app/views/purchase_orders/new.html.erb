@@ -1,8 +1,5 @@
-<div class="max-w-5xl mx-auto py-8 px-4">
-  <div class="mb-8">
-    <h1 class="text-2xl font-bold text-foreground">Nueva Orden de Compra</h1>
-    <p class="mt-1 text-sm text-muted-foreground">Crea una nueva orden de compra a un proveedor</p>
-  </div>
+<% content_for :page_title, "Nueva Orden de Compra" %>
 
+<div class="max-w-5xl mx-auto">
   <%= render "form", purchase_order: @purchase_order %>
 </div>

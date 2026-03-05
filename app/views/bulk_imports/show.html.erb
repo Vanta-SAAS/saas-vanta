@@ -9,19 +9,19 @@
 
 <% content_for :page_title, "Detalle de Importacion" %>
 
-<div class="max-w-4xl mx-auto py-8 px-4">
-  <div class="flex items-center justify-between mb-8">
-    <div>
+<div class="max-w-5xl mx-auto space-y-6">
+  <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+    <div class="space-y-1">
       <div class="flex items-center gap-3">
-        <h1 class="text-2xl font-bold text-foreground">Importacion #<%= @bulk_import.id %></h1>
+        <h1 class="text-xl font-semibold text-foreground">Importacion #<%= @bulk_import.id %></h1>
         <%= render_import_status_badge(@bulk_import.status) %>
       </div>
-      <p class="mt-1 text-sm text-muted-foreground">
-        <%= resource_label %> |
+      <p class="text-sm text-muted-foreground">
+        <%= resource_label %> &middot;
         <%= @bulk_import.created_at.strftime("%d/%m/%Y %H:%M") %>
       </p>
     </div>
-    <div class="flex gap-3">
+    <div class="flex flex-wrap gap-2">
       <%= link_to "Volver", bulk_imports_path(resource_type: @bulk_import.resource_type), class: "btn-secondary" %>
       <%= link_to "Nueva Importacion",
                   new_bulk_import_path(resource_type: @bulk_import.resource_type),
@@ -30,7 +30,7 @@
   </div>
 
   <% if @bulk_import.processing? %>
-    <div class="mb-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+    <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
       <div class="flex items-center gap-3">
         <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 animate-spin" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -46,7 +46,7 @@
   <% end %>
 
   <% if @bulk_import.general_error.present? %>
-    <div class="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
       <div class="flex items-start gap-3">
         <svg class="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -59,25 +59,25 @@
     </div>
   <% end %>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
     <div class="card text-center">
-      <p class="text-sm font-medium text-muted-foreground">Total de Filas</p>
-      <p class="mt-2 text-3xl font-bold text-foreground"><%= @bulk_import.total_rows %></p>
+      <p class="text-xs text-muted-foreground uppercase tracking-wide">Total de Filas</p>
+      <p class="mt-1 text-2xl font-bold text-foreground tabular-nums"><%= @bulk_import.total_rows %></p>
     </div>
     <div class="card text-center">
-      <p class="text-sm font-medium text-muted-foreground">Exitosos</p>
-      <p class="mt-2 text-3xl font-bold text-green-600 dark:text-green-400"><%= @bulk_import.successful_rows %></p>
+      <p class="text-xs text-muted-foreground uppercase tracking-wide">Exitosos</p>
+      <p class="mt-1 text-2xl font-bold text-green-600 dark:text-green-400 tabular-nums"><%= @bulk_import.successful_rows %></p>
     </div>
     <div class="card text-center">
-      <p class="text-sm font-medium text-muted-foreground">Fallidos</p>
-      <p class="mt-2 text-3xl font-bold <%= @bulk_import.failed_rows > 0 ? 'text-red-600 dark:text-red-400' : 'text-foreground' %>">
+      <p class="text-xs text-muted-foreground uppercase tracking-wide">Fallidos</p>
+      <p class="mt-1 text-2xl font-bold tabular-nums <%= @bulk_import.failed_rows > 0 ? 'text-red-600 dark:text-red-400' : 'text-foreground' %>">
         <%= @bulk_import.failed_rows %>
       </p>
     </div>
   </div>
 
-  <div class="mt-6 card">
-    <h3 class="text-lg font-medium text-foreground mb-4">Detalles de importación</h3>
+  <div class="card">
+    <h3 class="text-sm font-semibold text-foreground mb-3">Detalles de importación</h3>
     <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
         <dt class="text-sm font-medium text-muted-foreground">Archivo</dt>
@@ -113,8 +113,8 @@
   </div>
 
   <% if @bulk_import.error_details.any? %>
-    <div class="mt-6 card">
-      <h3 class="text-lg font-medium text-foreground mb-4">
+    <div class="card">
+      <h3 class="text-sm font-semibold text-foreground mb-3">
         Errores Detallados
         <span class="text-sm font-normal text-muted-foreground">
           (<%= @bulk_import.error_details.size %> registros)
@@ -122,7 +122,7 @@
       </h3>
       <div class="overflow-x-auto">
         <table class="min-w-full divide-y divide-border">
-          <thead class="bg-muted/50">
+          <thead class="bg-muted/40">
             <tr>
               <th class="table-th text-left">Fila</th>
               <th class="table-th text-left">Nombre</th>

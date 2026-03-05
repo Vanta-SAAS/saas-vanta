@@ -11,7 +11,7 @@
 
   <%# Informacion General %>
   <div class="card">
-    <h3 class="text-lg font-medium text-foreground mb-4">Informacion General</h3>
+    <h3 class="text-sm font-semibold text-foreground mb-3">Informacion General</h3>
 
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div>
@@ -55,7 +55,7 @@
 
   <%# Direcciones %>
   <div class="card">
-    <h3 class="text-lg font-medium text-foreground mb-4">Direcciones</h3>
+    <h3 class="text-sm font-semibold text-foreground mb-3">Direcciones</h3>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <div class="space-y-4">
@@ -96,7 +96,7 @@
 
   <%# Destinatario (GRR) / Remitente (GRT) %>
   <div class="card" data-dispatch-guide-form-target="recipientSection">
-    <h3 class="text-lg font-medium text-foreground mb-4">
+    <h3 class="text-sm font-semibold text-foreground mb-3">
       <%= dispatch_guide.grt? ? "Remitente" : "Destinatario" %>
     </h3>
 
@@ -133,7 +133,7 @@
 
   <%# Transporte %>
   <div class="card">
-    <h3 class="text-lg font-medium text-foreground mb-4">Transporte</h3>
+    <h3 class="text-sm font-semibold text-foreground mb-3">Transporte</h3>
 
     <div class="mb-4">
       <%= f.label :transport_modality, "Modalidad", class: "form-label" %>
@@ -176,7 +176,7 @@
 
   <%# Items %>
   <div class="card">
-    <h3 class="text-lg font-medium text-foreground mb-4">Items</h3>
+    <h3 class="text-sm font-semibold text-foreground mb-3">Items</h3>
 
     <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-border" id="dispatch-guide-items-table">
@@ -205,7 +205,7 @@
 
   <%# Observaciones %>
   <div class="card">
-    <h3 class="text-lg font-medium text-foreground mb-4">Observaciones</h3>
+    <h3 class="text-sm font-semibold text-foreground mb-3">Observaciones</h3>
     <%= f.text_area :notes, class: "form-input", rows: 3, placeholder: "Observaciones adicionales..." %>
   </div>
 

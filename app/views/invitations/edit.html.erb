@@ -1,4 +1,4 @@
-<div class="min-h-screen flex relative">
+<div class="min-h-screen flex items-center justify-center bg-background p-6">
   <button
     id="theme-toggle"
     class="absolute top-6 right-6 theme-toggle z-10"
@@ -12,114 +12,52 @@
     </svg>
   </button>
 
-  <div class="w-full lg:w-1/2 flex items-center justify-center p-6 lg:p-12 bg-background">
-    <div class="w-full max-w-md">
-      <div class="flex flex-col items-center lg:items-start mb-8">
-        <img src="/logo-vanta.png" alt="VANTA Logo" class="h-16 w-auto mb-6">
-        <h1 class="text-3xl font-bold text-foreground mb-2">Configura tu contraseña</h1>
-        <p class="text-muted-foreground">Crea una contraseña segura para activar tu cuenta</p>
+  <div class="w-full max-w-sm">
+    <div class="flex flex-col items-center mb-8">
+      <img src="/logo-vanta.png" alt="VANTA" class="h-12 w-auto mb-6">
+      <h1 class="text-xl font-semibold text-foreground">Configura tu contrasena</h1>
+      <p class="mt-1 text-sm text-muted-foreground">Crea una contrasena para activar tu cuenta</p>
+    </div>
+
+    <% if @user.errors.any? %>
+      <div class="alert-error mb-4">
+        <h3 class="text-sm font-medium mb-2"><%= pluralize(@user.errors.count, "error") %> impidieron guardar tu contrasena:</h3>
+        <ul class="list-disc list-inside text-sm">
+          <% @user.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
       </div>
+    <% end %>
 
-      <% if @user.errors.any? %>
-        <div class="alert-error mb-6">
-          <h3 class="text-sm font-medium mb-2"><%= pluralize(@user.errors.count, "error") %> impidieron guardar tu contraseña:</h3>
-          <ul class="list-disc list-inside text-sm">
-            <% @user.errors.full_messages.each do |message| %>
-              <li><%= message %></li>
-            <% end %>
-          </ul>
-        </div>
-      <% end %>
-
+    <div class="card">
       <%= form_with(model: @user, url: invitation_path(token: params[:token]), method: :patch, class: "space-y-5") do |form| %>
         <%= render "shared/password_field",
             form: form,
             field: :password,
-            label: "Nueva contraseña",
+            label: "Nueva contrasena",
             autofocus: true,
             autocomplete: "new-password" %>
 
         <%= render "shared/password_field",
             form: form,
             field: :password_confirmation,
-            label: "Confirmar contraseña",
+            label: "Confirmar contrasena",
             autocomplete: "new-password" %>
 
         <div>
-          <%= form.submit "Activar cuenta", class: "w-full btn-primary h-12 cursor-pointer" %>
+          <%= form.submit "Activar cuenta", class: "w-full btn-primary h-11 cursor-pointer" %>
         </div>
       <% end %>
-
-      <div class="mt-6 text-center">
-        <%= link_to login_path, class: "inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors" do %>
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-          </svg>
-          Ya tengo una cuenta
-        <% end %>
-      </div>
     </div>
-  </div>
 
-  <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary via-primary to-secondary relative overflow-hidden">
-    <div
-      class="absolute inset-0 bg-cover bg-center opacity-20"
-      style="background-image: url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0ZWFtJTIwd29ya3xlbnwxfHx8fDE3Njg1MzM0MjZ8MA&ixlib=rb-4.1.0&q=80&w=1080');"
-    ></div>
-
-    <div class="relative z-10 flex flex-col justify-center p-12 lg:p-16 text-white">
-      <div class="mb-12">
-        <h2 class="text-4xl font-bold mb-4">Bienvenido al equipo</h2>
-        <p class="text-xl opacity-90 leading-relaxed">
-          Has sido invitado a formar parte de <strong><%= @user.enterprises.first.comercial_name %></strong>.
-          Configura tu contraseña para comenzar a trabajar.
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 gap-6">
-        <div class="card-glass flex items-start gap-4">
-          <div class="icon-container">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-            </svg>
-          </div>
-          <div>
-            <h3 class="font-semibold text-lg mb-1">Tu cuenta esta lista</h3>
-            <p class="text-sm opacity-90">Solo necesitas crear una contraseña</p>
-          </div>
-        </div>
-
-        <div class="card-glass flex items-start gap-4">
-          <div class="icon-container">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-            </svg>
-          </div>
-          <div>
-            <h3 class="font-semibold text-lg mb-1">Contraseña segura</h3>
-            <p class="text-sm opacity-90">Usa al menos 8 caracteres con letras y numeros</p>
-          </div>
-        </div>
-
-        <div class="card-glass flex items-start gap-4">
-          <div class="icon-container">
-            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-            </svg>
-          </div>
-          <div>
-            <h3 class="font-semibold text-lg mb-1">Comienza a trabajar</h3>
-            <p class="text-sm opacity-90">Accede a todas las herramientas del sistema</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="mt-12 pt-8 border-t border-white/20">
-        <p class="text-sm opacity-75">
-          Si tienes problemas para activar tu cuenta,
-          contacta al administrador de tu empresa.
-        </p>
-      </div>
+    <div class="mt-6 text-center">
+      <%= link_to login_path, class: "inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors" do %>
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        Ya tengo una cuenta
+      <% end %>
     </div>
   </div>
 </div>

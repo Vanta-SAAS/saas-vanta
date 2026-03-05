@@ -1,4 +1,142 @@
-<div class="container">
-  <h1>Dashboard</h1>
-  <p>Bienvenido a tu panel de control.</p>
-</div>
+<% content_for :page_title, "Dashboard" %>
+
+<% if current_enterprise.present? %>
+  <div class="max-w-7xl mx-auto space-y-6">
+
+    <%# Metrics %>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="metric-card">
+        <span class="metric-card-label">Ventas del mes</span>
+        <span class="metric-card-value">S/ <%= number_with_precision(@sales_total_month, precision: 2, delimiter: ",") %></span>
+        <span class="text-xs text-muted-foreground"><%= @sales_count %> confirmadas</span>
+      </div>
+
+      <div class="metric-card">
+        <span class="metric-card-label">Ventas pendientes</span>
+        <span class="metric-card-value"><%= @sales_pending %></span>
+        <span class="text-xs text-muted-foreground">Por confirmar</span>
+      </div>
+
+      <div class="metric-card">
+        <span class="metric-card-label">Cotizaciones</span>
+        <span class="metric-card-value"><%= @quotes_pending %></span>
+        <span class="text-xs text-muted-foreground">Pendientes de respuesta</span>
+      </div>
+
+      <div class="metric-card">
+        <span class="metric-card-label">Ordenes de compra</span>
+        <span class="metric-card-value"><%= @po_pending %></span>
+        <span class="text-xs text-muted-foreground">Pendientes</span>
+      </div>
+    </div>
+
+    <%# Quick Actions %>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <% if policy(Sale).create? %>
+        <%= link_to new_sale_path, class: "quick-action" do %>
+          <div class="quick-action-icon">
+            <%= sidebar_icon("shopping-cart", class: "w-4 h-4") %>
+          </div>
+          <div>
+            <div class="quick-action-label">Nueva Venta</div>
+            <div class="quick-action-hint">Crear venta a cliente</div>
+          </div>
+        <% end %>
+      <% end %>
+
+      <% if policy(CustomerQuote).create? %>
+        <%= link_to new_customer_quote_path, class: "quick-action" do %>
+          <div class="quick-action-icon">
+            <%= sidebar_icon("file-text", class: "w-4 h-4") %>
+          </div>
+          <div>
+            <div class="quick-action-label">Nueva Cotizacion</div>
+            <div class="quick-action-hint">Preparar propuesta</div>
+          </div>
+        <% end %>
+      <% end %>
+
+      <% if policy(PurchaseOrder).create? %>
+        <%= link_to new_purchase_order_path, class: "quick-action" do %>
+          <div class="quick-action-icon">
+            <%= sidebar_icon("package", class: "w-4 h-4") %>
+          </div>
+          <div>
+            <div class="quick-action-label">Nueva Orden de Compra</div>
+            <div class="quick-action-hint">Pedir a proveedor</div>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+
+    <%# Recent activity %>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <%# Recent Sales %>
+      <div class="card p-0">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-border">
+          <h3 class="text-sm font-semibold text-foreground">Ventas recientes</h3>
+          <%= link_to "Ver todas", sales_path, class: "text-xs text-primary hover:text-primary/80 font-medium" %>
+        </div>
+        <% if @recent_sales.any? %>
+          <div class="divide-y divide-border">
+            <% @recent_sales.each do |sale| %>
+              <%= link_to sale, class: "flex items-center justify-between px-5 py-3 hover:bg-muted/50 transition-colors" do %>
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="min-w-0">
+                    <div class="text-sm font-medium text-foreground truncate"><%= sale.customer.name %></div>
+                    <div class="text-xs text-muted-foreground"><%= sale.code %> &middot; <%= l(sale.issue_date, format: :short) %></div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3 flex-shrink-0 ml-3">
+                  <span class="text-sm font-medium text-foreground tabular-nums">S/ <%= number_with_precision(sale.total, precision: 2, delimiter: ",") %></span>
+                  <span class="<%= sale.status_badge_class %>"><%= sale.status_label %></span>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="px-5 py-8 text-center">
+            <p class="text-sm text-muted-foreground">No hay ventas recientes</p>
+          </div>
+        <% end %>
+      </div>
+
+      <%# Recent Quotes %>
+      <div class="card p-0">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-border">
+          <h3 class="text-sm font-semibold text-foreground">Cotizaciones recientes</h3>
+          <%= link_to "Ver todas", customer_quotes_path, class: "text-xs text-primary hover:text-primary/80 font-medium" %>
+        </div>
+        <% if @recent_quotes.any? %>
+          <div class="divide-y divide-border">
+            <% @recent_quotes.each do |quote| %>
+              <%= link_to quote, class: "flex items-center justify-between px-5 py-3 hover:bg-muted/50 transition-colors" do %>
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="min-w-0">
+                    <div class="text-sm font-medium text-foreground truncate"><%= quote.customer.name %></div>
+                    <div class="text-xs text-muted-foreground"><%= quote.code %> &middot; <%= l(quote.issue_date, format: :short) %></div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3 flex-shrink-0 ml-3">
+                  <span class="text-sm font-medium text-foreground tabular-nums">S/ <%= number_with_precision(quote.total, precision: 2, delimiter: ",") %></span>
+                  <span class="<%= quote.status_badge_class %>"><%= quote.status_label %></span>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="px-5 py-8 text-center">
+            <p class="text-sm text-muted-foreground">No hay cotizaciones recientes</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% else %>
+  <div class="flex items-center justify-center min-h-[60vh]">
+    <div class="text-center">
+      <h2 class="text-xl font-semibold text-foreground mb-2">Bienvenido a VANTA</h2>
+      <p class="text-muted-foreground">Selecciona una empresa para comenzar.</p>
+    </div>
+  </div>
+<% end %>

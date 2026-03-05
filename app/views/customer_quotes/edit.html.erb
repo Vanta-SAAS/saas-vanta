@@ -1,8 +1,5 @@
-<div class="max-w-5xl mx-auto py-8 px-4">
-  <div class="mb-8">
-    <h1 class="text-2xl font-bold text-foreground">Editar Cotizacion <%= @customer_quote.code %></h1>
-    <p class="mt-1 text-sm text-muted-foreground">Modifica los datos de la cotizacion</p>
-  </div>
+<% content_for :page_title, "Editar Cotizacion" %>
 
+<div class="max-w-5xl mx-auto">
   <%= render "form", customer_quote: @customer_quote, show_seller_selector: @show_seller_selector %>
 </div>

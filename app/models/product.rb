@@ -12,11 +12,11 @@ class Product < ApplicationRecord
 
   # Validations
   validates :name, presence: true
-  validates :buy_price, presence: true, numericality: { greater_than_or_equal_to: 0 }
+  validates :buy_price, presence: true, numericality: { greater_than_or_equal_to: 0 }, if: :purchased?
   validates :sell_cash_price, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :sell_credit_price, presence: true, numericality: { greater_than_or_equal_to: 0 }
-  validate :validate_stock
-  validate :provider_presence_based_on_source
+  validate :validate_stock, unless: :service?
+  validate :provider_presence_based_on_source, unless: :service?
 
   # Enums
   enum :unit, {
@@ -40,8 +40,24 @@ class Product < ApplicationRecord
     other: "other"
   }
 
+  enum :product_type, {
+    good: "good",
+    service: "service"
+  }
+
+  scope :goods, -> { where(product_type: :good) }
+  scope :services, -> { where(product_type: :service) }
+
+  def capacity_label
+    return nil unless capacity.present? && capacity > 0
+    "#{capacity.to_s.gsub(/\.?0+$/, '')}#{unit}"
+  end
+
   def combobox_display
-    sku.present? ? "#{name} (#{sku})" : name
+    parts = [ name ]
+    parts << capacity_label if capacity_label
+    parts << "(#{sku})" if sku.present?
+    parts.join(" ")
   end
 
   private

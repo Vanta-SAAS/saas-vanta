@@ -1,101 +1,114 @@
-<div class="max-w-4xl mx-auto py-8 px-4">
-  <div class="flex items-center justify-between mb-8">
-    <div>
+<% content_for :page_title, @product.name %>
+
+<div class="max-w-5xl mx-auto space-y-6">
+  <%# Header %>
+  <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+    <div class="space-y-1">
       <div class="flex items-center gap-3">
-        <h1 class="text-2xl font-bold text-foreground"><%= @product.name %></h1>
+        <h1 class="text-xl font-semibold text-foreground"><%= @product.name %></h1>
+        <% if @product.service? %>
+          <span class="badge-info">Servicio</span>
+        <% end %>
         <%= render_status_badge(@product.status) %>
       </div>
-      <p class="mt-1 text-sm text-muted-foreground">
+      <p class="text-sm text-muted-foreground">
         <% if @product.sku.present? %>
-          SKU: <%= @product.sku %> |
+          <span class="font-mono">SKU: <%= @product.sku %></span> &middot;
         <% end %>
         Creado <%= time_ago_in_words(@product.created_at) %> atras
       </p>
     </div>
-    <div class="flex gap-3">
-      <%= link_to "Volver", products_path, class: "btn-secondary" %>
+    <div class="flex flex-wrap gap-2">
+      <%= link_to "Volver", products_path(product_type: @product.product_type), class: "btn-secondary" %>
       <% if policy(@product).edit? %>
-        <%= link_to "Editar", edit_product_path(@product), class: "btn-primary" %>
+        <%= link_to "Editar", edit_product_path(@product), class: "btn-secondary" %>
       <% end %>
     </div>
   </div>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <div class="lg:col-span-2 space-y-6">
+  <%# Info Cards %>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div class="lg:col-span-2 space-y-4">
       <div class="card">
-        <h3 class="text-lg font-medium text-foreground mb-4">Informacion General</h3>
+        <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Informacion General</h3>
         <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <dt class="text-sm font-medium text-muted-foreground">Nombre</dt>
-            <dd class="mt-1 text-sm text-foreground"><%= @product.name %></dd>
+            <dt class="text-xs text-muted-foreground">Nombre</dt>
+            <dd class="text-sm font-medium text-foreground mt-0.5"><%= @product.name %></dd>
           </div>
           <div>
-            <dt class="text-sm font-medium text-muted-foreground">SKU</dt>
-            <dd class="mt-1 text-sm text-foreground"><%= @product.sku.presence || "-" %></dd>
+            <dt class="text-xs text-muted-foreground">SKU</dt>
+            <dd class="text-sm font-medium text-foreground mt-0.5 font-mono"><%= @product.sku.presence || "-" %></dd>
           </div>
           <div>
-            <dt class="text-sm font-medium text-muted-foreground">Tipo de Origen</dt>
-            <dd class="mt-1 text-sm text-foreground"><%= source_type_label(@product.source_type) %></dd>
+            <dt class="text-xs text-muted-foreground">Tipo de Origen</dt>
+            <dd class="text-sm font-medium text-foreground mt-0.5"><%= source_type_label(@product.source_type) %></dd>
           </div>
           <div>
-            <dt class="text-sm font-medium text-muted-foreground">Unidad de Medida</dt>
-            <dd class="mt-1 text-sm text-foreground"><%= unit_label(@product.unit) %></dd>
+            <dt class="text-xs text-muted-foreground">Unidad de Medida</dt>
+            <dd class="text-sm font-medium text-foreground mt-0.5"><%= unit_label(@product.unit) %></dd>
           </div>
+          <% if @product.capacity_label.present? %>
+            <div>
+              <dt class="text-xs text-muted-foreground">Capacidad</dt>
+              <dd class="text-sm font-medium text-foreground mt-0.5"><%= @product.capacity_label %></dd>
+            </div>
+          <% end %>
           <% if @product.units_per_package.present? %>
             <div>
-              <dt class="text-sm font-medium text-muted-foreground">Unidades por Paquete</dt>
-              <dd class="mt-1 text-sm text-foreground"><%= @product.units_per_package %></dd>
+              <dt class="text-xs text-muted-foreground">Unidades por Paquete</dt>
+              <dd class="text-sm font-medium text-foreground mt-0.5"><%= @product.units_per_package %></dd>
             </div>
           <% end %>
           <% if @product.provider.present? %>
             <div>
-              <dt class="text-sm font-medium text-muted-foreground">Proveedor</dt>
-              <dd class="mt-1 text-sm text-foreground"><%= @product.provider.name %></dd>
+              <dt class="text-xs text-muted-foreground">Proveedor</dt>
+              <dd class="text-sm font-medium text-foreground mt-0.5"><%= @product.provider.name %></dd>
             </div>
           <% end %>
         </dl>
         <% if @product.description.present? %>
           <div class="mt-4 pt-4 border-t border-border">
-            <dt class="text-sm font-medium text-muted-foreground">Descripcion</dt>
-            <dd class="mt-1 text-sm text-foreground"><%= @product.description %></dd>
+            <dt class="text-xs text-muted-foreground">Descripcion</dt>
+            <dd class="text-sm text-foreground mt-0.5"><%= @product.description %></dd>
           </div>
         <% end %>
       </div>
 
       <div class="card">
-        <h3 class="text-lg font-medium text-foreground mb-4">Precios</h3>
+        <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Precios</h3>
         <dl class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div class="p-4 bg-muted/30 rounded-lg">
-            <dt class="text-sm font-medium text-muted-foreground">Precio de Compra</dt>
-            <dd class="mt-1 text-xl font-semibold text-foreground">S/ <%= number_with_precision(@product.buy_price, precision: 2) %></dd>
+          <div class="p-3 bg-muted/30 rounded-lg">
+            <dt class="text-xs text-muted-foreground">Precio de Compra</dt>
+            <dd class="text-lg font-semibold text-foreground mt-0.5 tabular-nums">S/ <%= number_with_precision(@product.buy_price, precision: 2) %></dd>
           </div>
-          <div class="p-4 bg-muted/30 rounded-lg">
-            <dt class="text-sm font-medium text-muted-foreground">Precio Venta Contado</dt>
-            <dd class="mt-1 text-xl font-semibold text-primary">S/ <%= number_with_precision(@product.sell_cash_price, precision: 2) %></dd>
+          <div class="p-3 bg-muted/30 rounded-lg">
+            <dt class="text-xs text-muted-foreground">Precio Venta Contado</dt>
+            <dd class="text-lg font-semibold text-primary mt-0.5 tabular-nums">S/ <%= number_with_precision(@product.sell_cash_price, precision: 2) %></dd>
           </div>
-          <div class="p-4 bg-muted/30 rounded-lg">
-            <dt class="text-sm font-medium text-muted-foreground">Precio Venta Credito</dt>
-            <dd class="mt-1 text-xl font-semibold text-foreground">S/ <%= number_with_precision(@product.sell_credit_price, precision: 2) %></dd>
+          <div class="p-3 bg-muted/30 rounded-lg">
+            <dt class="text-xs text-muted-foreground">Precio Venta Credito</dt>
+            <dd class="text-lg font-semibold text-foreground mt-0.5 tabular-nums">S/ <%= number_with_precision(@product.sell_credit_price, precision: 2) %></dd>
           </div>
         </dl>
       </div>
     </div>
 
-    <div class="space-y-6">
-      <% if current_enterprise.use_stock? %>
+    <div class="space-y-4">
+      <% if current_enterprise.use_stock? && !@product.service? %>
         <div class="card">
-          <h3 class="text-lg font-medium text-foreground mb-4">Inventario</h3>
-          <div class="text-center p-4 bg-muted/30 rounded-lg">
-            <span class="text-3xl font-bold text-foreground"><%= @product.stock.presence || 0 %></span>
-            <span class="text-lg text-muted-foreground ml-1"><%= @product.unit %></span>
-            <p class="text-sm text-muted-foreground mt-1">en stock</p>
+          <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Inventario</h3>
+          <div class="text-center p-3 bg-muted/30 rounded-lg">
+            <span class="text-2xl font-bold text-foreground tabular-nums"><%= @product.stock.presence || 0 %></span>
+            <span class="text-sm text-muted-foreground ml-1"><%= @product.unit %></span>
+            <p class="text-xs text-muted-foreground mt-0.5">en stock</p>
           </div>
         </div>
       <% end %>
 
       <% if policy(@product).destroy? %>
         <div class="card">
-          <h3 class="text-lg font-medium text-foreground mb-4">Zona de Peligro</h3>
+          <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Zona de Peligro</h3>
           <%= button_to "Eliminar Producto",
               @product,
               method: :delete,

@@ -11,7 +11,7 @@ module LineItemCalculable
   end
 
   def unit_label
-    product.unit.upcase
+    product.capacity_label || product.unit.upcase
   end
 
   private

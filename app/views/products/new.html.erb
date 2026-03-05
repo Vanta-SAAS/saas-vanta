@@ -1,17 +1,6 @@
-<% content_for :page_title, "Nuevo Producto" %>
+<% label = @product.service? ? "Nuevo Servicio" : "Nuevo Producto" %>
+<% content_for :page_title, label %>
 
 <div class="max-w-4xl mx-auto">
-  <div class="flex items-center gap-4 mb-8">
-    <%= link_to products_path, class: "p-2 rounded-lg border border-border hover:bg-muted transition-colors", title: "Volver" do %>
-      <svg class="w-5 h-5 text-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-      </svg>
-    <% end %>
-    <div>
-      <h1 class="text-2xl font-bold text-foreground">Nuevo Producto</h1>
-      <p class="mt-1 text-sm text-muted-foreground">Agrega un nuevo producto al inventario</p>
-    </div>
-  </div>
-
   <%= render "form", product: @product, providers: @providers %>
 </div>

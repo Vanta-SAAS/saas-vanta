@@ -1,0 +1,43 @@
+<%#
+  Document status lifecycle bar.
+  Usage: render "shared/documents/status_bar", steps: [...], current: "confirmed"
+  Each step: { key: "pending", label: "Pendiente" }
+%>
+<%
+  steps = local_assigns[:steps] || []
+  current_key = local_assigns[:current].to_s
+  cancelled = local_assigns[:cancelled] || false
+
+  current_index = steps.index { |s| s[:key].to_s == current_key } || 0
+%>
+
+<div class="doc-status-bar">
+  <% steps.each_with_index do |step, index| %>
+    <% if index > 0 %>
+      <div class="doc-status-connector"></div>
+    <% end %>
+
+    <%
+      if cancelled && step[:key].to_s == current_key
+        step_class = "doc-status-step cancelled"
+      elsif index < current_index
+        step_class = "doc-status-step completed"
+      elsif index == current_index
+        step_class = "doc-status-step current"
+      else
+        step_class = "doc-status-step"
+      end
+    %>
+
+    <div class="<%= step_class %>">
+      <% if index < current_index && !cancelled %>
+        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      <% else %>
+        <div class="doc-status-step-dot"></div>
+      <% end %>
+      <span><%= step[:label] %></span>
+    </div>
+  <% end %>
+</div>
