@@ -10,6 +10,11 @@ class SessionsController < ApplicationController
 
   def create
     if user = User.authenticate_by(params.permit(:email_address, :password))
+      if user.pending?
+        redirect_to login_path, alert: "Tu cuenta aun no ha sido confirmada. Revisa tu correo electronico."
+        return
+      end
+
       start_new_session_for user
       redirect_to after_authentication_url
     else

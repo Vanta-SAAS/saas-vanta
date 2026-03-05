@@ -1,0 +1,108 @@
+es:
+  date:
+    formats:
+      short: "%d de %b"
+      long: "%d de %B de %Y"
+    day_names:
+      - domingo
+      - lunes
+      - martes
+      - miércoles
+      - jueves
+      - viernes
+      - sábado
+    abbr_day_names:
+      - dom
+      - lun
+      - mar
+      - mié
+      - jue
+      - vie
+      - sáb
+    month_names:
+      - ~
+      - enero
+      - febrero
+      - marzo
+      - abril
+      - mayo
+      - junio
+      - julio
+      - agosto
+      - septiembre
+      - octubre
+      - noviembre
+      - diciembre
+    abbr_month_names:
+      - ~
+      - ene
+      - feb
+      - mar
+      - abr
+      - may
+      - jun
+      - jul
+      - ago
+      - sep
+      - oct
+      - nov
+      - dic
+  time:
+    formats:
+      short: "%d de %b, %H:%M"
+      long: "%d de %B de %Y a las %H:%M"
+  activerecord:
+    attributes:
+      user:
+        first_name: "Nombre"
+        first_last_name: "Apellido paterno"
+        second_last_name: "Apellido materno"
+        email_address: "Correo electronico"
+        password: "Contrasena"
+        password_confirmation: "Confirmar contrasena"
+        phone_number: "Telefono"
+        status: "Estado"
+        platform_role: "Rol"
+      enterprise:
+        comercial_name: "Nombre comercial"
+        tax_id: "RUC"
+        social_reason: "Razon social"
+        email: "Correo electronico"
+        phone_number: "Telefono"
+        address: "Direccion"
+        subdomain: "Subdominio"
+      user_enterprise:
+        user: "Usuario"
+        enterprise: "Empresa"
+      provider:
+        name: "Nombre"
+        email: "Correo electronico"
+        phone_number: "Telefono"
+        tax_id: "RUC"
+    errors:
+      models:
+        user:
+          attributes:
+            email_address:
+              taken: "ya esta registrado"
+      messages:
+        blank: "no puede estar vacio"
+        taken: "ya esta en uso"
+        too_short: "es demasiado corto (minimo %{count} caracteres)"
+        too_long: "es demasiado largo (maximo %{count} caracteres)"
+        invalid: "no es valido"
+        confirmation: "no coincide"
+        required: "es obligatorio"
+        not_a_number: "no es un numero"
+        greater_than: "debe ser mayor que %{count}"
+        present: "debe estar en blanco"
+        inclusion: "no esta incluido en la lista"
+  errors:
+    format: "%{attribute} %{message}"
+    messages:
+      blank: "no puede estar vacio"
+      taken: "ya esta en uso"
+      too_short: "es demasiado corto (minimo %{count} caracteres)"
+      invalid: "no es valido"
+      confirmation: "no coincide"
+      required: "es obligatorio"

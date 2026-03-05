@@ -20,6 +20,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= enterprise_custom_colors_tag if defined?(current_enterprise) && current_enterprise %>
     <%= combobox_style_tag %>
     <%= javascript_importmap_tags %>
   </head>

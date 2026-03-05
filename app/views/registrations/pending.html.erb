@@ -1,0 +1,56 @@
+<div class="min-h-screen flex items-center justify-center bg-background p-6">
+  <button
+    id="theme-toggle"
+    class="absolute top-6 right-6 theme-toggle z-10"
+    aria-label="Cambiar tema"
+  >
+    <svg id="sun-icon" class="hidden w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+    <svg id="moon-icon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+    </svg>
+  </button>
+
+  <div class="w-full max-w-sm">
+    <div class="flex flex-col items-center mb-8">
+      <img src="/logo-vanta.png" alt="VANTA" class="h-12 w-auto mb-6">
+    </div>
+
+    <div class="card text-center">
+      <div class="flex justify-center mb-4">
+        <div class="flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30">
+          <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+        </div>
+      </div>
+
+      <h1 class="text-xl font-semibold text-foreground mb-2">Revisa tu correo</h1>
+
+      <p class="text-sm text-muted-foreground mb-4">
+        Te hemos enviado un enlace de confirmacion a tu correo electronico.
+        Haz clic en el boton del correo para activar tu cuenta y configurar tu contrasena.
+      </p>
+
+      <div class="border border-border rounded-lg p-3 bg-muted/50">
+        <p class="text-xs text-muted-foreground">
+          El enlace es valido por <strong class="text-foreground">7 dias</strong>. Si no lo encuentras, revisa tu carpeta de spam.
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-6 text-center">
+      <%= link_to login_path, class: "inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors" do %>
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        Volver al inicio de sesion
+      <% end %>
+    </div>
+
+    <p class="mt-3 text-center text-xs text-muted-foreground">
+      VANTA &middot; Gestion comercial centralizada
+    </p>
+  </div>
+</div>

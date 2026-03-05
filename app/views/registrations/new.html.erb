@@ -1,0 +1,165 @@
+<div class="min-h-screen flex items-center justify-center bg-background p-6">
+  <button
+    id="theme-toggle"
+    class="absolute top-6 right-6 theme-toggle z-10"
+    aria-label="Cambiar tema"
+  >
+    <svg id="sun-icon" class="hidden w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+    <svg id="moon-icon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+    </svg>
+  </button>
+
+  <div class="w-full max-w-lg">
+    <div class="flex flex-col items-center mb-8">
+      <img src="/logo-vanta.png" alt="VANTA" class="h-12 w-auto mb-6">
+      <h1 class="text-xl font-semibold text-foreground">Crea tu cuenta</h1>
+      <p class="mt-1 text-sm text-muted-foreground">Registrate y comienza a gestionar tu negocio</p>
+    </div>
+
+    <%= render "shared/flash_messages" %>
+
+    <div class="card" data-controller="registration-steps">
+      <%# Timeline stepper %>
+      <div class="flex items-center mb-6" data-registration-steps-target="timeline">
+        <%# Step 1 %>
+        <div class="flex items-center" data-registration-steps-target="timelineStep">
+          <div class="flex items-center justify-center w-8 h-8 rounded-full border-2 border-primary bg-primary text-white text-xs font-semibold transition-all duration-300" data-registration-steps-target="timelineCircle">
+            1
+          </div>
+          <span class="ml-2 text-sm font-medium text-foreground transition-colors duration-300" data-registration-steps-target="timelineLabel">Tus datos</span>
+        </div>
+
+        <%# Connector line %>
+        <div class="flex-1 mx-3 h-0.5 bg-border rounded-full overflow-hidden" data-registration-steps-target="timelineConnector">
+          <div class="h-full w-0 bg-primary rounded-full transition-all duration-500" data-registration-steps-target="timelineFill"></div>
+        </div>
+
+        <%# Step 2 %>
+        <div class="flex items-center" data-registration-steps-target="timelineStep">
+          <div class="flex items-center justify-center w-8 h-8 rounded-full border-2 border-border text-muted-foreground text-xs font-semibold transition-all duration-300" data-registration-steps-target="timelineCircle">
+            2
+          </div>
+          <span class="ml-2 text-sm font-medium text-muted-foreground transition-colors duration-300" data-registration-steps-target="timelineLabel">Tu empresa</span>
+        </div>
+      </div>
+
+      <%= form_with url: registration_path, scope: :registration, class: "space-y-5" do |form| %>
+
+        <%# Step 1: Datos personales %>
+        <div data-registration-steps-target="step" data-step="1">
+          <%= form.fields_for :user do |user_form| %>
+            <div class="space-y-4">
+              <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1.5">
+                  <label for="registration_user_first_name" class="form-label">Nombre <span class="text-red-500">*</span></label>
+                  <%= user_form.text_field :first_name,
+                      id: "registration_user_first_name",
+                      required: true,
+                      autofocus: true,
+                      autocomplete: "given-name",
+                      placeholder: "Juan",
+                      value: @user_params&.dig(:first_name) || @user_params&.dig("first_name"),
+                      class: "form-input" %>
+                </div>
+
+                <div class="space-y-1.5">
+                  <label for="registration_user_phone_number" class="form-label">Telefono</label>
+                  <%= user_form.telephone_field :phone_number,
+                      id: "registration_user_phone_number",
+                      autocomplete: "tel",
+                      placeholder: "987654321",
+                      value: @user_params&.dig(:phone_number) || @user_params&.dig("phone_number"),
+                      class: "form-input" %>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-4">
+                <div class="space-y-1.5">
+                  <label for="registration_user_first_last_name" class="form-label">Apellido paterno <span class="text-red-500">*</span></label>
+                  <%= user_form.text_field :first_last_name,
+                      id: "registration_user_first_last_name",
+                      required: true,
+                      autocomplete: "family-name",
+                      placeholder: "Perez",
+                      value: @user_params&.dig(:first_last_name) || @user_params&.dig("first_last_name"),
+                      class: "form-input" %>
+                </div>
+
+                <div class="space-y-1.5">
+                  <label for="registration_user_second_last_name" class="form-label">Apellido materno</label>
+                  <%= user_form.text_field :second_last_name,
+                      id: "registration_user_second_last_name",
+                      autocomplete: "family-name",
+                      placeholder: "Garcia",
+                      value: @user_params&.dig(:second_last_name) || @user_params&.dig("second_last_name"),
+                      class: "form-input" %>
+                </div>
+              </div>
+
+              <div class="space-y-1.5">
+                <label for="registration_user_email" class="form-label">Correo electronico <span class="text-red-500">*</span></label>
+                <%= user_form.email_field :email_address,
+                    id: "registration_user_email",
+                    required: true,
+                    autocomplete: "email",
+                    placeholder: "tu@email.com",
+                    value: @user_params&.dig(:email_address) || @user_params&.dig("email_address"),
+                    class: "form-input" %>
+              </div>
+
+              <div class="flex justify-end pt-2">
+                <button type="button" class="btn-primary h-10 px-6" data-action="registration-steps#next">
+                  Continuar
+                  <svg class="w-4 h-4 ml-1 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          <% end %>
+        </div>
+
+        <%# Step 2: Tu empresa %>
+        <div data-registration-steps-target="step" data-step="2" class="hidden">
+          <%= form.fields_for :enterprise do |enterprise_form| %>
+            <div class="space-y-4">
+              <div class="space-y-1.5">
+                <label for="registration_enterprise_comercial_name" class="form-label">Nombre comercial <span class="text-red-500">*</span></label>
+                <%= enterprise_form.text_field :comercial_name,
+                    id: "registration_enterprise_comercial_name",
+                    required: true,
+                    placeholder: "Mi Empresa S.A.C.",
+                    value: @enterprise_params&.dig(:comercial_name) || @enterprise_params&.dig("comercial_name"),
+                    class: "form-input" %>
+                <p class="text-xs text-muted-foreground">Podras completar los datos fiscales mas adelante</p>
+              </div>
+
+              <div class="flex items-center gap-3 pt-2">
+                <button type="button" class="btn-outline h-10 px-6" data-action="registration-steps#previous">
+                  <svg class="w-4 h-4 mr-1 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Atras
+                </button>
+                <%= form.submit "Registrar mi cuenta", class: "btn-primary h-10 flex-1 cursor-pointer" %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+
+      <% end %>
+    </div>
+
+    <p class="mt-6 text-center text-sm text-muted-foreground">
+      Ya tengo una cuenta.
+      <%= link_to "Iniciar sesion", login_path, class: "link-primary font-medium" %>
+    </p>
+
+    <p class="mt-3 text-center text-xs text-muted-foreground">
+      VANTA &middot; Gestion comercial centralizada
+    </p>
+  </div>
+</div>

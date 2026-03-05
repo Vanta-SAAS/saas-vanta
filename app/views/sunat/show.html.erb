@@ -92,6 +92,109 @@
 
   <% if @enterprise.formal? && policy(@enterprise).manage? %>
 
+    <%# ---- Prerequisites guide (shown when not yet configured) ---- %>
+    <% unless @settings.sunat_api_key.present? && @settings.sunat_certificate_uploaded? %>
+      <div class="card border-l-4 border-l-primary">
+        <div class="flex items-start gap-3 mb-5">
+          <div class="flex-shrink-0 mt-0.5">
+            <svg class="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-foreground">Antes de comenzar</h3>
+            <p class="mt-1 text-sm text-muted-foreground">
+              Para configurar la facturacion electronica necesitas tener listos estos dos elementos desde el Portal SOL de SUNAT:
+            </p>
+          </div>
+        </div>
+
+        <div class="space-y-4 ml-8">
+          <%# Prerequisite 1: Secondary SOL user %>
+          <div class="flex items-start gap-3 p-4 rounded-lg bg-muted/40">
+            <div class="flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary text-xs font-bold">1</div>
+            <div>
+              <h4 class="text-sm font-medium text-foreground">Crear un usuario secundario SOL</h4>
+              <p class="mt-1 text-xs text-muted-foreground leading-relaxed">
+                Es un usuario adicional que permite a sistemas externos (como VANTA SAAS) emitir comprobantes en nombre de tu empresa, sin usar tu clave principal.
+              </p>
+              <details class="mt-3 group">
+                <summary class="text-xs font-medium text-primary cursor-pointer select-none flex items-center gap-1">
+                  <svg class="w-3.5 h-3.5 transition-transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                  Como crearlo paso a paso
+                </summary>
+                <ol class="mt-2 ml-1 space-y-2 text-xs text-muted-foreground leading-relaxed">
+                  <li class="flex gap-2">
+                    <span class="font-semibold text-foreground flex-shrink-0">1.</span>
+                    Ingresa al <strong class="text-foreground">Portal SOL</strong> de SUNAT con tu RUC, usuario y clave principal.
+                  </li>
+                  <li class="flex gap-2">
+                    <span class="font-semibold text-foreground flex-shrink-0">2.</span>
+                    Ve a <strong class="text-foreground">Empresas &rarr; Mis Usuarios Secundarios &rarr; Registro de Usuarios Secundarios</strong>.
+                  </li>
+                  <li class="flex gap-2">
+                    <span class="font-semibold text-foreground flex-shrink-0">3.</span>
+                    Haz clic en <strong class="text-foreground">"Crear nuevo usuario"</strong> y completa los datos solicitados.
+                  </li>
+                  <li class="flex gap-2">
+                    <span class="font-semibold text-foreground flex-shrink-0">4.</span>
+                    En la seccion de perfiles, asegurate de asignar el perfil <strong class="text-foreground">"Facturador"</strong> para que pueda emitir comprobantes.
+                  </li>
+                  <li class="flex gap-2">
+                    <span class="font-semibold text-foreground flex-shrink-0">5.</span>
+                    Guarda el <strong class="text-foreground">usuario y contrasena</strong> que creaste. Los necesitaras en el paso de registro de abajo.
+                  </li>
+                </ol>
+              </details>
+            </div>
+          </div>
+
+          <%# Prerequisite 2: Digital certificate %>
+          <div class="flex items-start gap-3 p-4 rounded-lg bg-muted/40">
+            <div class="flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary text-xs font-bold">2</div>
+            <div>
+              <h4 class="text-sm font-medium text-foreground">Obtener tu certificado digital SOL</h4>
+              <p class="mt-1 text-xs text-muted-foreground leading-relaxed">
+                Es un archivo <strong class="text-foreground">.pfx</strong> o <strong class="text-foreground">.p12</strong> que funciona como tu firma digital para validar los comprobantes electronicos ante SUNAT.
+              </p>
+              <details class="mt-3 group">
+                <summary class="text-xs font-medium text-primary cursor-pointer select-none flex items-center gap-1">
+                  <svg class="w-3.5 h-3.5 transition-transform group-open:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                  Como obtenerlo paso a paso
+                </summary>
+                <ol class="mt-2 ml-1 space-y-2 text-xs text-muted-foreground leading-relaxed">
+                  <li class="flex gap-2">
+                    <span class="font-semibold text-foreground flex-shrink-0">1.</span>
+                    Ingresa al <strong class="text-foreground">Portal SOL</strong> con tu RUC y clave principal.
+                  </li>
+                  <li class="flex gap-2">
+                    <span class="font-semibold text-foreground flex-shrink-0">2.</span>
+                    Ve a <strong class="text-foreground">Empresas &rarr; Certificado Digital &rarr; Certificado Digital SOL</strong>.
+                  </li>
+                  <li class="flex gap-2">
+                    <span class="font-semibold text-foreground flex-shrink-0">3.</span>
+                    Haz clic en <strong class="text-foreground">"Generar nuevo certificado"</strong>.
+                  </li>
+                  <li class="flex gap-2">
+                    <span class="font-semibold text-foreground flex-shrink-0">4.</span>
+                    Crea una <strong class="text-foreground">contrasena para el certificado</strong> y confirma. Guarda esta contrasena, la necesitaras al subir el certificado.
+                  </li>
+                  <li class="flex gap-2">
+                    <span class="font-semibold text-foreground flex-shrink-0">5.</span>
+                    Descarga el archivo <strong class="text-foreground">.pfx o .p12</strong> generado y tenlo listo para subirlo aqui.
+                  </li>
+                </ol>
+              </details>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
     <%# ---- Step 1: Register enterprise ---- %>
     <% unless @settings.sunat_api_key.present? %>
       <div class="card">
@@ -321,4 +424,21 @@
 
     <% end %>
   <% end %>
+
+  <%# ---- Security disclaimer (always visible) ---- %>
+  <div class="flex items-start gap-3 p-4 rounded-lg border border-border bg-muted/20">
+    <div class="flex-shrink-0 mt-0.5">
+      <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+      </svg>
+    </div>
+    <div>
+      <h4 class="text-sm font-medium text-foreground">Tu informacion esta protegida</h4>
+      <p class="mt-1 text-xs text-muted-foreground leading-relaxed">
+        Tus credenciales SOL y certificados digitales se almacenan de forma encriptada.
+        Estamos comprometidos con la seguridad de tu informacion y seguimos las mejores practicas
+        de proteccion de datos para garantizar la confidencialidad de tus datos tributarios.
+      </p>
+    </div>
+  </div>
 </div>

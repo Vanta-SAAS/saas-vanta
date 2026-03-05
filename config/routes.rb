@@ -2,6 +2,9 @@ Rails.application.routes.draw do
   root "dashboard#index"
   resource :session
   get "login", to: "sessions#new", as: :login
+  resource :registration, only: [ :new, :create ] do
+    get :pending, on: :collection
+  end
   resources :passwords, param: :token
   resources :invitations, only: [ :edit, :update ], param: :token
 

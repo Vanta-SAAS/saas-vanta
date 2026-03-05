@@ -1,0 +1,17 @@
+<h2>¡Hola, <%= @user.first_name %>!</h2>
+
+<p>
+  Gracias por registrarte en VANTA con tu empresa <strong><%= @enterprise.comercial_name %></strong>.
+</p>
+
+<p class="text-muted">
+  Para activar tu cuenta y configurar tu contraseña de acceso, haz clic en el siguiente botón:
+</p>
+
+<div class="button-container">
+  <%= link_to "Confirmar mi cuenta", @confirmation_url, class: "button" %>
+</div>
+
+<p class="text-muted text-small">
+  Este enlace es válido por 7 días. Si no creaste esta cuenta, puedes ignorar este correo.
+</p>

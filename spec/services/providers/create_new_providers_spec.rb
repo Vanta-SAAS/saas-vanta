@@ -66,7 +66,7 @@ RSpec.describe Providers::CreateNewProviders do
 
         error_entry = subject.errors.find { |e| e[:name] == "" }
         expect(error_entry).to be_present
-        expect(error_entry[:errors]).to include("Name can't be blank")
+        expect(error_entry[:errors]).to include("Nombre no puede estar vacio")
       end
     end
 
