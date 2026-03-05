@@ -1,0 +1,6 @@
+<%= turbo_frame_tag "vehicle-select" do %>
+  <%= select_tag "dispatch_guide[vehicle_id]",
+      options_from_collection_for_select(vehicles, :id, :combobox_display, selected_vehicle_id),
+      include_blank: "Seleccionar vehiculo",
+      class: "form-input" %>
+<% end %>

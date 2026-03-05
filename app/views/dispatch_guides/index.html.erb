@@ -1,0 +1,93 @@
+<% content_for :page_title, "Guias de Remision" %>
+
+<div class="max-w-7xl mx-auto">
+  <div class="flex items-center justify-end gap-3 mb-6">
+    <% if policy(DispatchGuide).create? %>
+      <%= link_to new_dispatch_guide_path(guide_type: "grr"), class: "btn-primary inline-flex items-center gap-2" do %>
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+        Nueva Guia Remitente
+      <% end %>
+      <%= link_to new_dispatch_guide_path(guide_type: "grt"), class: "btn-secondary inline-flex items-center gap-2" do %>
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+        Nueva Guia Transportista
+      <% end %>
+    <% end %>
+  </div>
+
+  <% if @dispatch_guides.any? %>
+    <div class="card overflow-hidden p-0">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-border">
+          <thead class="bg-muted/50">
+            <tr>
+              <th class="table-th text-left">Codigo</th>
+              <th class="table-th text-left">Tipo</th>
+              <th class="table-th text-left">Fecha Traslado</th>
+              <th class="table-th text-left">Destinatario</th>
+              <th class="table-th text-left">Estado</th>
+              <th class="table-th text-left">SUNAT</th>
+              <th class="table-th"><span class="sr-only">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody class="bg-card divide-y divide-border">
+            <% @dispatch_guides.each do |guide| %>
+              <tr class="hover:bg-muted/30 transition-colors">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <%= link_to guide.code, dispatch_guide_path(guide), class: "text-primary hover:underline font-medium text-sm" %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground"><%= guide.guide_type_label %></td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground"><%= l(guide.transfer_date, format: :short) %></td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground"><%= guide.recipient_name.presence || guide.shipper_name.presence || "-" %></td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span class="<%= guide.status_badge_class %>"><%= guide.status_label %></span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <% if guide.sunat_status.present? %>
+                    <span class="<%= guide.sunat_status_badge_class %>"><%= guide.sunat_status %></span>
+                  <% else %>
+                    <span class="text-sm text-muted-foreground">-</span>
+                  <% end %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <div class="flex items-center justify-end gap-1">
+                    <%= link_to dispatch_guide_path(guide), class: "table-action-btn", title: "Ver" do %>
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    <% end %>
+                    <% if guide.can_edit? && policy(guide).update? %>
+                      <%= link_to edit_dispatch_guide_path(guide), class: "table-action-btn", title: "Editar" do %>
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                      <% end %>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <% if @pagy.pages > 1 %>
+        <div class="px-6 py-4 border-t border-border bg-muted/30">
+          <%= render "shared/table/pagination", pagy: @pagy %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <%= render "shared/table/empty_state",
+      icon: :truck,
+      title: "No hay guias de remision",
+      description: "Comienza creando tu primera guia de remision.",
+      action_path: new_dispatch_guide_path(guide_type: "grr"),
+      action_label: "Nueva Guia Remitente",
+      show_action: policy(DispatchGuide).create? %>
+  <% end %>
+</div>

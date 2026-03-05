@@ -39,6 +39,12 @@
             data: { turbo_confirm: "Se emitira una #{doc_type} electronica a SUNAT. Continuar?" } %>
       <% end %>
 
+      <% if @sale.confirmed? && policy(DispatchGuide).create? %>
+        <%= link_to "Generar Guia de Remision",
+            new_dispatch_guide_path(sale_id: @sale.id, guide_type: "grr"),
+            class: "btn-secondary" %>
+      <% end %>
+
       <% if @sale.can_cancel? && policy(@sale).cancel? %>
         <%= button_to "Cancelar", cancel_sale_path(@sale),
             method: :patch,

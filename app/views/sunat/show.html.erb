@@ -148,6 +148,50 @@
       </div>
 
       <div class="card mb-6">
+        <h3 class="text-lg font-medium text-foreground mb-2">Guia Remitente (GRR)</h3>
+        <p class="text-sm text-muted-foreground mb-4">
+          Configure la serie y correlativo para guias de remision remitente.
+        </p>
+
+        <%= form_with model: @settings, url: update_settings_sunat_path, method: :patch, class: "space-y-4", data: { turbo_confirm: sunat_confirm } do |f| %>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <%= f.label :sunat_series_grr, "Serie", class: "form-label" %>
+              <%= f.text_field :sunat_series_grr, class: "form-input", placeholder: "T001", maxlength: 4 %>
+            </div>
+            <div>
+              <%= f.label :sunat_next_grr_number, "Correlativo", class: "form-label" %>
+              <%= f.number_field :sunat_next_grr_number, class: "form-input", placeholder: "1", min: 1 %>
+            </div>
+          </div>
+
+          <%= f.submit "Guardar GRR", class: "btn-primary cursor-pointer" %>
+        <% end %>
+      </div>
+
+      <div class="card mb-6">
+        <h3 class="text-lg font-medium text-foreground mb-2">Guia Transportista (GRT)</h3>
+        <p class="text-sm text-muted-foreground mb-4">
+          Configure la serie y correlativo para guias de remision transportista.
+        </p>
+
+        <%= form_with model: @settings, url: update_settings_sunat_path, method: :patch, class: "space-y-4", data: { turbo_confirm: sunat_confirm } do |f| %>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <%= f.label :sunat_series_grt, "Serie", class: "form-label" %>
+              <%= f.text_field :sunat_series_grt, class: "form-input", placeholder: "V001", maxlength: 4 %>
+            </div>
+            <div>
+              <%= f.label :sunat_next_grt_number, "Correlativo", class: "form-label" %>
+              <%= f.number_field :sunat_next_grt_number, class: "form-input", placeholder: "1", min: 1 %>
+            </div>
+          </div>
+
+          <%= f.submit "Guardar GRT", class: "btn-primary cursor-pointer" %>
+        <% end %>
+      </div>
+
+      <div class="card mb-6">
         <h3 class="text-lg font-medium text-foreground mb-2">Credenciales SOL</h3>
         <p class="text-sm text-muted-foreground mb-4">
           Actualice su usuario y clave SOL de SUNAT.

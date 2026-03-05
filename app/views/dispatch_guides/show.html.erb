@@ -1,0 +1,227 @@
+<div class="max-w-5xl mx-auto py-8 px-4">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+    <div>
+      <div class="flex items-center gap-3">
+        <h1 class="text-2xl font-bold text-foreground"><%= @dispatch_guide.code %></h1>
+        <span class="<%= @dispatch_guide.status_badge_class %>"><%= @dispatch_guide.status_label %></span>
+        <span class="badge-secondary"><%= @dispatch_guide.guide_type_label %></span>
+      </div>
+      <p class="mt-1 text-sm text-muted-foreground">
+        Creada por <%= @dispatch_guide.created_by.first_name %> el <%= l(@dispatch_guide.created_at, format: :long) %>
+      </p>
+    </div>
+    <div class="flex flex-wrap gap-3">
+      <%= link_to "Volver", dispatch_guides_path, class: "btn-secondary" %>
+
+      <% if @dispatch_guide.can_edit? && policy(@dispatch_guide).update? %>
+        <%= link_to "Editar", edit_dispatch_guide_path(@dispatch_guide), class: "btn-secondary" %>
+      <% end %>
+
+      <% if @dispatch_guide.can_emit_document? && policy(@dispatch_guide).emit_document? %>
+        <% doc_type = @dispatch_guide.grr? ? "Guia Remitente" : "Guia Transportista" %>
+        <%= button_to "Emitir #{doc_type}", emit_document_dispatch_guide_path(@dispatch_guide),
+            method: :post,
+            class: "btn-primary",
+            data: { turbo_confirm: "Se emitira una #{doc_type} electronica a SUNAT. Continuar?" } %>
+      <% end %>
+
+      <% if @dispatch_guide.can_cancel? && policy(@dispatch_guide).cancel? %>
+        <%= button_to "Cancelar", cancel_dispatch_guide_path(@dispatch_guide),
+            method: :patch,
+            class: "btn-destructive",
+            data: { turbo_confirm: "Cancelar esta guia? Esta accion no se puede deshacer." } %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+    <div class="card">
+      <h3 class="text-sm font-medium text-muted-foreground mb-2">Motivo de Traslado</h3>
+      <p class="text-foreground font-medium"><%= @dispatch_guide.transfer_reason_label %></p>
+    </div>
+
+    <div class="card">
+      <h3 class="text-sm font-medium text-muted-foreground mb-2">Modalidad de Transporte</h3>
+      <p class="text-foreground font-medium"><%= @dispatch_guide.transport_modality_label %></p>
+    </div>
+
+    <div class="card">
+      <h3 class="text-sm font-medium text-muted-foreground mb-2">Fechas</h3>
+      <p class="text-foreground text-sm">
+        <span class="font-medium">Emision:</span> <%= l(@dispatch_guide.issue_date, format: :long) %>
+      </p>
+      <p class="text-foreground text-sm">
+        <span class="font-medium">Traslado:</span> <%= l(@dispatch_guide.transfer_date, format: :long) %>
+      </p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <div class="card">
+      <h3 class="text-sm font-medium text-muted-foreground mb-2">Punto de Partida</h3>
+      <p class="text-foreground font-medium"><%= @dispatch_guide.departure_address %></p>
+      <% if @dispatch_guide.departure_ubigeo.present? %>
+        <p class="text-sm text-muted-foreground"><%= @dispatch_guide.departure_ubigeo.full_path %></p>
+      <% end %>
+    </div>
+
+    <div class="card">
+      <h3 class="text-sm font-medium text-muted-foreground mb-2">Punto de Llegada</h3>
+      <p class="text-foreground font-medium"><%= @dispatch_guide.arrival_address %></p>
+      <% if @dispatch_guide.arrival_ubigeo.present? %>
+        <p class="text-sm text-muted-foreground"><%= @dispatch_guide.arrival_ubigeo.full_path %></p>
+      <% end %>
+    </div>
+  </div>
+
+  <% if @dispatch_guide.grr? && @dispatch_guide.recipient_name.present? %>
+    <div class="card mb-8">
+      <h3 class="text-sm font-medium text-muted-foreground mb-2">Destinatario</h3>
+      <p class="text-foreground font-medium"><%= @dispatch_guide.recipient_name %></p>
+      <p class="text-sm text-muted-foreground"><%= @dispatch_guide.recipient_doc_type&.upcase %>: <%= @dispatch_guide.recipient_doc_number %></p>
+    </div>
+  <% end %>
+
+  <% if @dispatch_guide.grt? && @dispatch_guide.shipper_name.present? %>
+    <div class="card mb-8">
+      <h3 class="text-sm font-medium text-muted-foreground mb-2">Remitente</h3>
+      <p class="text-foreground font-medium"><%= @dispatch_guide.shipper_name %></p>
+      <p class="text-sm text-muted-foreground"><%= @dispatch_guide.shipper_doc_type&.upcase %>: <%= @dispatch_guide.shipper_doc_number %></p>
+    </div>
+  <% end %>
+
+  <div class="card mb-8">
+    <h3 class="text-sm font-medium text-muted-foreground mb-4">Transporte</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+      <% if @dispatch_guide.private_transport? %>
+        <% if @dispatch_guide.vehicle.present? %>
+          <div>
+            <dt class="text-muted-foreground">Vehiculo</dt>
+            <dd class="font-medium text-foreground"><%= @dispatch_guide.vehicle.combobox_display %></dd>
+          </div>
+        <% end %>
+        <% if @dispatch_guide.driver.present? %>
+          <div>
+            <dt class="text-muted-foreground">Conductor</dt>
+            <dd class="font-medium text-foreground"><%= @dispatch_guide.driver.full_name %></dd>
+          </div>
+        <% end %>
+      <% else %>
+        <div>
+          <dt class="text-muted-foreground">Transportista</dt>
+          <dd class="font-medium text-foreground"><%= @dispatch_guide.carrier_name %></dd>
+        </div>
+        <div>
+          <dt class="text-muted-foreground">RUC Transportista</dt>
+          <dd class="font-medium text-foreground"><%= @dispatch_guide.carrier_ruc %></dd>
+        </div>
+      <% end %>
+      <% if @dispatch_guide.gross_weight.present? %>
+        <div>
+          <dt class="text-muted-foreground">Peso Bruto (KG)</dt>
+          <dd class="font-medium text-foreground"><%= @dispatch_guide.gross_weight %></dd>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="card mb-8">
+    <h3 class="text-lg font-medium text-foreground mb-4">Items</h3>
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-border">
+        <thead class="bg-muted/50">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">N</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Descripcion</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase">Cantidad</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase">Unidad</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-border">
+          <% @dispatch_guide.items.each_with_index do |item, index| %>
+            <tr>
+              <td class="px-4 py-3 text-sm text-muted-foreground"><%= index + 1 %></td>
+              <td class="px-4 py-3 text-sm font-medium text-foreground"><%= item.description %></td>
+              <td class="px-4 py-3 text-sm text-foreground text-right"><%= item.quantity %></td>
+              <td class="px-4 py-3 text-sm text-muted-foreground"><%= item.unit_code %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <% if @dispatch_guide.notes.present? %>
+    <div class="card mb-8">
+      <h3 class="text-lg font-medium text-foreground mb-2">Observaciones</h3>
+      <p class="text-foreground whitespace-pre-wrap"><%= @dispatch_guide.notes %></p>
+    </div>
+  <% end %>
+
+  <% if @dispatch_guide.sunat_uuid.present? %>
+    <div class="card mb-8">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-medium text-foreground">Documento Electronico</h3>
+        <span class="<%= @dispatch_guide.sunat_status_badge_class %>"><%= @dispatch_guide.sunat_status %></span>
+      </div>
+      <dl class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+        <div>
+          <dt class="text-muted-foreground">Tipo</dt>
+          <dd class="font-medium text-foreground"><%= @dispatch_guide.sunat_document_type_label %></dd>
+        </div>
+        <% if @dispatch_guide.sunat_series.present? %>
+          <div>
+            <dt class="text-muted-foreground">Serie - Numero</dt>
+            <dd class="font-medium text-foreground"><%= @dispatch_guide.sunat_formatted_number %></dd>
+          </div>
+        <% end %>
+        <div>
+          <dt class="text-muted-foreground">UUID</dt>
+          <dd class="font-medium text-foreground text-xs"><%= @dispatch_guide.sunat_uuid %></dd>
+        </div>
+      </dl>
+
+      <% if @dispatch_guide.sunat_cdr_code.present? %>
+        <div class="mt-4 p-3 bg-muted rounded-lg text-sm">
+          <span class="text-muted-foreground">Respuesta SUNAT:</span>
+          <span class="font-medium text-foreground"><%= @dispatch_guide.sunat_cdr_code %></span>
+          <% if @dispatch_guide.sunat_cdr_description.present? %>
+            <span class="text-muted-foreground">- <%= @dispatch_guide.sunat_cdr_description %></span>
+          <% end %>
+        </div>
+      <% end %>
+
+      <div class="mt-4 flex flex-wrap gap-3">
+        <%= link_to "Consultar Estado", check_sunat_status_dispatch_guide_path(@dispatch_guide),
+            class: "btn-secondary text-sm" %>
+
+        <% if @dispatch_guide.can_retry_document? && policy(@dispatch_guide).retry_document? %>
+          <%= button_to "Reintentar Envio", retry_document_dispatch_guide_path(@dispatch_guide),
+              method: :post,
+              class: "btn-secondary text-sm",
+              data: { turbo_confirm: "Reintentar el envio de la guia a SUNAT?" } %>
+        <% end %>
+
+        <% if @dispatch_guide.sunat_status == "ACCEPTED" %>
+          <%= link_to "Descargar PDF", pdf_dispatch_guide_path(@dispatch_guide),
+              class: "btn-primary text-sm", data: { turbo: false } %>
+          <% if @dispatch_guide.sunat_xml.present? %>
+            <%= link_to "Descargar XML", sunat_xml_dispatch_guide_path(@dispatch_guide),
+                class: "btn-secondary text-sm", data: { turbo: false } %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @dispatch_guide.sourceable.present? %>
+    <div class="card mb-8">
+      <h3 class="text-sm font-medium text-muted-foreground mb-2">Origen</h3>
+      <p class="text-foreground">
+        Generada desde venta
+        <%= link_to @dispatch_guide.sourceable.code, sale_path(@dispatch_guide.sourceable), class: "text-primary hover:underline font-medium" %>
+      </p>
+    </div>
+  <% end %>
+</div>

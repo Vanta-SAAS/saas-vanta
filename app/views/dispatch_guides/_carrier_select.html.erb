@@ -1,0 +1,6 @@
+<%= turbo_frame_tag "carrier-select" do %>
+  <%= select_tag "dispatch_guide[carrier_id]",
+      options_from_collection_for_select(carriers, :id, :combobox_display, selected_carrier_id),
+      include_blank: "Seleccionar transportista",
+      class: "form-input" %>
+<% end %>

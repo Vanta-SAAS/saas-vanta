@@ -161,5 +161,12 @@
     <div data-controller="toast" data-toast-position-value="bottom-right" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 max-w-sm">
       <div data-toast-target="container" class="flex flex-col gap-2"></div>
     </div>
+
+    <dialog id="modal-dialog"
+            data-controller="modal"
+            data-action="click->modal#backdropClose turbo:submit-end->modal#onSubmitEnd"
+            class="backdrop:bg-black/50 backdrop:backdrop-blur-sm bg-card text-card-foreground rounded-xl shadow-2xl border border-border max-w-lg w-[calc(100%-2rem)] p-0 fixed inset-0 m-auto h-fit open:flex open:flex-col">
+      <%= turbo_frame_tag "modal" %>
+    </dialog>
   </body>
 </html>

@@ -1,0 +1,125 @@
+<% content_for :title, @dispatch_guide.sunat_formatted_number || @dispatch_guide.code %>
+
+<% content_for :head do %>
+  <%= render "shared/documents/pdf_styles" %>
+  <style>
+    .sunat-meta {
+      margin-top: 16px;
+      padding: 12px 16px;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      background-color: #F9FAFB;
+      font-size: 11px;
+      color: #6B7280;
+    }
+    .sunat-meta .meta-row { margin-bottom: 4px; }
+    .sunat-meta .meta-label { font-weight: 600; color: #374151; }
+    .transport-info { margin-top: 12px; padding: 8px 16px; border: 1px solid #E5E7EB; border-radius: 8px; font-size: 11px; }
+    .transport-info .label { font-weight: 600; color: #374151; }
+    .transport-info .value { color: #111827; }
+    .info-row-wrap { font-size: 13px; margin-bottom: 6px; display: table; width: 100%; }
+    .info-row-wrap .label { color: #6B7280; display: table-cell; white-space: nowrap; vertical-align: top; }
+    .info-row-wrap .value { font-weight: 600; color: #111827; display: table-cell; text-align: right; white-space: normal; word-wrap: break-word; max-width: 260px; }
+  </style>
+<% end %>
+
+<% enterprise = @dispatch_guide.enterprise %>
+<% doc_type_label = @dispatch_guide.grr? ? "GUIA DE REMISION REMITENTE" : "GUIA DE REMISION TRANSPORTISTA" %>
+<% serie_correlativo = @dispatch_guide.sunat_formatted_number || @dispatch_guide.code %>
+
+<div class="doc">
+  <%= render "shared/documents/pdf_header",
+    enterprise: enterprise,
+    document_title: doc_type_label,
+    document_code: serie_correlativo,
+    document_date: @dispatch_guide.issue_date %>
+
+  <table class="info-grid"><tr>
+    <td>
+      <div class="info-card">
+        <div class="info-card-title">Emisor</div>
+        <div class="info-row"><span class="label">Razon Social</span><span class="value"><%= enterprise.social_reason || enterprise.comercial_name %></span></div>
+        <div class="info-row"><span class="label">RUC</span><span class="value"><%= enterprise.tax_id %></span></div>
+        <% if enterprise.address.present? %>
+          <div class="info-row-wrap"><span class="label">Direccion</span><span class="value"><%= enterprise.address %></span></div>
+        <% end %>
+      </div>
+    </td>
+    <td class="spacer"></td>
+    <td>
+      <div class="info-card">
+        <div class="info-card-title"><%= @dispatch_guide.grr? ? "Destinatario" : "Remitente" %></div>
+        <% if @dispatch_guide.grr? %>
+          <div class="info-row"><span class="label">Nombre</span><span class="value"><%= @dispatch_guide.recipient_name %></span></div>
+          <div class="info-row"><span class="label"><%= @dispatch_guide.recipient_doc_type&.upcase %></span><span class="value"><%= @dispatch_guide.recipient_doc_number %></span></div>
+        <% else %>
+          <div class="info-row"><span class="label">Nombre</span><span class="value"><%= @dispatch_guide.shipper_name %></span></div>
+          <div class="info-row"><span class="label"><%= @dispatch_guide.shipper_doc_type&.upcase %></span><span class="value"><%= @dispatch_guide.shipper_doc_number %></span></div>
+        <% end %>
+      </div>
+    </td>
+  </tr></table>
+
+  <div class="transport-info">
+    <div class="info-row"><span class="label">Fecha de Traslado:</span> <span class="value"><%= @dispatch_guide.transfer_date %></span></div>
+    <div class="info-row"><span class="label">Motivo:</span> <span class="value"><%= @dispatch_guide.transfer_reason_label %></span></div>
+    <% if @dispatch_guide.gross_weight.present? %>
+      <div class="info-row"><span class="label">Peso Bruto:</span> <span class="value"><%= @dispatch_guide.gross_weight %> KG</span></div>
+    <% end %>
+    <div class="info-row-wrap"><span class="label">Partida:</span> <span class="value"><%= @dispatch_guide.departure_address %> (<%= @dispatch_guide.departure_ubigeo&.code %>)</span></div>
+    <div class="info-row-wrap"><span class="label">Llegada:</span> <span class="value"><%= @dispatch_guide.arrival_address %> (<%= @dispatch_guide.arrival_ubigeo&.code %>)</span></div>
+    <% if @dispatch_guide.private_transport? && @dispatch_guide.vehicle.present? %>
+      <div class="info-row"><span class="label">Vehiculo:</span> <span class="value"><%= @dispatch_guide.vehicle.plate %></span></div>
+    <% end %>
+    <% if @dispatch_guide.private_transport? && @dispatch_guide.driver.present? %>
+      <div class="info-row"><span class="label">Conductor:</span> <span class="value"><%= @dispatch_guide.driver.full_name %> - <%= @dispatch_guide.driver.doc_number_for_sunat %></span></div>
+    <% end %>
+    <% if @dispatch_guide.public_transport? %>
+      <div class="info-row"><span class="label">Transportista:</span> <span class="value"><%= @dispatch_guide.carrier_name %> - RUC: <%= @dispatch_guide.carrier_ruc %></span></div>
+    <% end %>
+  </div>
+
+  <table class="items-table">
+    <thead>
+      <tr>
+        <th style="width:10%">N</th>
+        <th style="width:50%">Descripcion</th>
+        <th class="r">Cant.</th>
+        <th class="r">Unidad</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @dispatch_guide.items.each_with_index do |item, i| %>
+        <tr class="<%= i.even? ? 'even' : '' %>">
+          <td><%= i + 1 %></td>
+          <td><div class="item-name"><%= item.description %></div></td>
+          <td class="r"><%= item.quantity %></td>
+          <td class="r"><%= item.unit_code %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <div class="sunat-meta">
+    <div class="meta-row">
+      <span class="meta-label">Comprobante:</span> <%= doc_type_label %> <%= serie_correlativo %>
+    </div>
+    <% if @dispatch_guide.sunat_hash.present? %>
+      <div class="meta-row">
+        <span class="meta-label">Hash:</span> <%= @dispatch_guide.sunat_hash %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @qr_file_path.present? %>
+    <div style="text-align: center; margin-top: 16px;">
+      <img src="file:///<%= @qr_file_path %>" style="width: 260px; height: 260px;" />
+      <p style="font-size: 10px; color: #6B7280; margin-top: 4px;">
+        Representacion impresa de la <%= doc_type_label %>
+      </p>
+    </div>
+  <% end %>
+
+  <%= render "shared/documents/pdf_footer",
+    notes: @dispatch_guide.notes %>
+</div>
