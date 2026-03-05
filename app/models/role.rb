@@ -11,6 +11,7 @@ class Role < ApplicationRecord
   enum :slug, {
     super_admin: "super_admin",
     admin: "admin",
-    seller: "seller"
+    seller: "seller",
+    driver: "driver"
   }
 end

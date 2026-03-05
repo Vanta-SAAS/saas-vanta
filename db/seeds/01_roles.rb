@@ -13,6 +13,11 @@ roles = [
         name: 'Vendedor',
         slug: 'seller',
         description: 'Acceso a ver sus propias ventas'
+    },
+    {
+        name: 'Conductor',
+        slug: 'driver',
+        description: 'Puede ser asignado como conductor en guias de remision'
     }
 ]
 

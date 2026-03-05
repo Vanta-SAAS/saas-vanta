@@ -67,6 +67,20 @@ Rails.application.routes.draw do
     patch :update_sol_credentials
   end
 
+  resources :vehicles, except: [ :show ]
+  resources :carriers, except: [ :show ]
+
+  resources :dispatch_guides do
+    member do
+      post :emit_document
+      post :retry_document
+      get :check_sunat_status
+      patch :cancel
+      get :pdf
+      get :sunat_xml
+    end
+  end
+
   resources :purchase_orders do
     collection do
       get :prefill

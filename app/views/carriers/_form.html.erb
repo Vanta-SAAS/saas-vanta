@@ -1,0 +1,37 @@
+<%= form_with(model: carrier, class: "space-y-6") do |f| %>
+  <% if carrier.errors.any? %>
+    <div class="alert-error">
+      <ul class="list-disc list-inside text-sm">
+        <% carrier.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="card">
+    <h3 class="text-lg font-medium text-foreground mb-4">Datos del Transportista</h3>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <%= f.label :ruc, "RUC", class: "form-label" %>
+        <%= f.text_field :ruc, class: "form-input", required: true, placeholder: "20XXXXXXXXX" %>
+      </div>
+
+      <div>
+        <%= f.label :name, "Razon Social", class: "form-label" %>
+        <%= f.text_field :name, class: "form-input", required: true, placeholder: "Nombre del transportista" %>
+      </div>
+
+      <div>
+        <%= f.label :status, "Estado", class: "form-label" %>
+        <%= f.select :status, [["Activo", "active"], ["Inactivo", "inactive"]], {}, class: "form-input" %>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <%= f.submit carrier.persisted? ? "Actualizar Transportista" : "Registrar Transportista", class: "btn-primary cursor-pointer" %>
+    <%= link_to "Cancelar", carriers_path, class: "btn-secondary" %>
+  </div>
+<% end %>

@@ -83,6 +83,38 @@ module Sunat
       request { connection(authenticated: true).get("documents") }
     end
 
+    # --- Guias de Remision ---
+
+    # Emitir guia de remision remitente (tipo 09)
+    def create_dispatch_guide_remitente(guide)
+      request do
+        connection(authenticated: true).post("dispatch-guides/remitente") do |req|
+          req.body = build_dispatch_guide_payload(guide)
+        end
+      end
+    end
+
+    # Emitir guia de remision transportista (tipo 31)
+    def create_dispatch_guide_transportista(guide)
+      request do
+        connection(authenticated: true).post("dispatch-guides/transportista") do |req|
+          req.body = build_dispatch_guide_payload(guide)
+        end
+      end
+    end
+
+    def get_dispatch_guide(uuid)
+      request { connection(authenticated: true).get("dispatch-guides/#{uuid}") }
+    end
+
+    def get_dispatch_guide_status(uuid)
+      request { connection(authenticated: true).get("dispatch-guides/#{uuid}/status") }
+    end
+
+    def retry_dispatch_guide(uuid)
+      request { connection(authenticated: true).post("dispatch-guides/#{uuid}/retry") }
+    end
+
     private
 
     def connection(authenticated: true, json: true)
@@ -122,6 +154,55 @@ module Sunat
           }
         end
       }
+    end
+
+    def build_dispatch_guide_payload(guide)
+      payload = {
+        transfer_reason: guide.transfer_reason,
+        transport_modality: guide.transport_modality == "private" ? "private" : "public",
+        transfer_date: guide.transfer_date.to_s,
+        gross_weight: guide.gross_weight.to_s,
+        departure_address: guide.departure_address,
+        departure_ubigeo: guide.departure_ubigeo&.code || "150101",
+        arrival_address: guide.arrival_address,
+        arrival_ubigeo: guide.arrival_ubigeo&.code || "150101",
+        recipient_doc_type: guide.recipient_doc_type,
+        recipient_doc_number: guide.recipient_doc_number,
+        recipient_name: guide.recipient_name,
+        items: guide.items.map do |item|
+          {
+            description: item.description,
+            quantity: item.quantity.to_f,
+            unit_code: item.unit_code
+          }
+        end
+      }
+
+      # Transporte privado: vehiculo + conductor
+      if guide.private_transport?
+        payload[:vehicle_plate] = guide.vehicle&.plate
+        if guide.driver.present?
+          payload[:driver_doc_type] = guide.driver.doc_type_for_sunat
+          payload[:driver_doc_number] = guide.driver.doc_number_for_sunat
+          payload[:driver_name] = guide.driver.full_name
+          payload[:driver_license] = guide.driver.driving_license_number
+        end
+      end
+
+      # Transporte publico: datos del transportista
+      if guide.public_transport?
+        payload[:carrier_ruc] = guide.carrier_ruc
+        payload[:carrier_name] = guide.carrier_name
+      end
+
+      # GRT: datos del remitente
+      if guide.grt?
+        payload[:shipper_doc_type] = guide.shipper_doc_type
+        payload[:shipper_doc_number] = guide.shipper_doc_number
+        payload[:shipper_name] = guide.shipper_name
+      end
+
+      payload
     end
 
     def request

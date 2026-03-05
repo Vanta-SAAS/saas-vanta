@@ -8,6 +8,7 @@ class User < ApplicationRecord
   has_many :enterprises, through: :user_enterprises
   has_many :user_enterprise_roles, through: :user_enterprises
   has_many :roles, through: :user_enterprise_roles
+  has_many :user_fields, dependent: :destroy
   has_many :bulk_imports, dependent: :nullify
   has_many :created_purchase_orders, class_name: "PurchaseOrder", foreign_key: :created_by_id, dependent: :restrict_with_error
   has_many :created_customer_quotes, class_name: "CustomerQuote", foreign_key: :created_by_id, dependent: :restrict_with_error
@@ -116,6 +117,23 @@ class User < ApplicationRecord
   # @return [Boolean]
   def has_role?(enterprise, role_slug)
     roles_for(enterprise).include?(role_slug.to_s)
+  end
+
+  # Helpers para datos extendidos (user_fields)
+  def driving_license_number
+    user_fields.find_by(field_type: "driving_license_number")&.value
+  end
+
+  def doc_number_for_sunat
+    user_fields.find_by(field_type: "doc_number")&.value
+  end
+
+  def doc_type_for_sunat
+    user_fields.find_by(field_type: "doc_type")&.value || "dni"
+  end
+
+  def full_name
+    "#{first_name} #{first_last_name}"
   end
 
   private

@@ -7,6 +7,7 @@ class Sale < ApplicationRecord
 
   has_many :items, class_name: "SaleItem", dependent: :destroy
   has_many :purchase_orders, as: :sourceable
+  has_many :dispatch_guides, as: :sourceable
   accepts_nested_attributes_for :items, allow_destroy: true, reject_if: :all_blank
 
   enum :status, { pending: "pending", confirmed: "confirmed", cancelled: "cancelled" }

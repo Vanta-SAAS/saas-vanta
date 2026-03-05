@@ -14,8 +14,10 @@ if [ "${1}" == "./bin/rails" ] && [ "${2}" == "server" ]; then
   
   # Prepare all databases (primary + cache/queue/cable)
   ./bin/rails db:prepare
-  ./bin/rails db:schema:load 2>/dev/null || true
   ./bin/rails db:seed
+
+  # Build Tailwind CSS
+  ./bin/rails tailwindcss:build
 fi
 
 # Execute the command

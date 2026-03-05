@@ -1,0 +1,19 @@
+<% content_for :page_title, "Nuevo Vehiculo" %>
+
+<%= turbo_frame_tag "modal" do %>
+  <div class="p-6">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h2 class="text-xl font-bold text-foreground">Nuevo Vehiculo</h2>
+        <p class="mt-1 text-sm text-muted-foreground">Registra un nuevo vehiculo para tu empresa.</p>
+      </div>
+      <button type="button" data-action="modal#close" class="p-2 rounded-lg hover:bg-muted text-muted-foreground transition-colors">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <%= render "form", vehicle: @vehicle %>
+  </div>
+<% end %>

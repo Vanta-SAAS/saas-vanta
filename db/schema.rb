@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_01_035142) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_04_000006) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -61,6 +61,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_035142) do
     t.index ["resource_type"], name: "index_bulk_imports_on_resource_type"
     t.index ["status"], name: "index_bulk_imports_on_status"
     t.index ["user_id"], name: "index_bulk_imports_on_user_id"
+  end
+
+  create_table "carriers", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "enterprise_id", null: false
+    t.string "name", null: false
+    t.string "ruc", null: false
+    t.string "status", default: "active", null: false
+    t.datetime "updated_at", null: false
+    t.index ["enterprise_id", "ruc"], name: "index_carriers_on_enterprise_id_and_ruc", unique: true
+    t.index ["enterprise_id"], name: "index_carriers_on_enterprise_id"
   end
 
   create_table "customer_quote_items", force: :cascade do |t|
@@ -120,6 +131,73 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_035142) do
     t.index ["ubigeo_id"], name: "index_customers_on_ubigeo_id"
   end
 
+  create_table "dispatch_guide_items", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "description", null: false
+    t.bigint "dispatch_guide_id", null: false
+    t.bigint "product_id"
+    t.decimal "quantity", precision: 10, scale: 2, null: false
+    t.string "unit_code", default: "NIU", null: false
+    t.datetime "updated_at", null: false
+    t.index ["dispatch_guide_id"], name: "index_dispatch_guide_items_on_dispatch_guide_id"
+    t.index ["product_id"], name: "index_dispatch_guide_items_on_product_id"
+  end
+
+  create_table "dispatch_guides", force: :cascade do |t|
+    t.string "arrival_address"
+    t.bigint "arrival_ubigeo_id"
+    t.bigint "carrier_id"
+    t.string "carrier_name"
+    t.string "carrier_ruc"
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.bigint "created_by_id", null: false
+    t.string "departure_address"
+    t.bigint "departure_ubigeo_id"
+    t.bigint "driver_id"
+    t.bigint "enterprise_id", null: false
+    t.decimal "gross_weight", precision: 10, scale: 2
+    t.string "guide_type", null: false
+    t.date "issue_date", null: false
+    t.text "notes"
+    t.string "recipient_doc_number"
+    t.string "recipient_doc_type"
+    t.string "recipient_name"
+    t.string "shipper_doc_number"
+    t.string "shipper_doc_type"
+    t.string "shipper_name"
+    t.bigint "sourceable_id"
+    t.string "sourceable_type"
+    t.string "status", default: "draft", null: false
+    t.string "sunat_cdr_code"
+    t.text "sunat_cdr_description"
+    t.string "sunat_document_type"
+    t.string "sunat_hash"
+    t.integer "sunat_number"
+    t.text "sunat_qr_image"
+    t.jsonb "sunat_response_data"
+    t.string "sunat_series"
+    t.string "sunat_status"
+    t.string "sunat_uuid"
+    t.text "sunat_xml"
+    t.date "transfer_date", null: false
+    t.string "transfer_reason", null: false
+    t.string "transport_modality", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "vehicle_id"
+    t.index ["arrival_ubigeo_id"], name: "index_dispatch_guides_on_arrival_ubigeo_id"
+    t.index ["carrier_id"], name: "index_dispatch_guides_on_carrier_id"
+    t.index ["created_by_id"], name: "index_dispatch_guides_on_created_by_id"
+    t.index ["departure_ubigeo_id"], name: "index_dispatch_guides_on_departure_ubigeo_id"
+    t.index ["driver_id"], name: "index_dispatch_guides_on_driver_id"
+    t.index ["enterprise_id", "code"], name: "index_dispatch_guides_on_enterprise_id_and_code", unique: true
+    t.index ["enterprise_id"], name: "index_dispatch_guides_on_enterprise_id"
+    t.index ["sourceable_type", "sourceable_id"], name: "index_dispatch_guides_on_sourceable"
+    t.index ["status"], name: "index_dispatch_guides_on_status"
+    t.index ["sunat_uuid"], name: "index_dispatch_guides_on_sunat_uuid", unique: true, where: "(sunat_uuid IS NOT NULL)"
+    t.index ["vehicle_id"], name: "index_dispatch_guides_on_vehicle_id"
+  end
+
   create_table "enterprise_settings", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.boolean "dropshipping_enabled", default: false, null: false
@@ -130,8 +208,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_035142) do
     t.string "sunat_next_boleta_series"
     t.integer "sunat_next_factura_number"
     t.string "sunat_next_factura_series"
+    t.integer "sunat_next_grr_number"
+    t.string "sunat_next_grr_series"
+    t.integer "sunat_next_grt_number"
+    t.string "sunat_next_grt_series"
     t.string "sunat_series_boleta", default: "B001"
     t.string "sunat_series_factura", default: "F001"
+    t.string "sunat_series_grr", default: "T001"
+    t.string "sunat_series_grt", default: "V001"
     t.string "sunat_sol_password"
     t.string "sunat_sol_user"
     t.datetime "updated_at", null: false
@@ -343,6 +427,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_035142) do
     t.index ["user_id"], name: "index_user_enterprises_on_user_id"
   end
 
+  create_table "user_fields", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "field_type", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.text "value", null: false
+    t.index ["user_id", "field_type"], name: "index_user_fields_on_user_id_and_field_type", unique: true
+    t.index ["user_id"], name: "index_user_fields_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "email_address", null: false
@@ -363,10 +457,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_035142) do
     t.index ["status"], name: "index_users_on_status"
   end
 
+  create_table "vehicles", force: :cascade do |t|
+    t.string "brand"
+    t.datetime "created_at", null: false
+    t.bigint "enterprise_id", null: false
+    t.string "model"
+    t.string "plate", null: false
+    t.string "status", default: "active", null: false
+    t.datetime "updated_at", null: false
+    t.index ["enterprise_id", "plate"], name: "index_vehicles_on_enterprise_id_and_plate", unique: true
+    t.index ["enterprise_id"], name: "index_vehicles_on_enterprise_id"
+  end
+
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "bulk_imports", "enterprises"
   add_foreign_key "bulk_imports", "users"
+  add_foreign_key "carriers", "enterprises"
   add_foreign_key "customer_quote_items", "customer_quotes"
   add_foreign_key "customer_quote_items", "products"
   add_foreign_key "customer_quotes", "customers"
@@ -376,6 +483,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_035142) do
   add_foreign_key "customer_quotes", "users", column: "seller_id"
   add_foreign_key "customers", "enterprises"
   add_foreign_key "customers", "ubigeos"
+  add_foreign_key "dispatch_guide_items", "dispatch_guides"
+  add_foreign_key "dispatch_guide_items", "products"
+  add_foreign_key "dispatch_guides", "carriers"
+  add_foreign_key "dispatch_guides", "enterprises"
+  add_foreign_key "dispatch_guides", "ubigeos", column: "arrival_ubigeo_id"
+  add_foreign_key "dispatch_guides", "ubigeos", column: "departure_ubigeo_id"
+  add_foreign_key "dispatch_guides", "users", column: "created_by_id"
+  add_foreign_key "dispatch_guides", "users", column: "driver_id"
+  add_foreign_key "dispatch_guides", "vehicles"
   add_foreign_key "enterprise_settings", "enterprises"
   add_foreign_key "enterprises", "ubigeos"
   add_foreign_key "products", "enterprises"
@@ -402,4 +518,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_01_035142) do
   add_foreign_key "user_enterprise_roles", "user_enterprises"
   add_foreign_key "user_enterprises", "enterprises"
   add_foreign_key "user_enterprises", "users"
+  add_foreign_key "user_fields", "users"
+  add_foreign_key "vehicles", "enterprises"
 end

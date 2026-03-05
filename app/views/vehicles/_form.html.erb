@@ -1,0 +1,41 @@
+<%= form_with(model: vehicle, class: "space-y-6") do |f| %>
+  <% if vehicle.errors.any? %>
+    <div class="alert-error">
+      <ul class="list-disc list-inside text-sm">
+        <% vehicle.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="card">
+    <h3 class="text-lg font-medium text-foreground mb-4">Datos del Vehiculo</h3>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
+        <%= f.label :plate, "Placa", class: "form-label" %>
+        <%= f.text_field :plate, class: "form-input", required: true, placeholder: "ABC-123" %>
+      </div>
+
+      <div>
+        <%= f.label :status, "Estado", class: "form-label" %>
+        <%= f.select :status, [["Activo", "active"], ["Inactivo", "inactive"]], {}, class: "form-input" %>
+      </div>
+
+      <div>
+        <%= f.label :brand, "Marca", class: "form-label" %>
+        <%= f.text_field :brand, class: "form-input", placeholder: "Toyota" %>
+      </div>
+
+      <div>
+        <%= f.label :model, "Modelo", class: "form-label" %>
+        <%= f.text_field :model, class: "form-input", placeholder: "Hilux" %>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex items-end justify-end gap-3">
+    <%= f.submit vehicle.persisted? ? "Actualizar Vehiculo" : "Registrar Vehiculo", class: "btn-primary cursor-pointer" %>
+  </div>
+<% end %>
