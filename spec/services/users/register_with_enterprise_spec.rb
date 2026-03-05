@@ -2,6 +2,8 @@ require "rails_helper"
 
 RSpec.describe Users::RegisterWithEnterprise do
   describe "#call" do
+    let!(:super_admin_role) { Role.find_or_create_by!(slug: "super_admin") { |r| r.name = "Super Administrador" } }
+
     let(:valid_params) do
       {
         user: {
