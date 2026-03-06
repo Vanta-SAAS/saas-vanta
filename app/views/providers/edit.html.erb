@@ -1,4 +1,8 @@
 <% content_for :page_title, "Editar Proveedor" %>
+<% add_breadcrumb "Compras" %>
+<% add_breadcrumb "Proveedores", providers_path %>
+<% add_breadcrumb @provider.name, provider_path(@provider) %>
+<% add_breadcrumb "Editar" %>
 
 <div class="max-w-3xl mx-auto">
   <%= render "form", provider: @provider %>

@@ -1,4 +1,8 @@
 <% content_for :page_title, "Editar Cotizacion" %>
+<% add_breadcrumb "Comercial" %>
+<% add_breadcrumb "Cotizaciones", customer_quotes_path %>
+<% add_breadcrumb @customer_quote.code, customer_quote_path(@customer_quote) %>
+<% add_breadcrumb "Editar" %>
 
 <div class="max-w-5xl mx-auto">
   <%= render "form", customer_quote: @customer_quote, show_seller_selector: @show_seller_selector %>

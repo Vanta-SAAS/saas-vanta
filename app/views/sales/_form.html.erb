@@ -8,7 +8,7 @@
 
   <% if sale.errors.any? %>
     <div class="alert-error">
-      <h3 class="text-sm font-medium">Se encontraron errores:</h3>
+      <h3 class="text-sm font-medium">Se encontraron <%= pluralize(sale.errors.count, "error") %>:</h3>
       <div class="mt-2 text-sm">
         <ul role="list" class="list-disc space-y-1 pl-5">
           <% sale.errors.full_messages.each do |msg| %>
@@ -26,9 +26,10 @@
     <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
       <div class="sm:col-span-3">
         <%= f.label :code, "Nro. de Venta", class: "form-label" %>
-        <%= f.text_field :code, class: "form-input",
+        <%= f.text_field :code, class: form_field_class(sale, :code),
             data: { sale_form_target: "codeField" },
             placeholder: "Se generara automaticamente" %>
+        <%= form_field_errors(sale, :code) %>
       </div>
 
       <div class="sm:col-span-3">
@@ -38,10 +39,12 @@
             value: sale.customer_id,
             display: sale.customer&.combobox_display,
             label: "Cliente",
+            required: true,
             placeholder: "Buscar cliente...",
             hint: "Selecciona el cliente para la venta",
             id: "customer_combobox",
             size: "full" %>
+        <%= form_field_errors(sale, :customer) %>
       </div>
 
       <% if show_seller_selector %>
@@ -76,8 +79,11 @@
       </div>
 
       <div class="sm:col-span-3">
-        <%= f.label :issue_date, "Fecha de Emision", class: "form-label" %>
-        <%= f.date_field :issue_date, class: "form-input", required: true %>
+        <%= f.label :issue_date, class: "form-label" do %>
+          Fecha de Emision <span class="required-mark">*</span>
+        <% end %>
+        <%= f.date_field :issue_date, class: form_field_class(sale, :issue_date), required: true %>
+        <%= form_field_errors(sale, :issue_date) %>
       </div>
     </div>
   </div>
@@ -209,6 +215,6 @@
 
   <div class="flex justify-end gap-3">
     <%= link_to "Cancelar", sales_path, class: "btn-secondary" %>
-    <%= f.submit sale.persisted? ? "Actualizar Venta" : "Crear Venta", class: "btn-primary cursor-pointer" %>
+    <%= f.submit sale.persisted? ? "Actualizar Venta" : "Crear Venta", class: "btn-primary cursor-pointer", data: { turbo_submits_with: "Guardando..." } %>
   </div>
 <% end %>

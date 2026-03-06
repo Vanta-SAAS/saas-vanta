@@ -1,4 +1,7 @@
 <% content_for :page_title, @sale.code %>
+<% add_breadcrumb "Comercial" %>
+<% add_breadcrumb "Ventas", sales_path %>
+<% add_breadcrumb @sale.code %>
 
 <div class="max-w-5xl mx-auto space-y-6">
   <%# Header %>
@@ -19,41 +22,55 @@
           current: @sale.status,
           cancelled: @sale.cancelled? %>
     </div>
-    <div class="flex flex-wrap gap-2">
+    <div class="action-bar">
+      <%# Navigation %>
       <%= link_to "Volver", sales_path, class: "btn-secondary" %>
       <%= link_to "PDF", pdf_sale_path(@sale), class: "btn-secondary", data: { turbo: false } %>
-
       <% if @sale.can_edit? && policy(@sale).update? %>
         <%= link_to "Editar", edit_sale_path(@sale), class: "btn-secondary" %>
+      <% end %>
+
+      <%# Primary actions %>
+      <% has_primary = @sale.can_confirm? || @sale.can_emit_document? %>
+      <% if has_primary %>
+        <span class="action-bar-divider"></span>
       <% end %>
 
       <% if @sale.can_confirm? && policy(@sale).confirm? %>
         <%= button_to "Confirmar", confirm_sale_path(@sale),
             method: :patch, class: "btn-primary",
-            data: { turbo_confirm: "Confirmar esta venta? Se descontara el stock." } %>
-      <% end %>
-
-      <% if @sale.can_generate_purchase_orders? && policy(@sale).generate_purchase_orders? %>
-        <%= button_to "Generar OC", generate_purchase_orders_sale_path(@sale),
-            method: :post, class: "btn-secondary",
-            data: { turbo_confirm: "Se generaran ordenes de compra agrupadas por proveedor. Continuar?" } %>
+            data: { turbo_confirm: "Confirmar esta venta? Se descontara el stock.", turbo_submits_with: "Confirmando..." } %>
       <% end %>
 
       <% if @sale.can_emit_document? && policy(@sale).emit_document? %>
         <% doc_type = @sale.customer.ruc? ? "Factura" : "Boleta" %>
         <%= button_to "Emitir #{doc_type}", emit_document_sale_path(@sale),
             method: :post, class: "btn-primary",
-            data: { turbo_confirm: "Se emitira una #{doc_type} electronica a SUNAT. Continuar?" } %>
+            data: { turbo_confirm: "Se emitira una #{doc_type} electronica a SUNAT. Continuar?", turbo_submits_with: "Emitiendo..." } %>
+      <% end %>
+
+      <%# Secondary actions %>
+      <% has_secondary = @sale.can_generate_purchase_orders? || (@sale.confirmed? && @sale.has_goods?) %>
+      <% if has_secondary %>
+        <span class="action-bar-divider"></span>
+      <% end %>
+
+      <% if @sale.can_generate_purchase_orders? && policy(@sale).generate_purchase_orders? %>
+        <%= button_to "Generar OC", generate_purchase_orders_sale_path(@sale),
+            method: :post, class: "btn-secondary",
+            data: { turbo_confirm: "Se generaran ordenes de compra agrupadas por proveedor. Continuar?", turbo_submits_with: "Generando..." } %>
       <% end %>
 
       <% if @sale.confirmed? && @sale.has_goods? && policy(DispatchGuide).create? %>
         <%= link_to "Guia de Remision", new_dispatch_guide_path(sale_id: @sale.id, guide_type: "grr"), class: "btn-secondary" %>
       <% end %>
 
+      <%# Danger %>
       <% if @sale.can_cancel? && policy(@sale).cancel? %>
+        <span class="action-bar-divider"></span>
         <%= button_to "Cancelar", cancel_sale_path(@sale),
             method: :patch, class: "btn-destructive",
-            data: { turbo_confirm: "Cancelar esta venta? Esta accion no se puede deshacer." } %>
+            data: { turbo_confirm: "Cancelar esta venta? Esta accion no se puede deshacer.", turbo_submits_with: "Cancelando..." } %>
       <% end %>
     </div>
   </div>

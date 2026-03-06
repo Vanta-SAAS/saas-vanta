@@ -1,4 +1,7 @@
 <% content_for :page_title, @dispatch_guide.code %>
+<% add_breadcrumb "Despacho" %>
+<% add_breadcrumb "Guias de Remision", dispatch_guides_path %>
+<% add_breadcrumb @dispatch_guide.code %>
 
 <div class="max-w-5xl mx-auto space-y-6">
   <%# Header %>

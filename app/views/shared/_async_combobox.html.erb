@@ -6,6 +6,7 @@
   hint_text = local_assigns.fetch(:hint, nil)
   delay_ms = local_assigns.fetch(:delay, 300)
   is_optional = local_assigns.fetch(:optional, false)
+  is_required = local_assigns.fetch(:required, false)
   label_text = local_assigns.fetch(:label, nil)
 
   # Size options: s, m, l, xl, full (default)
@@ -32,6 +33,8 @@
       <%= label_text %>
       <% if is_optional %>
         <span class="text-muted-foreground font-normal">(opcional)</span>
+      <% elsif is_required %>
+        <span class="required-mark">*</span>
       <% end %>
     </label>
   <% end %>

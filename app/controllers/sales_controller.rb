@@ -9,6 +9,21 @@ class SalesController < ApplicationController
     sales = current_enterprise.sales
                               .includes(:customer, :seller, :created_by)
                               .order(created_at: :desc)
+
+    case params[:doc_type]
+    when "factura"
+      sales = sales.where(sunat_document_type: "01")
+      @doc_type_filter = "factura"
+    when "boleta"
+      sales = sales.where(sunat_document_type: "03")
+      @doc_type_filter = "boleta"
+    end
+
+    if params[:q].present?
+      query = "%#{params[:q].strip.downcase}%"
+      sales = sales.joins(:customer).where("LOWER(sales.code) LIKE :q OR LOWER(customers.name) LIKE :q", q: query)
+    end
+
     @pagy, @sales = pagy(sales)
   end
 

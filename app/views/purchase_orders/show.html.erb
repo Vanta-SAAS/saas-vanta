@@ -1,4 +1,7 @@
 <% content_for :page_title, @purchase_order.code %>
+<% add_breadcrumb "Compras" %>
+<% add_breadcrumb "Ordenes de Compra", purchase_orders_path %>
+<% add_breadcrumb @purchase_order.code %>
 
 <div class="max-w-5xl mx-auto space-y-6">
   <%# Header %>
@@ -17,30 +20,37 @@
           current: @purchase_order.status,
           cancelled: @purchase_order.cancelled? %>
     </div>
-    <div class="flex flex-wrap gap-2">
+    <div class="action-bar">
+      <%# Navigation %>
       <%= link_to "Volver", purchase_orders_path, class: "btn-secondary" %>
       <%= link_to "PDF", pdf_purchase_order_path(@purchase_order), class: "btn-secondary", data: { turbo: false } %>
-
       <% if @purchase_order.can_edit? && policy(@purchase_order).update? %>
         <%= link_to "Editar", edit_purchase_order_path(@purchase_order), class: "btn-secondary" %>
+      <% end %>
+
+      <%# Primary actions %>
+      <% if @purchase_order.can_confirm? || @purchase_order.can_receive? %>
+        <span class="action-bar-divider"></span>
       <% end %>
 
       <% if @purchase_order.can_confirm? && policy(@purchase_order).confirm? %>
         <%= button_to "Confirmar", confirm_purchase_order_path(@purchase_order),
             method: :patch, class: "btn-primary",
-            data: { turbo_confirm: "Confirmar esta orden? Una vez confirmada no podra editarse." } %>
+            data: { turbo_confirm: "Confirmar esta orden? Una vez confirmada no podra editarse.", turbo_submits_with: "Confirmando..." } %>
       <% end %>
 
       <% if @purchase_order.can_receive? && policy(@purchase_order).receive? %>
         <%= button_to "Marcar Recibida", receive_purchase_order_path(@purchase_order),
             method: :patch, class: "btn-success",
-            data: { turbo_confirm: "Marcar como recibida? Esto actualizara el stock de los productos." } %>
+            data: { turbo_confirm: "Marcar como recibida? Esto actualizara el stock de los productos.", turbo_submits_with: "Procesando..." } %>
       <% end %>
 
+      <%# Danger %>
       <% if @purchase_order.can_cancel? && policy(@purchase_order).cancel? %>
+        <span class="action-bar-divider"></span>
         <%= button_to "Cancelar", cancel_purchase_order_path(@purchase_order),
             method: :patch, class: "btn-destructive",
-            data: { turbo_confirm: "Cancelar esta orden? Esta accion no se puede deshacer." } %>
+            data: { turbo_confirm: "Cancelar esta orden? Esta accion no se puede deshacer.", turbo_submits_with: "Cancelando..." } %>
       <% end %>
     </div>
   </div>

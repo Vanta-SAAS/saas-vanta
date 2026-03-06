@@ -40,10 +40,12 @@ class UsersController < ApplicationController
   def create
     authorize User
 
-    role = Role.find_by(id: params[:role_id])
-    unless role
+    selected_role_ids = Array(params[:role_ids]).reject(&:blank?)
+    roles = Role.where(id: selected_role_ids)
+
+    if roles.empty?
       @user = User.new(user_params)
-      @user.errors.add(:base, "Debes seleccionar un rol")
+      @user.errors.add(:base, "Debes seleccionar al menos un rol")
       @roles = available_roles
       return render :new, status: :unprocessable_entity
     end
@@ -54,13 +56,23 @@ class UsersController < ApplicationController
       first_name: params[:user][:first_name],
       first_last_name: params[:user][:first_last_name],
       second_last_name: params[:user][:second_last_name],
-      role_slug: role.slug
+      role_slug: roles.first.slug
     )
 
     service.call
 
     if service.valid?
-      redirect_to users_path, notice: "Usuario invitado exitosamente. Se ha enviado un correo de invitación."
+      # If more than one role, add the remaining ones
+      if roles.size > 1
+        user = User.find_by(email_address: params[:user][:email_address])
+        user_enterprise = user&.user_enterprises&.find_by(enterprise: current_enterprise)
+        if user_enterprise
+          roles[1..].each do |role|
+            user_enterprise.user_enterprise_roles.find_or_create_by!(role: role)
+          end
+        end
+      end
+      redirect_to users_path, notice: "Usuario invitado exitosamente. Se ha enviado un correo de invitacion."
     else
       @user = User.new(user_params)
       @user.errors.add(:base, service.errors_message)
@@ -72,26 +84,18 @@ class UsersController < ApplicationController
   def edit
     authorize @user
     @roles = available_roles
-    @current_role = @user.roles_for(current_enterprise).first
+    @current_role_ids = current_role_ids_for(@user)
   end
 
   def update
     authorize @user
 
     if @user.update(user_update_params)
-      # Update role if changed
-      if params[:role_id].present?
-        user_enterprise = @user.user_enterprises.find_by(enterprise: current_enterprise)
-        if user_enterprise
-          user_enterprise.user_enterprise_roles.destroy_all
-          user_enterprise.user_enterprise_roles.create!(role_id: params[:role_id])
-        end
-      end
-
+      update_user_roles(@user)
       redirect_to @user, notice: "Usuario actualizado exitosamente."
     else
       @roles = available_roles
-      @current_role = @user.roles_for(current_enterprise).first
+      @current_role_ids = current_role_ids_for(@user)
       render :edit, status: :unprocessable_entity
     end
   end
@@ -138,6 +142,29 @@ class UsersController < ApplicationController
   end
 
   def available_roles
-    Role.where(slug: [ :admin, :seller ])
+    if Current.user&.super_admin? || Current.user&.has_role?(current_enterprise, :super_admin)
+      Role.all.order(:id)
+    else
+      Role.where(slug: [ :admin, :seller, :driver ]).order(:id)
+    end
+  end
+
+  def current_role_ids_for(user)
+    user_enterprise = user.user_enterprises.find_by(enterprise: current_enterprise)
+    return [] unless user_enterprise
+    user_enterprise.user_enterprise_roles.pluck(:role_id)
+  end
+
+  def update_user_roles(user)
+    selected_role_ids = Array(params[:role_ids]).reject(&:blank?)
+    return if selected_role_ids.empty?
+
+    user_enterprise = user.user_enterprises.find_by(enterprise: current_enterprise)
+    return unless user_enterprise
+
+    user_enterprise.user_enterprise_roles.destroy_all
+    selected_role_ids.each do |role_id|
+      user_enterprise.user_enterprise_roles.create!(role_id: role_id)
+    end
   end
 end

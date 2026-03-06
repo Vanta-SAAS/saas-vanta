@@ -89,12 +89,13 @@
       </div>
 
       <div class="card">
-        <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Rol en la Empresa</h3>
-        <div class="text-center p-3 bg-muted/30 rounded-lg">
-          <% role = @user.roles_for(current_enterprise).first %>
-          <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium <%= role_badge_class(role) %>">
-            <%= role_label(role) %>
-          </span>
+        <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Roles en la Empresa</h3>
+        <div class="flex flex-wrap justify-center gap-1.5 p-3 bg-muted/30 rounded-lg">
+          <% @user.roles_for(current_enterprise).each do |role| %>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium <%= role_badge_class(role) %>">
+              <%= role_label(role) %>
+            </span>
+          <% end %>
         </div>
       </div>
 

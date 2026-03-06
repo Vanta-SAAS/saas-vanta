@@ -1,5 +1,5 @@
 <% content_for :page_title, "Editar Usuario" %>
 
 <div class="max-w-2xl mx-auto">
-  <%= render "form", user: @user, roles: @roles, current_role_id: @roles.find_by(slug: @current_role)&.id %>
+  <%= render "form", user: @user, roles: @roles, current_role_ids: @current_role_ids %>
 </div>

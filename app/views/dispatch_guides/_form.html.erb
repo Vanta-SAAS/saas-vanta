@@ -216,7 +216,7 @@
   <% end %>
 
   <div class="flex items-center gap-3">
-    <%= f.submit dispatch_guide.persisted? ? "Actualizar Guia" : "Crear Guia", class: "btn-primary cursor-pointer" %>
+    <%= f.submit dispatch_guide.persisted? ? "Actualizar Guia" : "Crear Guia", class: "btn-primary cursor-pointer", data: { turbo_submits_with: "Guardando..." } %>
     <%= link_to "Cancelar", dispatch_guides_path, class: "btn-secondary" %>
   </div>
 <% end %>

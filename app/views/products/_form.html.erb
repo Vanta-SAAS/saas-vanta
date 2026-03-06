@@ -181,6 +181,6 @@
   <div class="flex justify-end gap-3">
     <%= link_to "Cancelar", products_path(product_type: product.product_type), class: "btn-secondary" %>
     <% label = product.service? ? "Servicio" : "Producto" %>
-    <%= f.submit product.persisted? ? "Actualizar #{label}" : "Crear #{label}", class: "btn-primary cursor-pointer" %>
+    <%= f.submit product.persisted? ? "Actualizar #{label}" : "Crear #{label}", class: "btn-primary cursor-pointer", data: { turbo_submits_with: "Guardando..." } %>
   </div>
 <% end %>

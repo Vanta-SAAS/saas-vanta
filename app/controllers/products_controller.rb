@@ -9,6 +9,12 @@ class ProductsController < ApplicationController
                                  .where(product_type: @product_type)
                                  .includes(:provider)
                                  .order(created_at: :desc)
+
+    if params[:q].present?
+      query = "%#{params[:q].strip.downcase}%"
+      products = products.where("LOWER(products.name) LIKE :q OR LOWER(products.sku) LIKE :q", q: query)
+    end
+
     @pagy, @products = pagy(products)
   end
 

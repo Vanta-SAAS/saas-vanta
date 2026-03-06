@@ -1,4 +1,7 @@
 <% content_for :page_title, "Nueva Orden de Compra" %>
+<% add_breadcrumb "Compras" %>
+<% add_breadcrumb "Ordenes de Compra", purchase_orders_path %>
+<% add_breadcrumb "Nueva Orden" %>
 
 <div class="max-w-5xl mx-auto">
   <%= render "form", purchase_order: @purchase_order %>
