@@ -5,6 +5,12 @@ class CustomersController < ApplicationController
   def index
     authorize Customer
     customers = current_enterprise.customers.order(created_at: :desc)
+
+    if params[:q].present?
+      query = "%#{params[:q].strip.downcase}%"
+      customers = customers.where("LOWER(name) LIKE :q OR LOWER(tax_id) LIKE :q", q: query)
+    end
+
     @pagy, @customers = pagy(customers)
   end
 

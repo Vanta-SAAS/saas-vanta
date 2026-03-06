@@ -27,9 +27,7 @@
   <% if show_action && action_path %>
     <div class="mt-4">
       <%= link_to action_path, class: "btn-primary" do %>
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-        </svg>
+        <%= app_icon("plus", class: "w-4 h-4") %>
         <%= action_label %>
       <% end %>
     </div>

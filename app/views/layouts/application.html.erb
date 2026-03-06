@@ -52,17 +52,29 @@
               <button type="button" class="mobile-menu-btn" data-action="click->main-content#openSidebar" title="Abrir menú">
                 <%= sidebar_icon("menu", class: "w-6 h-6") %>
               </button>
-              <h1 class="dashboard-header-title"><%= content_for(:page_title) || "Dashboard" %></h1>
+              <div>
+                <% if breadcrumb_items.any? %>
+                  <%= render "shared/breadcrumbs" %>
+                <% end %>
+                <h1 class="dashboard-header-title"><%= content_for(:page_title) || "Dashboard" %></h1>
+              </div>
             </div>
           </header>
 
           <%# Main Content %>
           <div class="dashboard-content">
-            <%# Flash Messages %>
+            <%# Flash messages as toasts %>
             <% flash.each do |key, value| %>
-              <div class="<%= key == 'notice' ? 'alert-success' : 'alert-error' %> mb-6" role="alert">
-                <span class="block sm:inline"><%= value %></span>
-              </div>
+              <script>
+                document.addEventListener("turbo:load", function handler() {
+                  showToast("<%= j(value) %>", "<%= key == 'notice' ? 'success' : 'error' %>");
+                  document.removeEventListener("turbo:load", handler);
+                }, { once: true });
+                // Also fire immediately for non-Turbo loads
+                if (document.readyState === "complete") {
+                  showToast("<%= j(value) %>", "<%= key == 'notice' ? 'success' : 'error' %>");
+                }
+              </script>
             <% end %>
 
             <%= yield %>

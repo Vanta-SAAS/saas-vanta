@@ -5,6 +5,12 @@ class ProvidersController < ApplicationController
   def index
     authorize Provider
     providers = current_enterprise.providers.order(created_at: :desc)
+
+    if params[:q].present?
+      query = "%#{params[:q].strip.downcase}%"
+      providers = providers.where("LOWER(name) LIKE :q OR LOWER(ruc) LIKE :q", q: query)
+    end
+
     @pagy, @providers = pagy(providers)
   end
 

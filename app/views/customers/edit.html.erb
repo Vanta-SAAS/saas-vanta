@@ -1,4 +1,8 @@
 <% content_for :page_title, "Editar Cliente" %>
+<% add_breadcrumb "Catalogo" %>
+<% add_breadcrumb "Clientes", customers_path %>
+<% add_breadcrumb @customer.name, customer_path(@customer) %>
+<% add_breadcrumb "Editar" %>
 
 <div class="max-w-3xl mx-auto">
   <%= render "form", customer: @customer %>

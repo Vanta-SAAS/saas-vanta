@@ -14,13 +14,19 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
-        <%= f.label :ruc, "RUC", class: "form-label" %>
-        <%= f.text_field :ruc, class: "form-input", required: true, placeholder: "20XXXXXXXXX" %>
+        <%= f.label :ruc, class: "form-label" do %>
+          RUC <span class="required-mark">*</span>
+        <% end %>
+        <%= f.text_field :ruc, class: form_field_class(carrier, :ruc), required: true, placeholder: "20XXXXXXXXX" %>
+        <%= form_field_errors(carrier, :ruc) %>
       </div>
 
       <div>
-        <%= f.label :name, "Razon Social", class: "form-label" %>
-        <%= f.text_field :name, class: "form-input", required: true, placeholder: "Nombre del transportista" %>
+        <%= f.label :name, class: "form-label" do %>
+          Razon Social <span class="required-mark">*</span>
+        <% end %>
+        <%= f.text_field :name, class: form_field_class(carrier, :name), required: true, placeholder: "Nombre del transportista" %>
+        <%= form_field_errors(carrier, :name) %>
       </div>
 
       <div>
@@ -31,7 +37,7 @@
   </div>
 
   <div class="flex items-center gap-3">
-    <%= f.submit carrier.persisted? ? "Actualizar Transportista" : "Registrar Transportista", class: "btn-primary cursor-pointer" %>
+    <%= f.submit carrier.persisted? ? "Actualizar Transportista" : "Registrar Transportista", class: "btn-primary cursor-pointer", data: { turbo_submits_with: "Guardando..." } %>
     <%= link_to "Cancelar", carriers_path, class: "btn-secondary" %>
   </div>
 <% end %>

@@ -9,6 +9,12 @@ class PurchaseOrdersController < ApplicationController
     purchase_orders = current_enterprise.purchase_orders
                                         .includes(:provider, :created_by)
                                         .order(created_at: :desc)
+
+    if params[:q].present?
+      query = "%#{params[:q].strip.downcase}%"
+      purchase_orders = purchase_orders.joins(:provider).where("LOWER(purchase_orders.code) LIKE :q OR LOWER(providers.name) LIKE :q", q: query)
+    end
+
     @pagy, @purchase_orders = pagy(purchase_orders)
   end
 

@@ -1,7 +1,7 @@
 <%= form_with model: provider, class: "space-y-8", local: true do |f| %>
   <% if provider.errors.any? %>
     <div class="alert-error">
-      <h3 class="text-sm font-medium">Se encontraron errores:</h3>
+      <h3 class="text-sm font-medium">Se encontraron <%= pluralize(provider.errors.count, "error") %>:</h3>
       <div class="mt-2 text-sm">
         <ul role="list" class="list-disc space-y-1 pl-5">
           <% provider.errors.full_messages.each do |msg| %>
@@ -19,14 +19,19 @@
     <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
 
       <div class="sm:col-span-4">
-        <%= f.label :name, "Nombre del Proveedor", class: "form-label" %>
-        <%= f.text_field :name, class: "form-input", required: true, placeholder: "Ej: Distribuidora ABC" %>
+        <%= f.label :name, class: "form-label" do %>
+          Nombre del Proveedor <span class="required-mark">*</span>
+        <% end %>
+        <%= f.text_field :name, class: form_field_class(provider, :name), required: true, placeholder: "Ej: Distribuidora ABC" %>
+        <%= form_field_errors(provider, :name) %>
       </div>
 
       <div class="sm:col-span-2">
-        <%= f.label :tax_id, "RUC", class: "form-label" %>
-        <%= f.text_field :tax_id, class: "form-input", placeholder: "Opcional" %>
-        <p class="mt-1 text-xs text-muted-foreground">11 digitos</p>
+        <%= f.label :tax_id, class: "form-label" do %>
+          RUC <span class="text-muted-foreground font-normal">(opcional)</span>
+        <% end %>
+        <%= f.text_field :tax_id, class: form_field_class(provider, :tax_id), placeholder: "11 digitos" %>
+        <%= form_field_errors(provider, :tax_id) %>
       </div>
       <div class="sm:col-span-3">
         <%= render "shared/async_combobox",
@@ -50,12 +55,17 @@
     <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
 
       <div class="sm:col-span-3">
-        <%= f.label :email, "Correo Electronico", class: "form-label" %>
-        <%= f.email_field :email, class: "form-input", placeholder: "proveedor@ejemplo.com" %>
+        <%= f.label :email, class: "form-label" do %>
+          Correo Electronico <span class="text-muted-foreground font-normal">(opcional)</span>
+        <% end %>
+        <%= f.email_field :email, class: form_field_class(provider, :email), placeholder: "proveedor@ejemplo.com" %>
+        <%= form_field_errors(provider, :email) %>
       </div>
 
       <div class="sm:col-span-3">
-        <%= f.label :phone_number, "Numero de Telefono", class: "form-label" %>
+        <%= f.label :phone_number, class: "form-label" do %>
+          Numero de Telefono <span class="text-muted-foreground font-normal">(opcional)</span>
+        <% end %>
         <%= f.text_field :phone_number, class: "form-input", placeholder: "987654321" %>
         <p class="mt-1 text-xs text-muted-foreground">Formato: 9 digitos para celular</p>
       </div>
@@ -65,6 +75,6 @@
 
   <div class="flex justify-end gap-3">
     <%= link_to "Cancelar", providers_path, class: "btn-secondary" %>
-    <%= f.submit provider.persisted? ? "Actualizar Proveedor" : "Crear Proveedor", class: "btn-primary cursor-pointer" %>
+    <%= f.submit provider.persisted? ? "Actualizar Proveedor" : "Crear Proveedor", class: "btn-primary cursor-pointer", data: { turbo_submits_with: "Guardando..." } %>
   </div>
 <% end %>

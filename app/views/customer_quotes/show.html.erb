@@ -1,4 +1,7 @@
 <% content_for :page_title, @customer_quote.code %>
+<% add_breadcrumb "Comercial" %>
+<% add_breadcrumb "Cotizaciones", customer_quotes_path %>
+<% add_breadcrumb @customer_quote.code %>
 
 <div class="max-w-5xl mx-auto space-y-6">
   <%# Header %>
@@ -16,30 +19,35 @@
           current: @customer_quote.status,
           cancelled: @customer_quote.rejected? || @customer_quote.expired? %>
     </div>
-    <div class="flex flex-wrap gap-2">
+    <div class="action-bar">
+      <%# Navigation %>
       <%= link_to "Volver", customer_quotes_path, class: "btn-secondary" %>
       <%= link_to "PDF", pdf_customer_quote_path(@customer_quote), class: "btn-secondary", data: { turbo: false } %>
-
       <% if @customer_quote.can_edit? && policy(@customer_quote).update? %>
         <%= link_to "Editar", edit_customer_quote_path(@customer_quote), class: "btn-secondary" %>
       <% end %>
 
+      <%# Primary action %>
       <% if @customer_quote.can_accept? && policy(@customer_quote).accept? %>
+        <span class="action-bar-divider"></span>
         <%= button_to "Aceptar", accept_customer_quote_path(@customer_quote),
             method: :patch, class: "btn-primary",
-            data: { turbo_confirm: "Aceptar esta cotizacion?" } %>
+            data: { turbo_confirm: "Aceptar esta cotizacion?", turbo_submits_with: "Aceptando..." } %>
       <% end %>
 
-      <% if @customer_quote.can_reject? && policy(@customer_quote).reject? %>
-        <%= button_to "Rechazar", reject_customer_quote_path(@customer_quote),
-            method: :patch, class: "btn-destructive",
-            data: { turbo_confirm: "Rechazar esta cotizacion? Esta accion no se puede deshacer." } %>
-      <% end %>
-
+      <%# Secondary %>
       <% if @customer_quote.can_expire? && policy(@customer_quote).expire? %>
         <%= button_to "Marcar Expirada", expire_customer_quote_path(@customer_quote),
             method: :patch, class: "btn-secondary",
             data: { turbo_confirm: "Marcar como expirada?" } %>
+      <% end %>
+
+      <%# Danger %>
+      <% if @customer_quote.can_reject? && policy(@customer_quote).reject? %>
+        <span class="action-bar-divider"></span>
+        <%= button_to "Rechazar", reject_customer_quote_path(@customer_quote),
+            method: :patch, class: "btn-destructive",
+            data: { turbo_confirm: "Rechazar esta cotizacion? Esta accion no se puede deshacer." } %>
       <% end %>
     </div>
   </div>

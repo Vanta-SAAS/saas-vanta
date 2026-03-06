@@ -14,8 +14,11 @@
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div>
-        <%= f.label :plate, "Placa", class: "form-label" %>
-        <%= f.text_field :plate, class: "form-input", required: true, placeholder: "ABC-123" %>
+        <%= f.label :plate, class: "form-label" do %>
+          Placa <span class="required-mark">*</span>
+        <% end %>
+        <%= f.text_field :plate, class: form_field_class(vehicle, :plate), required: true, placeholder: "ABC-123" %>
+        <%= form_field_errors(vehicle, :plate) %>
       </div>
 
       <div>
@@ -24,18 +27,22 @@
       </div>
 
       <div>
-        <%= f.label :brand, "Marca", class: "form-label" %>
+        <%= f.label :brand, class: "form-label" do %>
+          Marca <span class="text-muted-foreground font-normal">(opcional)</span>
+        <% end %>
         <%= f.text_field :brand, class: "form-input", placeholder: "Toyota" %>
       </div>
 
       <div>
-        <%= f.label :model, "Modelo", class: "form-label" %>
+        <%= f.label :model, class: "form-label" do %>
+          Modelo <span class="text-muted-foreground font-normal">(opcional)</span>
+        <% end %>
         <%= f.text_field :model, class: "form-input", placeholder: "Hilux" %>
       </div>
     </div>
   </div>
 
   <div class="flex items-end justify-end gap-3">
-    <%= f.submit vehicle.persisted? ? "Actualizar Vehiculo" : "Registrar Vehiculo", class: "btn-primary cursor-pointer" %>
+    <%= f.submit vehicle.persisted? ? "Actualizar Vehiculo" : "Registrar Vehiculo", class: "btn-primary cursor-pointer", data: { turbo_submits_with: "Guardando..." } %>
   </div>
 <% end %>

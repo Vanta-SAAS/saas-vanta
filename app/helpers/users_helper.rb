@@ -33,8 +33,21 @@ module UsersHelper
       "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
     when "seller"
       "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+    when "driver"
+      "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400"
     else
       "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400"
+    end
+  end
+
+  # Get description for role
+  def role_description(role_slug)
+    case role_slug.to_s
+    when "super_admin" then "Acceso total a la plataforma y todas las empresas"
+    when "admin" then "Acceso completo a la gestion de la empresa"
+    when "seller" then "Acceso a cotizaciones, ventas y clientes"
+    when "driver" then "Acceso a guias de remision y despacho"
+    else ""
     end
   end
 
@@ -44,6 +57,7 @@ module UsersHelper
     when "super_admin" then "Super Admin"
     when "admin" then "Administrador"
     when "seller" then "Vendedor"
+    when "driver" then "Conductor"
     else role_slug.to_s.humanize
     end
   end
