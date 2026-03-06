@@ -1,4 +1,8 @@
 <% content_for :page_title, "Editar Venta" %>
+<% add_breadcrumb "Comercial" %>
+<% add_breadcrumb "Ventas", sales_path %>
+<% add_breadcrumb @sale.code, sale_path(@sale) %>
+<% add_breadcrumb "Editar" %>
 
 <div class="max-w-5xl mx-auto">
   <%= render "form", sale: @sale, show_seller_selector: @show_seller_selector %>

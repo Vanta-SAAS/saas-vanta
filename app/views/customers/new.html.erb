@@ -1,4 +1,7 @@
 <% content_for :page_title, "Nuevo Cliente" %>
+<% add_breadcrumb "Catalogo" %>
+<% add_breadcrumb "Clientes", customers_path %>
+<% add_breadcrumb "Nuevo Cliente" %>
 
 <div class="max-w-3xl mx-auto">
   <%= render "form", customer: @customer %>

@@ -8,7 +8,8 @@
     <div class="sidebar-logo">
       <div class="sidebar-logo-group">
         <div class="sidebar-logo-icon">
-          <img src="/logo-vanta-fox.png" alt="VANTA" class="w-full h-full object-contain">
+          <img src="/logo-vanta-fox.png" alt="VANTA" class="sidebar-logo-light w-full h-full object-contain">
+          <img src="/logo-vanta-fox-dark.png" alt="VANTA" class="sidebar-logo-dark w-full h-full object-contain">
         </div>
         <span class="sidebar-logo-text" data-sidebar-target="collapsible">VANTA</span>
       </div>
@@ -27,46 +28,50 @@
       </button>
     </div>
 
-    <nav class="sidebar-nav">
-      <% if current_enterprise.present? %>
-        <div class="sidebar-nav-section">
-          <span class="sidebar-nav-section-label" data-sidebar-target="collapsible">General</span>
-        </div>
-      <% end %>
-
+    <nav class="sidebar-nav" aria-label="Menu principal">
       <%= sidebar_link_to "Dashboard", root_path, icon: "layout-dashboard" %>
 
       <% if current_enterprise.present? %>
-        <div class="sidebar-nav-section mt-5">
-          <span class="sidebar-nav-section-label" data-sidebar-target="collapsible">Operaciones</span>
+        <div class="sidebar-nav-section mt-4">
+          <span class="sidebar-nav-section-label" data-sidebar-target="collapsible">Comercial</span>
         </div>
         <%= sidebar_link_to "Cotizaciones", customer_quotes_path, icon: "file-text" %>
-        <%= sidebar_link_to "Ventas", sales_path, icon: "shopping-cart" %>
-        <%= sidebar_link_to "Ordenes de compra", purchase_orders_path, icon: "package" %>
+        <%= sidebar_nav_group("Ventas", icon: "shopping-cart", key: "ventas") do %>
+          <%= sidebar_link_to "Todas", sales_path, icon: "clipboard-list", sub: true %>
+          <% if current_enterprise.formal? %>
+            <%= sidebar_link_to "Facturas", sales_path(doc_type: "factura"), icon: "receipt", sub: true %>
+            <%= sidebar_link_to "Boletas", sales_path(doc_type: "boleta"), icon: "receipt", sub: true %>
+          <% end %>
+        <% end %>
 
-        <div class="sidebar-nav-section mt-5">
+        <div class="sidebar-nav-section mt-4">
+          <span class="sidebar-nav-section-label" data-sidebar-target="collapsible">Compras</span>
+        </div>
+        <%= sidebar_link_to "Ordenes de compra", purchase_orders_path, icon: "package" %>
+        <%= sidebar_link_to "Proveedores", providers_path, icon: "truck" %>
+
+        <div class="sidebar-nav-section mt-4">
+          <span class="sidebar-nav-section-label" data-sidebar-target="collapsible">Despacho</span>
+        </div>
+        <%= sidebar_link_to "Guias de remision", dispatch_guides_path, icon: "map" %>
+        <%= sidebar_link_to "Vehiculos", vehicles_path, icon: "car" %>
+        <%= sidebar_link_to "Transportistas", carriers_path, icon: "contact" %>
+
+        <div class="sidebar-nav-section mt-4">
           <span class="sidebar-nav-section-label" data-sidebar-target="collapsible">Catalogo</span>
         </div>
         <%= sidebar_link_to "Productos", products_path, icon: "package" %>
         <%= sidebar_link_to "Clientes", customers_path, icon: "users" %>
-        <%= sidebar_link_to "Proveedores", providers_path, icon: "truck" %>
         <%= sidebar_link_to "Importaciones", bulk_imports_path, icon: "upload" %>
-      <% end %>
-
-      <% if current_enterprise.present? && policy(User).index? %>
-        <div class="sidebar-nav-section mt-5">
-          <span class="sidebar-nav-section-label" data-sidebar-target="collapsible">Configuracion</span>
-        </div>
-        <%= sidebar_link_to "Usuarios", users_path, icon: "users" %>
-      <% end %>
-
-      <% if Current.user&.super_admin? %>
-        <%= sidebar_link_to "Empresas", new_admin_enterprise_path, icon: "building-2" %>
       <% end %>
     </nav>
   </div>
 
   <div class="sidebar-bottom">
+    <div class="sidebar-nav-section mb-1">
+      <span class="sidebar-nav-section-label" data-sidebar-target="collapsible">Configuracion</span>
+    </div>
+
     <button type="button" class="sidebar-theme-toggle" id="theme-toggle" title="Cambiar tema">
       <span class="theme-icon-dark">
         <%= sidebar_icon("moon", class: "w-4 h-4 flex-shrink-0") %>
@@ -85,7 +90,15 @@
     <% end %>
 
     <% if current_enterprise.present? && current_enterprise.formal? && policy(current_enterprise).sunat? %>
-      <%= sidebar_link_to "Facturacion", sunat_path, icon: "file-text" %>
+      <%= sidebar_link_to "Config. SUNAT", sunat_path, icon: "settings" %>
+    <% end %>
+
+    <% if current_enterprise.present? && policy(User).index? %>
+      <%= sidebar_link_to "Usuarios", users_path, icon: "users" %>
+    <% end %>
+
+    <% if Current.user&.super_admin? %>
+      <%= sidebar_link_to "Empresas", new_admin_enterprise_path, icon: "building-2" %>
     <% end %>
 
     <div class="sidebar-user">

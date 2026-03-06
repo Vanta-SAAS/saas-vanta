@@ -1,0 +1,11 @@
+<%= form_with url: url, method: :get, class: "search-bar", data: { turbo_action: "replace" } do |f| %>
+  <span class="search-bar-icon">
+    <%= sidebar_icon("search", class: "w-4 h-4") %>
+  </span>
+  <%= f.text_field :q, value: params[:q], class: "search-bar-input", placeholder: placeholder || "Buscar...", autocomplete: "off" %>
+  <% if defined?(extra_params) && extra_params.present? %>
+    <% extra_params.each do |key, value| %>
+      <%= hidden_field_tag key, value %>
+    <% end %>
+  <% end %>
+<% end %>

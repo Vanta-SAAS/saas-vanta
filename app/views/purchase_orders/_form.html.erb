@@ -220,6 +220,6 @@
 
   <div class="flex justify-end gap-3">
     <%= link_to "Cancelar", purchase_orders_path, class: "btn-secondary" %>
-    <%= f.submit purchase_order.persisted? ? "Actualizar Orden" : "Crear Orden", class: "btn-primary cursor-pointer" %>
+    <%= f.submit purchase_order.persisted? ? "Actualizar Orden" : "Crear Orden", class: "btn-primary cursor-pointer", data: { turbo_submits_with: "Guardando..." } %>
   </div>
 <% end %>

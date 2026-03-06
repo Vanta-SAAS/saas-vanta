@@ -1,5 +1,9 @@
 <% label = @product.service? ? "Editar Servicio" : "Editar Producto" %>
 <% content_for :page_title, label %>
+<% add_breadcrumb "Catalogo" %>
+<% add_breadcrumb "Productos", products_path %>
+<% add_breadcrumb @product.name, product_path(@product) %>
+<% add_breadcrumb "Editar" %>
 
 <div class="max-w-4xl mx-auto">
   <%= render "form", product: @product, providers: @providers %>

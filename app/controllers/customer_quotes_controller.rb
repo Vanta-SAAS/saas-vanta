@@ -9,6 +9,12 @@ class CustomerQuotesController < ApplicationController
     customer_quotes = current_enterprise.customer_quotes
                                         .includes(:customer, :seller, :created_by)
                                         .order(created_at: :desc)
+
+    if params[:q].present?
+      query = "%#{params[:q].strip.downcase}%"
+      customer_quotes = customer_quotes.joins(:customer).where("LOWER(customer_quotes.code) LIKE :q OR LOWER(customers.name) LIKE :q", q: query)
+    end
+
     @pagy, @customer_quotes = pagy(customer_quotes)
   end
 

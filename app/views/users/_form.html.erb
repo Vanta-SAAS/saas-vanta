@@ -45,19 +45,20 @@
   </div>
 
   <div class="card">
-    <h3 class="text-sm font-semibold text-foreground mb-3">Rol en la Empresa</h3>
+    <h3 class="text-sm font-semibold text-foreground mb-3">Roles en la Empresa</h3>
+    <p class="text-xs text-muted-foreground mb-3">Selecciona uno o mas roles para este usuario.</p>
 
-    <div class="form-group">
-      <%= label_tag :role_id, "Rol", class: "form-label" %>
-      <%= select_tag :role_id,
-          options_from_collection_for_select(@roles, :id, :name, local_assigns[:current_role_id]),
-          class: "form-input",
-          include_blank: "Seleccionar rol...",
-          required: true %>
-      <p class="text-xs text-muted-foreground mt-1">
-        <strong>Admin:</strong> Acceso completo a la empresa |
-        <strong>Vendedor:</strong> Acceso limitado a ventas
-      </p>
+    <div class="space-y-2">
+      <% current_ids = local_assigns[:current_role_ids] || [] %>
+      <% @roles.each do |role| %>
+        <label class="flex items-start gap-3 p-3 rounded-lg border border-border hover:bg-muted/30 transition-colors cursor-pointer has-[:checked]:border-primary/40 has-[:checked]:bg-primary/5">
+          <%= check_box_tag "role_ids[]", role.id, current_ids.include?(role.id), class: "form-checkbox mt-0.5" %>
+          <div>
+            <span class="text-sm font-medium text-foreground"><%= role.name %></span>
+            <p class="text-xs text-muted-foreground mt-0.5"><%= role_description(role.slug) %></p>
+          </div>
+        </label>
+      <% end %>
     </div>
   </div>
 

@@ -13,9 +13,7 @@
   <div class="flex items-center justify-end gap-3 mb-6">
     <%= link_to new_bulk_import_path(resource_type: @resource_type),
                 class: "btn-primary inline-flex items-center gap-2" do %>
-      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-      </svg>
+      <%= app_icon("cloud-upload", class: "w-4 h-4") %>
       Nueva Importacion
     <% end %>
   </div>
@@ -24,15 +22,15 @@
   <div class="border-b border-border mb-6">
     <nav class="-mb-px flex space-x-8">
       <%= link_to bulk_imports_path(resource_type: "Product"),
-                  class: "pb-4 px-1 border-b-2 font-medium text-sm #{@resource_type == 'Product' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'}" do %>
+                  class: "tab-link #{@resource_type == 'Product' ? 'tab-link-active' : ''}" do %>
         Productos
       <% end %>
       <%= link_to bulk_imports_path(resource_type: "Provider"),
-                  class: "pb-4 px-1 border-b-2 font-medium text-sm #{@resource_type == 'Provider' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'}" do %>
+                  class: "tab-link #{@resource_type == 'Provider' ? 'tab-link-active' : ''}" do %>
         Proveedores
       <% end %>
       <%= link_to bulk_imports_path(resource_type: "Customer"),
-                  class: "pb-4 px-1 border-b-2 font-medium text-sm #{@resource_type == 'Customer' ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'}" do %>
+                  class: "tab-link #{@resource_type == 'Customer' ? 'tab-link-active' : ''}" do %>
         Clientes
       <% end %>
     </nav>
@@ -80,10 +78,7 @@
                 </td>
                 <td class="px-5 py-3.5 whitespace-nowrap text-right text-sm">
                   <%= link_to bulk_import_path(import), class: "table-action-btn", title: "Ver detalles" do %>
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
+                    <%= app_icon("eye", class: "w-4 h-4") %>
                   <% end %>
                 </td>
               </tr>
@@ -100,17 +95,15 @@
     </div>
   <% else %>
     <div class="card text-center py-12">
-      <svg class="mx-auto h-12 w-12 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-      </svg>
-      <h3 class="mt-2 text-sm font-medium text-foreground">No hay importaciones</h3>
+      <div class="mx-auto w-12 h-12 rounded-lg bg-muted flex items-center justify-center mb-3">
+        <%= app_icon("cloud-upload", class: "w-6 h-6 text-muted-foreground") %>
+      </div>
+      <h3 class="text-sm font-medium text-foreground">No hay importaciones</h3>
       <p class="mt-1 text-sm text-muted-foreground">Realiza tu primera importacion masiva.</p>
-      <div class="mt-6">
+      <div class="mt-4">
         <%= link_to new_bulk_import_path(resource_type: @resource_type),
-                    class: "btn-primary inline-flex items-center" do %>
-          <svg class="-ml-1 mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-            <path d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" />
-          </svg>
+                    class: "btn-primary inline-flex items-center gap-2" do %>
+          <%= app_icon("plus", class: "w-4 h-4") %>
           Nueva Importacion
         <% end %>
       </div>

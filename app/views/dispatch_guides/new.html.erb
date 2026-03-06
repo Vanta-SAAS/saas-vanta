@@ -1,4 +1,7 @@
 <% content_for :page_title, "Nueva Guia de Remision" %>
+<% add_breadcrumb "Despacho" %>
+<% add_breadcrumb "Guias de Remision", dispatch_guides_path %>
+<% add_breadcrumb "Nueva Guia" %>
 
 <div class="max-w-4xl mx-auto">
   <%= render "form", dispatch_guide: @dispatch_guide %>

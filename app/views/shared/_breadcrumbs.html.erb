@@ -1,0 +1,14 @@
+<% if breadcrumb_items.any? %>
+  <nav class="breadcrumbs" aria-label="Navegacion">
+    <% breadcrumb_items.each_with_index do |item, i| %>
+      <% if i > 0 %>
+        <span class="breadcrumbs-separator">/</span>
+      <% end %>
+      <% if item[:path] && i < breadcrumb_items.size - 1 %>
+        <%= link_to item[:label], item[:path] %>
+      <% else %>
+        <span class="text-foreground font-medium"><%= item[:label] %></span>
+      <% end %>
+    <% end %>
+  </nav>
+<% end %>
