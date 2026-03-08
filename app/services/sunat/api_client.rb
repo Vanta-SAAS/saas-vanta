@@ -204,6 +204,11 @@ module Sunat
         payload[:shipper_name] = guide.shipper_name
       end
 
+      # Documento relacionado (factura/boleta vinculada)
+      if guide.sourceable.is_a?(Sale) && guide.sourceable.sunat_uuid.present?
+        payload[:related_document_id] = guide.sourceable.sunat_uuid
+      end
+
       payload
     end
 

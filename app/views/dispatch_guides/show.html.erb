@@ -228,6 +228,20 @@
         Generada desde venta
         <%= link_to @dispatch_guide.sourceable.code, sale_path(@dispatch_guide.sourceable), class: "link-primary font-medium font-mono" %>
       </p>
+      <% if @dispatch_guide.sourceable.is_a?(Sale) && @dispatch_guide.sourceable.sunat_uuid.present? %>
+        <div class="flex items-center gap-2 mt-2 pt-2 border-t border-border">
+          <svg class="w-4 h-4 text-primary shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+          </svg>
+          <p class="text-sm text-foreground">
+            Vinculada con
+            <span class="font-mono font-medium">
+              <%= @dispatch_guide.sourceable.sunat_document_type == "01" ? "Factura" : "Boleta" %>
+              <%= @dispatch_guide.sourceable.sunat_series %>-<%= @dispatch_guide.sourceable.sunat_number %>
+            </span>
+          </p>
+        </div>
+      <% end %>
     </div>
   <% end %>
 </div>
