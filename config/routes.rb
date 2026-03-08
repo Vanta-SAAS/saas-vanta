@@ -97,6 +97,8 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :suggestions, only: [ :new, :create ]
+
   resources :bulk_imports, only: [ :index, :show, :new, :create ] do
     collection do
       get :template

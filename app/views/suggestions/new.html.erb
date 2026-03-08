@@ -1,0 +1,82 @@
+<% content_for :page_title, "Sugerir Mejoras" %>
+<% add_breadcrumb "Sugerencias" %>
+
+<div class="max-w-5xl mx-auto">
+  <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
+
+    <%# Formulario — 3 columnas %>
+    <div class="lg:col-span-3 space-y-6">
+      <div>
+        <h2 class="text-lg font-semibold text-foreground">Tu opinion es importante para nosotros</h2>
+        <p class="text-sm text-muted-foreground mt-1">
+          Estamos en fase beta y cada sugerencia nos acerca a una herramienta que realmente
+          se adapte a tu dia a dia. Cuentanos que podemos mejorar.
+        </p>
+      </div>
+
+      <%= form_with(model: @suggestion, class: "space-y-5") do |f| %>
+        <% if @suggestion.errors.any? %>
+          <div class="alert-error">
+            <ul class="list-disc list-inside text-sm">
+              <% @suggestion.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+              <% end %>
+            </ul>
+          </div>
+        <% end %>
+
+        <div class="card space-y-4">
+          <div>
+            <%= f.label :body, "Tu sugerencia", class: "form-label" %>
+            <%= f.text_area :body, class: "form-input !h-auto py-3", rows: 10,
+                placeholder: "Que funcionalidad te gustaria? Que flujo podria ser mas simple? Alguna idea que te ayudaria en tu trabajo diario?" %>
+          </div>
+        </div>
+
+        <%# Seccion de contacto %>
+        <div class="card space-y-4" data-controller="toggle">
+          <div class="flex items-start gap-3">
+            <%= f.check_box :wants_contact,
+                class: "mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary",
+                data: { action: "toggle#toggle", toggle_target: "trigger" } %>
+            <div>
+              <%= f.label :wants_contact, "Me gustaria que me contacten para conversar mas a detalle", class: "text-sm font-medium text-foreground cursor-pointer" %>
+              <p class="text-xs text-muted-foreground mt-0.5">
+                Opcional. Nos encantaria escucharte para entender mejor tu necesidad.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 hidden" data-toggle-target="content">
+            <div>
+              <%= f.label :contact_email, "Correo electronico", class: "form-label" %>
+              <%= f.email_field :contact_email, class: "form-input",
+                  placeholder: "tu@empresa.com",
+                  value: @suggestion.contact_email || Current.user&.email_address %>
+            </div>
+            <div>
+              <%= f.label :contact_phone, "Telefono", class: "form-label" %>
+              <%= f.telephone_field :contact_phone, class: "form-input", placeholder: "999 999 999" %>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <%= f.submit "Enviar sugerencia", class: "btn-primary cursor-pointer",
+              data: { turbo_submits_with: "Enviando..." } %>
+        </div>
+      <% end %>
+    </div>
+
+    <%# Imagen Foxia — 2 columnas %>
+    <div class="lg:col-span-2 hidden lg:flex flex-col items-center justify-start pt-8">
+      <%= image_tag "foxia-suggestion.png", alt: "Foxia - Buzon de sugerencias",
+          class: "w-full max-w-xs" %>
+      <p class="text-center text-xs text-muted-foreground mt-4 max-w-[16rem] leading-relaxed">
+        Nuestra mision es simplificar tus flujos de trabajo.
+        Tus ideas nos ayudan a lograrlo.
+      </p>
+    </div>
+
+  </div>
+</div>

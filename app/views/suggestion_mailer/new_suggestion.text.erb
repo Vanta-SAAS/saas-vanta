@@ -1,0 +1,18 @@
+NUEVA SUGERENCIA RECIBIDA
+========================
+
+Usuario: <%= @user.full_name %> (<%= @user.email_address %>)
+Empresa: <%= @enterprise.comercial_name %> — RUC: <%= @enterprise.tax_id %>
+Fecha: <%= l(@suggestion.created_at, format: :long) %>
+
+SUGERENCIA
+----------
+<%= @suggestion.body %>
+
+<% if @suggestion.wants_contact? %>
+DATOS DE CONTACTO
+-----------------
+El usuario desea ser contactado.
+<% if @suggestion.contact_email.present? %>Email: <%= @suggestion.contact_email %><% end %>
+<% if @suggestion.contact_phone.present? %>Telefono: <%= @suggestion.contact_phone %><% end %>
+<% end %>
