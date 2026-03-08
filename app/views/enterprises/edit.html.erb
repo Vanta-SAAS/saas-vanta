@@ -1,6 +1,6 @@
 <% content_for :page_title, "Mi Empresa" %>
 
-<div class="max-w-7xl mx-auto">
+<div class="max-w-5xl mx-auto">
 
   <%= form_with model: @enterprise, url: enterprise_path(@enterprise), method: :patch, class: "space-y-8", local: true do |f| %>
     <% if @enterprise.errors.any? %>
@@ -105,9 +105,9 @@
             <% end %>
           </div>
 
-          <div class="mt-4 space-y-3">
-            <% FeatureModule.roots.ordered.each do |root_mod| %>
-              <div class="flex items-center justify-between py-2 <%= 'border-t border-border' unless root_mod == FeatureModule.roots.ordered.first %>">
+          <div class="mt-4 divide-y divide-border">
+            <% @root_modules.each do |root_mod| %>
+              <div class="flex items-center justify-between py-2.5">
                 <div class="flex items-center gap-3">
                   <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10">
                     <%= sidebar_icon(root_mod.icon || "box", class: "w-4 h-4 text-primary") %>
@@ -115,9 +115,9 @@
                   <span class="text-sm font-medium text-foreground"><%= root_mod.name %></span>
                 </div>
                 <% if @enterprise.module_enabled?(root_mod.key) %>
-                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">Activo</span>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">Activo</span>
                 <% else %>
-                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground">Inactivo</span>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground">Inactivo</span>
                 <% end %>
               </div>
             <% end %>

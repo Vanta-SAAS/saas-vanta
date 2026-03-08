@@ -13,7 +13,7 @@ class CreateFeatureModulesAndEnterpriseModules < ActiveRecord::Migration[8.0]
     end
 
     add_index :feature_modules, :key, unique: true
-    add_index :feature_modules, [:parent_id, :position]
+    add_index :feature_modules, [ :parent_id, :position ]
 
     create_table :enterprise_modules do |t|
       t.references :enterprise, null: false, foreign_key: true
@@ -22,6 +22,6 @@ class CreateFeatureModulesAndEnterpriseModules < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :enterprise_modules, [:enterprise_id, :feature_module_id], unique: true, name: "idx_enterprise_modules_uniq"
+    add_index :enterprise_modules, [ :enterprise_id, :feature_module_id ], unique: true, name: "idx_enterprise_modules_uniq"
   end
 end

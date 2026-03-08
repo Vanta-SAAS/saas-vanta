@@ -1,13 +1,6 @@
 <% content_for :page_title, "Configuración de Módulos" %>
 
-<div class="max-w-4xl mx-auto space-y-6">
-  <div>
-    <h2 class="text-lg font-semibold text-foreground">Configuración de Módulos</h2>
-    <p class="mt-1 text-sm text-muted-foreground">
-      Activa o desactiva los módulos y opciones disponibles para tu empresa.
-    </p>
-  </div>
-
+<div class="max-w-4xl mx-auto">
   <%= form_with url: enterprise_modules_configuration_path(@enterprise), method: :patch, class: "space-y-4" do |f| %>
 
     <% @root_modules.each do |root_mod| %>
@@ -47,15 +40,17 @@
                        <%= "checked" if @module_states[child.key] %>
                        <%= "disabled" if child.badge.present? %>
                        class="mt-0.5 h-4 w-4 rounded border-border text-primary focus:ring-primary disabled:opacity-50">
-                <div class="flex items-center gap-2">
-                  <label class="text-sm font-medium text-foreground"><%= child.name %></label>
-                  <% if child.badge.present? %>
-                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"><%= child.badge %></span>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <label class="text-sm font-medium text-foreground"><%= child.name %></label>
+                    <% if child.badge.present? %>
+                      <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"><%= child.badge %></span>
+                    <% end %>
+                  </div>
+                  <% if child.description.present? %>
+                    <p class="text-xs text-muted-foreground"><%= child.description %></p>
                   <% end %>
                 </div>
-                <% if child.description.present? %>
-                  <p class="text-xs text-muted-foreground"><%= child.description %></p>
-                <% end %>
               </div>
             <% end %>
           </div>

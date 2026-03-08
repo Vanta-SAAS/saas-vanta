@@ -20,6 +20,7 @@ class EnterprisesController < ApplicationController
     @enterprise = current_enterprise
     authorize @enterprise
     @enterprise.build_settings unless @enterprise.settings
+    @root_modules = FeatureModule.roots.ordered
   end
 
   def update
