@@ -227,8 +227,8 @@ module Sunat
       raise Error, extract_error_message(e)
     rescue Faraday::ConnectionFailed
       raise Error, "No se pudo conectar al servicio de facturacion. Verifique que este activo."
-    rescue Faraday::ServerError => e
-      raise Error, "Error interno del servicio de facturacion: #{extract_error_message(e)}"
+    rescue Faraday::ServerError
+      raise Error, "Error interno del servicio de facturación. El servidor no está disponible, intente nuevamente más tarde."
     rescue Faraday::Error => e
       raise Error, "Error al comunicarse con el servicio SUNAT: #{e.message}"
     end
@@ -247,7 +247,7 @@ module Sunat
           body["error"] || body["message"] || body.to_s
         end
       else
-        body.to_s
+        body.to_s.truncate(200)
       end
     end
   end
