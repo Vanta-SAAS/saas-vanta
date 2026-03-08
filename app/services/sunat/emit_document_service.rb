@@ -20,9 +20,11 @@ module Sunat
         client.create_receipt(@sale)
       end
 
+      sunat_status = @sunat_result["status"] || "CREATED"
+
       @sale.update!(
         sunat_uuid: @sunat_result["uuid"] || @sunat_result["id"],
-        sunat_status: @sunat_result["status"] || "CREATED",
+        sunat_status: sunat_status,
         sunat_document_type: factura? ? "01" : "03",
         sunat_series: @sunat_result["series"],
         sunat_number: @sunat_result["correlative"] || @sunat_result["number"],
@@ -33,6 +35,13 @@ module Sunat
         sunat_qr_image: @sunat_result["qr_image"],
         sunat_response_data: @sunat_result
       )
+
+      if sunat_status == "REJECTED"
+        description = @sunat_result["cdr_description"] || "Documento rechazado por SUNAT"
+        add_error("SUNAT rechazo el documento: #{description}")
+        set_as_invalid!
+        return
+      end
 
       save_next_document_info!
     rescue Sunat::ApiClient::Error => e

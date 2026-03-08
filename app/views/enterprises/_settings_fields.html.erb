@@ -62,33 +62,3 @@
   <% end %>
 </div>
 
-<div class="card">
-  <h3 class="text-sm font-semibold text-foreground">Configuracion</h3>
-  <p class="mt-1 text-sm text-muted-foreground">Opciones de funcionamiento de la empresa.</p>
-
-  <%= f.fields_for :settings do |sf| %>
-    <div class="mt-6 space-y-4">
-      <div class="flex items-start gap-3">
-        <%= sf.check_box :use_stock, class: "mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary" %>
-        <div>
-          <%= sf.label :use_stock, "Gestionar stock", class: "text-sm font-medium text-foreground" %>
-          <p class="text-sm text-muted-foreground">
-            Habilita el control de inventario. Se mostrara el stock en productos y se actualizara
-            automaticamente al confirmar ventas o recibir ordenes de compra.
-          </p>
-        </div>
-      </div>
-
-      <div class="flex items-start gap-3">
-        <%= sf.check_box :dropshipping_enabled, class: "mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary" %>
-        <div>
-          <%= sf.label :dropshipping_enabled, "Habilitar dropshipping", class: "text-sm font-medium text-foreground" %>
-          <p class="text-sm text-muted-foreground">
-            Permite generar ordenes de compra automaticamente desde las ventas, agrupadas por proveedor.
-            La mercaderia se envia directamente del proveedor al cliente.
-          </p>
-        </div>
-      </div>
-    </div>
-  <% end %>
-</div>

@@ -16,8 +16,8 @@ docker exec saas-vanta-app bash -c "COMMAND"
 # Rails console
 docker exec saas-vanta-app bash -c "bin/rails console"
 
-# Database
-docker exec saas-vanta-app bash -c "bin/rails db:migrate"
+# Database (use :with_data to include data migrations)
+docker exec saas-vanta-app bash -c "bin/rails db:migrate:with_data"
 docker exec saas-vanta-app bash -c "bin/rails db:seed"
 ```
 

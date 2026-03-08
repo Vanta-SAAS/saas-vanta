@@ -1,5 +1,6 @@
 class SunatController < ApplicationController
   before_action :require_enterprise_selected
+  before_action -> { require_module!(:facturacion) }
 
   def show
     authorize current_enterprise, :show?

@@ -1,6 +1,6 @@
-<% content_for :page_title, "Editar Empresa" %>
+<% content_for :page_title, "Mi Empresa" %>
 
-<div class="max-w-4xl mx-auto">
+<div class="max-w-5xl mx-auto">
 
   <%= form_with model: @enterprise, url: enterprise_path(@enterprise), method: :patch, class: "space-y-8", local: true do |f| %>
     <% if @enterprise.errors.any? %>
@@ -16,76 +16,116 @@
       </div>
     <% end %>
 
-    <div class="card">
-      <h3 class="text-sm font-semibold text-foreground">Datos de la Empresa</h3>
-      <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-        <% formalized = @enterprise.tax_id.present? %>
+      <%# === Columna izquierda: Datos === %>
+      <div class="space-y-6">
+        <div class="card">
+          <h3 class="text-sm font-semibold text-foreground">Datos de la Empresa</h3>
+          <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
 
-        <div class="sm:col-span-6">
-          <%= f.label :comercial_name, "Nombre Comercial", class: "form-label" %>
-          <%= f.text_field :comercial_name, class: "form-input" %>
-        </div>
+            <% formalized = @enterprise.tax_id.present? %>
 
-        <div class="sm:col-span-3">
-          <%= f.label :tax_id, "RUC", class: "form-label" %>
-          <%= f.text_field :tax_id, class: "form-input", disabled: formalized, placeholder: "20123456789" %>
-          <% if formalized %>
-            <p class="mt-1 text-xs text-muted-foreground">El RUC no puede modificarse una vez registrado</p>
-          <% else %>
-            <p class="mt-1 text-xs text-muted-foreground">11 digitos, empieza con 10 o 20</p>
-          <% end %>
-        </div>
-
-        <div class="sm:col-span-3">
-          <%= f.label :social_reason, "Razon Social", class: "form-label" %>
-          <%= f.text_field :social_reason, class: "form-input", disabled: formalized %>
-        </div>
-
-        <div class="sm:col-span-3">
-          <%= f.label :address, "Direccion", class: "form-label" %>
-          <%= f.text_field :address, class: "form-input", disabled: formalized %>
-        </div>
-
-        <div class="sm:col-span-3">
-          <%= render "shared/async_combobox",
-              name: "enterprise[ubigeo_id]",
-              src: ubigeos_path,
-              value: @enterprise.ubigeo_id,
-              display: @enterprise.ubigeo&.combobox_display,
-              label: "Ubigeo",
-              optional: true,
-              placeholder: "Buscar distrito...",
-              hint: "Requerido para facturacion electronica",
-              size: "full" %>
-        </div>
-
-        <div class="sm:col-span-3">
-          <%= f.label :email, "Email de la Empresa", class: "form-label" %>
-          <%= f.email_field :email, class: "form-input" %>
-        </div>
-
-        <div class="sm:col-span-3">
-          <%= f.label :phone_number, "Telefono", class: "form-label" %>
-          <%= f.text_field :phone_number, class: "form-input" %>
-        </div>
-
-        <div class="sm:col-span-6">
-          <%= f.label :logo, "Logo", class: "form-label" %>
-          <% if @enterprise.logo.attached? %>
-            <div class="mt-2 mb-4">
-              <%= image_tag @enterprise.logo, class: "h-20 w-20 object-contain rounded-lg border border-border" %>
+            <div class="sm:col-span-6">
+              <%= f.label :comercial_name, "Nombre Comercial", class: "form-label" %>
+              <%= f.text_field :comercial_name, class: "form-input" %>
             </div>
-          <% end %>
-          <div class="mt-1 flex items-center">
-            <%= f.file_field :logo, class: "block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 file:cursor-pointer" %>
+
+            <div class="sm:col-span-3">
+              <%= f.label :tax_id, "RUC", class: "form-label" %>
+              <%= f.text_field :tax_id, class: "form-input", disabled: formalized, placeholder: "20123456789" %>
+              <% if formalized %>
+                <p class="mt-1 text-xs text-muted-foreground">El RUC no puede modificarse una vez registrado</p>
+              <% else %>
+                <p class="mt-1 text-xs text-muted-foreground">11 digitos, empieza con 10 o 20</p>
+              <% end %>
+            </div>
+
+            <div class="sm:col-span-3">
+              <%= f.label :social_reason, "Razon Social", class: "form-label" %>
+              <%= f.text_field :social_reason, class: "form-input", disabled: formalized %>
+            </div>
+
+            <div class="sm:col-span-3">
+              <%= f.label :address, "Direccion", class: "form-label" %>
+              <%= f.text_field :address, class: "form-input", disabled: formalized %>
+            </div>
+
+            <div class="sm:col-span-3">
+              <%= render "shared/async_combobox",
+                  name: "enterprise[ubigeo_id]",
+                  src: ubigeos_path,
+                  value: @enterprise.ubigeo_id,
+                  display: @enterprise.ubigeo&.combobox_display,
+                  label: "Ubigeo",
+                  optional: true,
+                  placeholder: "Buscar distrito...",
+                  hint: "Requerido para facturacion electronica",
+                  size: "full" %>
+            </div>
+
+            <div class="sm:col-span-3">
+              <%= f.label :email, "Email de la Empresa", class: "form-label" %>
+              <%= f.email_field :email, class: "form-input" %>
+            </div>
+
+            <div class="sm:col-span-3">
+              <%= f.label :phone_number, "Telefono", class: "form-label" %>
+              <%= f.text_field :phone_number, class: "form-input" %>
+            </div>
+
+            <div class="sm:col-span-6">
+              <%= f.label :logo, "Logo", class: "form-label" %>
+              <% if @enterprise.logo.attached? %>
+                <div class="mt-2 mb-4">
+                  <%= image_tag @enterprise.logo, class: "h-20 w-20 object-contain rounded-lg border border-border" %>
+                </div>
+              <% end %>
+              <div class="mt-1 flex items-center">
+                <%= f.file_field :logo, class: "block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 file:cursor-pointer" %>
+              </div>
+            </div>
+
           </div>
         </div>
 
+        <%= render "enterprises/settings_fields", f: f %>
       </div>
-    </div>
 
-    <%= render "enterprises/settings_fields", f: f %>
+      <%# === Columna derecha: Configuración === %>
+      <div class="space-y-6">
+        <div class="card">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-semibold text-foreground">Módulos</h3>
+              <p class="mt-1 text-sm text-muted-foreground">Gestiona las funcionalidades activas de tu empresa.</p>
+            </div>
+            <%= link_to enterprise_modules_configuration_path(@enterprise), class: "btn-primary text-sm" do %>
+              Configurar módulos
+            <% end %>
+          </div>
+
+          <div class="mt-4 divide-y divide-border">
+            <% @root_modules.each do |root_mod| %>
+              <div class="flex items-center justify-between py-2.5">
+                <div class="flex items-center gap-3">
+                  <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10">
+                    <%= sidebar_icon(root_mod.icon || "box", class: "w-4 h-4 text-primary") %>
+                  </div>
+                  <span class="text-sm font-medium text-foreground"><%= root_mod.name %></span>
+                </div>
+                <% if @enterprise.module_enabled?(root_mod.key) %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">Activo</span>
+                <% else %>
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground">Inactivo</span>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+    </div>
 
     <div class="flex justify-end gap-3">
       <%= link_to "Cancelar", root_path, class: "btn-secondary" %>

@@ -1,10 +1,11 @@
 class ProductsController < ApplicationController
   before_action :require_enterprise_selected
+  before_action :validate_product_type_access, only: %i[index new]
   before_action :set_product, only: %i[show edit update destroy]
 
   def index
     authorize Product
-    @product_type = params[:product_type].presence || "good"
+    @product_type = resolve_default_product_type
     products = current_enterprise.products
                                  .where(product_type: @product_type)
                                  .includes(:provider)
@@ -91,6 +92,29 @@ class ProductsController < ApplicationController
     return if current_enterprise.present?
 
     redirect_to enterprises_path, alert: "Debes seleccionar una empresa primero."
+  end
+
+  def allowed_product_types
+    types = []
+    types << "good" if current_enterprise.sells_products?
+    types << "service" if current_enterprise.sells_services?
+    types
+  end
+
+  def validate_product_type_access
+    requested = params[:product_type].presence
+    return if requested.nil?
+
+    unless allowed_product_types.include?(requested)
+      redirect_to root_path, alert: "Este tipo de producto no está habilitado para tu empresa."
+    end
+  end
+
+  def resolve_default_product_type
+    requested = params[:product_type].presence
+    return requested if requested && allowed_product_types.include?(requested)
+
+    allowed_product_types.first || "good"
   end
 
   def set_product

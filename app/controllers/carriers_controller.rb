@@ -1,5 +1,6 @@
 class CarriersController < ApplicationController
   before_action :require_enterprise_selected
+  before_action -> { require_module!("despacho.transportistas") }
   before_action :set_carrier, only: %i[edit update destroy]
 
   def index

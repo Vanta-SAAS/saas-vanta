@@ -14,6 +14,7 @@ class Enterprise < ApplicationRecord
   has_many :vehicles, dependent: :destroy
   has_many :carriers, dependent: :destroy
   has_many :dispatch_guides, dependent: :destroy
+  has_many :enterprise_modules, dependent: :destroy
   belongs_to :ubigeo, optional: true
   has_one :settings, class_name: "EnterpriseSetting", dependent: :destroy
   accepts_nested_attributes_for :settings, update_only: true
@@ -21,6 +22,7 @@ class Enterprise < ApplicationRecord
   # Callbacks
   before_validation :generate_subdomain, on: :create
   before_validation :set_enterprise_type
+  after_create :initialize_default_modules
 
   # Validations
   validates :comercial_name, :enterprise_type, presence: true
@@ -39,11 +41,48 @@ class Enterprise < ApplicationRecord
       formal: "formal"
   }
 
+  def module_enabled?(key)
+    parent_key = key.to_s.split(".").first
+
+    # If checking a child option, the parent must also be enabled
+    if parent_key != key.to_s
+      return false unless module_states[parent_key]
+    end
+
+    module_states.fetch(key.to_s, false)
+  end
+
   def use_stock?
-    settings&.use_stock != false
+    module_enabled?("ventas.stock_kardex")
+  end
+
+  def sells_products?
+    module_enabled?("ventas.productos_tangibles")
+  end
+
+  def sells_services?
+    module_enabled?("ventas.servicios")
+  end
+
+  def reload(*)
+    @module_states = nil
+    super
   end
 
   private
+
+  def module_states
+    @module_states ||= enterprise_modules
+      .joins(:feature_module)
+      .pluck("feature_modules.key", "enterprise_modules.enabled")
+      .to_h
+  end
+
+  def initialize_default_modules
+    FeatureModule.find_each do |fm|
+      enterprise_modules.create!(feature_module: fm, enabled: fm.default_enabled)
+    end
+  end
 
   def set_enterprise_type
     self.enterprise_type = tax_id.present? ? :formal : :informal

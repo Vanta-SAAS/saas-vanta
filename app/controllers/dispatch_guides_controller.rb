@@ -2,6 +2,7 @@ class DispatchGuidesController < ApplicationController
   include PdfExportable
 
   before_action :require_enterprise_selected
+  before_action -> { require_module!(:despacho) }
   before_action :set_dispatch_guide, only: %i[show edit update destroy cancel emit_document check_sunat_status retry_document pdf sunat_xml]
 
   def index

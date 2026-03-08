@@ -5,6 +5,8 @@ module Sunat
     class Error < StandardError; end
     class AuthenticationError < Error; end
     class ValidationError < Error; end
+    class NotFoundError < Error; end
+    class ConflictError < Error; end
 
     def initialize(api_key: nil)
       @api_key = api_key
@@ -209,15 +211,39 @@ module Sunat
       response = yield
       response.body
     rescue Faraday::UnauthorizedError, Faraday::ForbiddenError => e
-      raise AuthenticationError, "Error de autenticacion con el servicio SUNAT: #{e.message}"
+      raise AuthenticationError, "Error de autenticacion con el servicio SUNAT: #{extract_error_message(e)}"
     rescue Faraday::UnprocessableEntityError => e
-      body = e.response&.dig(:body)
-      message = body.is_a?(Hash) ? (body["error"] || body["message"] || body.to_s) : body.to_s
-      raise ValidationError, message
+      raise ValidationError, extract_error_message(e)
+    rescue Faraday::ResourceNotFound => e
+      raise NotFoundError, extract_error_message(e)
+    rescue Faraday::ConflictError => e
+      raise ConflictError, extract_error_message(e)
+    rescue Faraday::BadRequestError => e
+      raise Error, extract_error_message(e)
     rescue Faraday::ConnectionFailed
       raise Error, "No se pudo conectar al servicio de facturacion. Verifique que este activo."
+    rescue Faraday::ServerError => e
+      raise Error, "Error interno del servicio de facturacion: #{extract_error_message(e)}"
     rescue Faraday::Error => e
       raise Error, "Error al comunicarse con el servicio SUNAT: #{e.message}"
+    end
+
+    def extract_error_message(error)
+      body = error.response&.dig(:body)
+      return error.message unless body
+
+      if body.is_a?(Hash)
+        detail = body["detail"]
+        if detail.is_a?(Array)
+          detail.map { |d| d["msg"] }.compact.join(". ")
+        elsif detail.is_a?(String)
+          detail
+        else
+          body["error"] || body["message"] || body.to_s
+        end
+      else
+        body.to_s
+      end
     end
   end
 end

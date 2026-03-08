@@ -1,5 +1,6 @@
 class VehiclesController < ApplicationController
   before_action :require_enterprise_selected
+  before_action -> { require_module!("despacho.vehiculos") }
   before_action :set_vehicle, only: %i[edit update destroy]
 
   def index
