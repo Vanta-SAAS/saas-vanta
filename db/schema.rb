@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_05_172649) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_08_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -131,6 +131,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_05_172649) do
     t.index ["ubigeo_id"], name: "index_customers_on_ubigeo_id"
   end
 
+  create_table "data_migrations", primary_key: "version", id: :string, force: :cascade do |t|
+  end
+
   create_table "dispatch_guide_items", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "description", null: false
@@ -198,6 +201,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_05_172649) do
     t.index ["vehicle_id"], name: "index_dispatch_guides_on_vehicle_id"
   end
 
+  create_table "enterprise_modules", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.boolean "enabled", default: true, null: false
+    t.bigint "enterprise_id", null: false
+    t.bigint "feature_module_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["enterprise_id", "feature_module_id"], name: "idx_enterprise_modules_uniq", unique: true
+    t.index ["enterprise_id"], name: "index_enterprise_modules_on_enterprise_id"
+    t.index ["feature_module_id"], name: "index_enterprise_modules_on_feature_module_id"
+  end
+
   create_table "enterprise_settings", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.boolean "dropshipping_enabled", default: false, null: false
@@ -243,6 +257,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_05_172649) do
     t.index ["subdomain"], name: "index_enterprises_on_subdomain", unique: true
     t.index ["tax_id"], name: "idx_enterprises_on_tax_id_unq_not_null", unique: true, where: "(tax_id IS NOT NULL)"
     t.index ["ubigeo_id"], name: "index_enterprises_on_ubigeo_id"
+  end
+
+  create_table "feature_modules", force: :cascade do |t|
+    t.string "badge"
+    t.datetime "created_at", null: false
+    t.boolean "default_enabled", default: false, null: false
+    t.string "description"
+    t.string "icon"
+    t.string "key", null: false
+    t.string "kind", default: "module", null: false
+    t.string "name", null: false
+    t.bigint "parent_id"
+    t.integer "position", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.index ["key"], name: "index_feature_modules_on_key", unique: true
+    t.index ["parent_id", "position"], name: "index_feature_modules_on_parent_id_and_position"
+    t.index ["parent_id"], name: "index_feature_modules_on_parent_id"
   end
 
   create_table "products", force: :cascade do |t|
@@ -496,8 +527,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_05_172649) do
   add_foreign_key "dispatch_guides", "users", column: "created_by_id"
   add_foreign_key "dispatch_guides", "users", column: "driver_id"
   add_foreign_key "dispatch_guides", "vehicles"
+  add_foreign_key "enterprise_modules", "enterprises"
+  add_foreign_key "enterprise_modules", "feature_modules"
   add_foreign_key "enterprise_settings", "enterprises"
   add_foreign_key "enterprises", "ubigeos"
+  add_foreign_key "feature_modules", "feature_modules", column: "parent_id"
   add_foreign_key "products", "enterprises"
   add_foreign_key "products", "providers"
   add_foreign_key "providers", "enterprises"

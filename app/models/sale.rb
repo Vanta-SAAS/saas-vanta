@@ -35,7 +35,7 @@ class Sale < ApplicationRecord
   end
 
   def can_generate_purchase_orders?
-    confirmed? && purchase_orders.empty? && enterprise.settings&.dropshipping_enabled?
+    confirmed? && purchase_orders.empty? && enterprise.module_enabled?("compras.dropshipping")
   end
 
   def can_emit_document?

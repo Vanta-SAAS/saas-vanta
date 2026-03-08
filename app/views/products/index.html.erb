@@ -21,19 +21,23 @@
     </div>
   </div>
 
-  <%# Tabs %>
-  <div class="border-b border-border mb-6">
-    <nav class="-mb-px flex space-x-8">
-      <%= link_to products_path(product_type: "good"),
-                  class: "tab-link #{@product_type == 'good' ? 'tab-link-active' : ''}" do %>
-        Productos
-      <% end %>
-      <%= link_to products_path(product_type: "service"),
-                  class: "tab-link #{@product_type == 'service' ? 'tab-link-active' : ''}" do %>
-        Servicios
-      <% end %>
-    </nav>
-  </div>
+  <%# Tabs - solo mostrar si hay más de un tipo habilitado %>
+  <% has_products = current_enterprise.sells_products? %>
+  <% has_services = current_enterprise.sells_services? %>
+  <% if has_products && has_services %>
+    <div class="border-b border-border mb-6">
+      <nav class="-mb-px flex space-x-8">
+        <%= link_to products_path(product_type: "good"),
+                    class: "tab-link #{@product_type == 'good' ? 'tab-link-active' : ''}" do %>
+          Productos
+        <% end %>
+        <%= link_to products_path(product_type: "service"),
+                    class: "tab-link #{@product_type == 'service' ? 'tab-link-active' : ''}" do %>
+          Servicios
+        <% end %>
+      </nav>
+    </div>
+  <% end %>
 
   <% if @products.any? %>
     <div class="card overflow-hidden p-0">

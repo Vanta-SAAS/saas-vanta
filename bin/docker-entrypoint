@@ -12,8 +12,8 @@ if [ "${1}" == "./bin/rails" ] && [ "${2}" == "server" ]; then
   # Remove any existing server.pid file to prevent "server already running" errors
   rm -f tmp/pids/server.pid
   
-  # Prepare all databases (primary + cache/queue/cable)
-  ./bin/rails db:prepare
+  # Prepare all databases (primary + data + cache/queue/cable)
+  ./bin/rails db:prepare:with_data
   ./bin/rails db:seed
 
   # Build Tailwind CSS

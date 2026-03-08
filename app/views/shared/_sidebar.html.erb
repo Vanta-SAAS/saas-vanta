@@ -32,31 +32,58 @@
       <%= sidebar_link_to "Dashboard", root_path, icon: "layout-dashboard" %>
 
       <% if current_enterprise.present? %>
-        <div class="sidebar-nav-section mt-4">
-          <span class="sidebar-nav-section-label" data-sidebar-target="collapsible">Comercial</span>
-        </div>
-        <%= sidebar_link_to "Cotizaciones", customer_quotes_path, icon: "file-text" %>
-        <%= sidebar_nav_group("Ventas", icon: "shopping-cart", key: "ventas") do %>
-          <%= sidebar_link_to "Todas", sales_path, icon: "clipboard-list", sub: true %>
-          <% if current_enterprise.formal? %>
-            <%= sidebar_link_to "Facturas", sales_path(doc_type: "factura"), icon: "receipt", sub: true %>
-            <%= sidebar_link_to "Boletas", sales_path(doc_type: "boleta"), icon: "receipt", sub: true %>
+        <%# === Comercial === %>
+        <% if current_enterprise.module_enabled?(:ventas) %>
+          <div class="sidebar-nav-section mt-4">
+            <span class="sidebar-nav-section-label" data-sidebar-target="collapsible">Comercial</span>
+          </div>
+          <% if current_enterprise.module_enabled?("ventas.cotizaciones") %>
+            <%= sidebar_link_to "Cotizaciones", customer_quotes_path, icon: "file-text" %>
+          <% end %>
+          <%
+            has_facturas = current_enterprise.module_enabled?("facturacion.facturas")
+            has_boletas = current_enterprise.module_enabled?("facturacion.boletas")
+            has_subitems = has_facturas || has_boletas
+          %>
+          <% if has_subitems %>
+            <%= sidebar_nav_group("Ventas", icon: "shopping-cart", key: "ventas") do %>
+              <%= sidebar_link_to "Todas", sales_path, icon: "clipboard-list", sub: true %>
+              <% if has_facturas %>
+                <%= sidebar_link_to "Facturas", sales_path(doc_type: "factura"), icon: "receipt", sub: true %>
+              <% end %>
+              <% if has_boletas %>
+                <%= sidebar_link_to "Boletas", sales_path(doc_type: "boleta"), icon: "receipt", sub: true %>
+              <% end %>
+            <% end %>
+          <% else %>
+            <%= sidebar_link_to "Ventas", sales_path, icon: "shopping-cart" %>
           <% end %>
         <% end %>
 
-        <div class="sidebar-nav-section mt-4">
-          <span class="sidebar-nav-section-label" data-sidebar-target="collapsible">Compras</span>
-        </div>
-        <%= sidebar_link_to "Ordenes de compra", purchase_orders_path, icon: "package" %>
-        <%= sidebar_link_to "Proveedores", providers_path, icon: "truck" %>
+        <%# === Compras === %>
+        <% if current_enterprise.module_enabled?(:compras) %>
+          <div class="sidebar-nav-section mt-4">
+            <span class="sidebar-nav-section-label" data-sidebar-target="collapsible">Compras</span>
+          </div>
+          <%= sidebar_link_to "Ordenes de compra", purchase_orders_path, icon: "package" %>
+          <%= sidebar_link_to "Proveedores", providers_path, icon: "truck" %>
+        <% end %>
 
-        <div class="sidebar-nav-section mt-4">
-          <span class="sidebar-nav-section-label" data-sidebar-target="collapsible">Despacho</span>
-        </div>
-        <%= sidebar_link_to "Guias de remision", dispatch_guides_path, icon: "map" %>
-        <%= sidebar_link_to "Vehiculos", vehicles_path, icon: "car" %>
-        <%= sidebar_link_to "Transportistas", carriers_path, icon: "contact" %>
+        <%# === Despacho === %>
+        <% if current_enterprise.module_enabled?(:despacho) %>
+          <div class="sidebar-nav-section mt-4">
+            <span class="sidebar-nav-section-label" data-sidebar-target="collapsible">Despacho</span>
+          </div>
+          <%= sidebar_link_to "Guias de remision", dispatch_guides_path, icon: "map" %>
+          <% if current_enterprise.module_enabled?("despacho.vehiculos") %>
+            <%= sidebar_link_to "Vehiculos", vehicles_path, icon: "car" %>
+          <% end %>
+          <% if current_enterprise.module_enabled?("despacho.transportistas") %>
+            <%= sidebar_link_to "Transportistas", carriers_path, icon: "contact" %>
+          <% end %>
+        <% end %>
 
+        <%# === Catálogo === %>
         <div class="sidebar-nav-section mt-4">
           <span class="sidebar-nav-section-label" data-sidebar-target="collapsible">Catalogo</span>
         </div>
@@ -89,7 +116,7 @@
       <%= sidebar_link_to "Mi Empresa", edit_enterprise_path(current_enterprise), icon: "building-2" %>
     <% end %>
 
-    <% if current_enterprise.present? && current_enterprise.formal? && policy(current_enterprise).sunat? %>
+    <% if current_enterprise.present? && current_enterprise.module_enabled?(:facturacion) && policy(current_enterprise).sunat? %>
       <%= sidebar_link_to "Config. SUNAT", sunat_path, icon: "settings" %>
     <% end %>
 

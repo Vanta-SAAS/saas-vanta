@@ -2,6 +2,7 @@ class CustomerQuotesController < ApplicationController
   include PdfExportable
 
   before_action :require_enterprise_selected
+  before_action -> { require_module!("ventas.cotizaciones") }
   before_action :set_customer_quote, only: %i[show edit update destroy accept reject expire pdf]
 
   def index

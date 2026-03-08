@@ -1,0 +1,71 @@
+<% content_for :page_title, "Configuración de Módulos" %>
+
+<div class="max-w-4xl mx-auto space-y-6">
+  <div>
+    <h2 class="text-lg font-semibold text-foreground">Configuración de Módulos</h2>
+    <p class="mt-1 text-sm text-muted-foreground">
+      Activa o desactiva los módulos y opciones disponibles para tu empresa.
+    </p>
+  </div>
+
+  <%= form_with url: enterprise_modules_configuration_path(@enterprise), method: :patch, class: "space-y-4" do |f| %>
+
+    <% @root_modules.each do |root_mod| %>
+      <div class="card" data-controller="module-toggle" data-module-toggle-key-value="<%= root_mod.key %>">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="flex items-center justify-center w-9 h-9 rounded-lg bg-primary/10">
+              <%= sidebar_icon(root_mod.icon || "box", class: "w-5 h-5 text-primary") %>
+            </div>
+            <div>
+              <h3 class="text-sm font-semibold text-foreground"><%= root_mod.name %></h3>
+              <p class="text-xs text-muted-foreground"><%= root_mod.description %></p>
+            </div>
+          </div>
+
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="hidden" name="modules[<%= root_mod.key %>]" value="0">
+            <input type="checkbox"
+                   name="modules[<%= root_mod.key %>]"
+                   value="1"
+                   <%= "checked" if @module_states[root_mod.key] %>
+                   class="sr-only peer"
+                   data-module-toggle-target="toggle"
+                   data-action="change->module-toggle#toggle">
+            <div class="w-9 h-5 bg-muted rounded-full peer peer-checked:bg-primary transition-colors after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-full"></div>
+          </label>
+        </div>
+
+        <% if root_mod.children.any? %>
+          <div class="mt-4 pt-4 border-t border-border space-y-3" data-module-toggle-target="children">
+            <% root_mod.children.order(:position).each do |child| %>
+              <div class="flex items-start gap-3 pl-12">
+                <input type="hidden" name="modules[<%= child.key %>]" value="0">
+                <input type="checkbox"
+                       name="modules[<%= child.key %>]"
+                       value="1"
+                       <%= "checked" if @module_states[child.key] %>
+                       <%= "disabled" if child.badge.present? %>
+                       class="mt-0.5 h-4 w-4 rounded border-border text-primary focus:ring-primary disabled:opacity-50">
+                <div class="flex items-center gap-2">
+                  <label class="text-sm font-medium text-foreground"><%= child.name %></label>
+                  <% if child.badge.present? %>
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"><%= child.badge %></span>
+                  <% end %>
+                </div>
+                <% if child.description.present? %>
+                  <p class="text-xs text-muted-foreground"><%= child.description %></p>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div class="flex justify-end gap-3">
+      <%= link_to "Volver", edit_enterprise_path(@enterprise), class: "btn-secondary" %>
+      <%= f.submit "Guardar Cambios", class: "btn-primary cursor-pointer" %>
+    </div>
+  <% end %>
+</div>

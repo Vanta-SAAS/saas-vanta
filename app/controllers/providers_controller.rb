@@ -1,5 +1,6 @@
 class ProvidersController < ApplicationController
   before_action :require_enterprise_selected
+  before_action -> { require_module!(:compras) }
   before_action :set_provider, only: %i[show edit update destroy]
 
   def index

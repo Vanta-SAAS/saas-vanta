@@ -2,6 +2,7 @@ class PurchaseOrdersController < ApplicationController
   include PdfExportable
 
   before_action :require_enterprise_selected
+  before_action -> { require_module!(:compras) }
   before_action :set_purchase_order, only: %i[show edit update destroy confirm receive cancel pdf]
 
   def index

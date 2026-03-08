@@ -17,6 +17,7 @@ Rails.application.routes.draw do
     member do
       post :select
     end
+    resource :modules_configuration, only: [ :show, :update ], controller: "enterprise_modules"
   end
 
   resources :products do
