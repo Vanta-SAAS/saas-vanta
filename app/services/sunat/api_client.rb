@@ -127,8 +127,8 @@ module Sunat
           f.request :multipart
           f.request :url_encoded
         end
-        f.response :json, content_type: /\bjson$/
         f.response :raise_error
+        f.response :json, content_type: /\bjson$/
         f.adapter Faraday.default_adapter
 
         if authenticated && @api_key.present?
@@ -227,8 +227,8 @@ module Sunat
       raise Error, extract_error_message(e)
     rescue Faraday::ConnectionFailed
       raise Error, "No se pudo conectar al servicio de facturacion. Verifique que este activo."
-    rescue Faraday::ServerError
-      raise Error, "Error interno del servicio de facturación. El servidor no está disponible, intente nuevamente más tarde."
+    rescue Faraday::ServerError => e
+      raise Error, "Error en SUNAT: #{extract_error_message(e)}"
     rescue Faraday::Error => e
       raise Error, "Error al comunicarse con el servicio SUNAT: #{e.message}"
     end
@@ -247,7 +247,12 @@ module Sunat
           body["error"] || body["message"] || body.to_s
         end
       else
-        body.to_s.truncate(200)
+        text = body.to_s
+        if text.include?("<!DOCTYPE") || text.include?("<html")
+          "El servicio de SUNAT no está disponible, intente nuevamente más tarde."
+        else
+          text.truncate(200)
+        end
       end
     end
   end
