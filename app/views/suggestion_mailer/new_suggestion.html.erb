@@ -1,0 +1,35 @@
+<h2>Nueva sugerencia recibida</h2>
+
+<table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+  <tr>
+    <td style="padding: 8px 12px; font-weight: bold; color: #6b7280; width: 140px;">Usuario</td>
+    <td style="padding: 8px 12px;"><%= @user.full_name %> (<%= @user.email_address %>)</td>
+  </tr>
+  <tr>
+    <td style="padding: 8px 12px; font-weight: bold; color: #6b7280;">Empresa</td>
+    <td style="padding: 8px 12px;"><%= @enterprise.comercial_name %> — RUC: <%= @enterprise.tax_id %></td>
+  </tr>
+  <tr>
+    <td style="padding: 8px 12px; font-weight: bold; color: #6b7280;">Fecha</td>
+    <td style="padding: 8px 12px;"><%= l(@suggestion.created_at, format: :long) %></td>
+  </tr>
+</table>
+
+<h3>Sugerencia</h3>
+
+<div style="padding: 16px; background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; white-space: pre-wrap; font-size: 14px; line-height: 1.6;">
+<%= @suggestion.body %>
+</div>
+
+<% if @suggestion.wants_contact? %>
+  <h3>Datos de contacto</h3>
+  <p>El usuario desea ser contactado para conversar mas sobre esta sugerencia.</p>
+  <ul>
+    <% if @suggestion.contact_email.present? %>
+      <li><strong>Email:</strong> <%= @suggestion.contact_email %></li>
+    <% end %>
+    <% if @suggestion.contact_phone.present? %>
+      <li><strong>Telefono:</strong> <%= @suggestion.contact_phone %></li>
+    <% end %>
+  </ul>
+<% end %>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_08_000002) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_08_222744) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -429,6 +429,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_08_000002) do
     t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
+  create_table "suggestions", force: :cascade do |t|
+    t.text "body", null: false
+    t.string "contact_email"
+    t.string "contact_phone"
+    t.datetime "created_at", null: false
+    t.bigint "enterprise_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.boolean "wants_contact", default: false
+    t.index ["enterprise_id"], name: "index_suggestions_on_enterprise_id"
+    t.index ["user_id"], name: "index_suggestions_on_user_id"
+  end
+
   create_table "ubigeos", force: :cascade do |t|
     t.string "code", limit: 6, null: false
     t.datetime "created_at", null: false
@@ -551,6 +564,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_08_000002) do
   add_foreign_key "sales", "users", column: "seller_id"
   add_foreign_key "sessions", "enterprises"
   add_foreign_key "sessions", "users"
+  add_foreign_key "suggestions", "enterprises"
+  add_foreign_key "suggestions", "users"
   add_foreign_key "ubigeos", "ubigeos", column: "parent_id"
   add_foreign_key "user_enterprise_roles", "roles"
   add_foreign_key "user_enterprise_roles", "user_enterprises"
