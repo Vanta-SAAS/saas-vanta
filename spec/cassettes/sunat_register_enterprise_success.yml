@@ -1,0 +1,37 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://stage.billing.vanta.lat/api/v1/clients
+    body:
+      encoding: UTF-8
+      string: '{"ruc":"20533639298","razon_social":"Gil y Pulido","nombre_comercial":"Palacios
+        y Carranza","direccion":"Puerta 622 Conjunto Sergio 7, Viladecans, Rio 70349","ubigeo":"150101","sol_user":"MODDATOS","sol_password":"MODDATOS"}'
+    headers:
+      User-Agent:
+      - Faraday v2.14.1
+      Content-Type:
+      - application/json
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Date:
+      - Mon, 09 Mar 2026 01:11:09 GMT
+      Server:
+      - uvicorn
+      Content-Length:
+      - '248'
+      Content-Type:
+      - application/json
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        eyJjbGllbnRfaWQiOiIxMDczOGFkNC03OTkyLTQ1ZjAtYTAxMi01OGNkZjIyYzc0NjMiLCJhcGlfa2V5Ijoic2tfbGl2ZV96THlHRE13RG1qUEV4d3lSeHg1YUxvS1B4YjBaUDIxcHQ0ZnVDa2FyUmFRUy1Ld2tOX2RCdmdyRWM5WG0wcDgxIiwicnVjIjoiMjA1MzM2MzkyOTgiLCJyYXpvbl9zb2NpYWwiOiJHaWwgeSBQdWxpZG8iLCJtZXNzYWdlIjoiU2F2ZSB0aGUgYXBpX2tleSDigJQgaXQgd2lsbCBub3QgYmUgc2hvd24gYWdhaW4uIn0=
+  recorded_at: Mon, 09 Mar 2026 01:11:10 GMT
+recorded_with: VCR 6.4.0

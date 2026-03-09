@@ -127,8 +127,8 @@ module Sunat
           f.request :multipart
           f.request :url_encoded
         end
-        f.response :raise_error
         f.response :json, content_type: /\bjson$/
+        f.response :raise_error
         f.adapter Faraday.default_adapter
 
         if authenticated && @api_key.present?
