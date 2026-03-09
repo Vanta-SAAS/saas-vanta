@@ -69,6 +69,7 @@ Rails.application.routes.draw do
     post :upload_certificate
     patch :update_settings
     patch :update_sol_credentials
+    patch :update_sunat_rest_credentials
   end
 
   resources :vehicles, except: [ :show ]

@@ -65,6 +65,8 @@ class DispatchGuidesController < ApplicationController
     if service.valid?
       doc_type = @dispatch_guide.grr? ? "Guia Remitente" : "Guia Transportista"
       redirect_to @dispatch_guide, notice: "#{doc_type} emitida exitosamente ante SUNAT."
+    elsif @dispatch_guide.sunat_uuid.present?
+      redirect_to @dispatch_guide, alert: "Error SUNAT: #{service.errors_message}. Puede reintentar la emision."
     else
       @dispatch_guide.destroy
       @dispatch_guide = current_enterprise.dispatch_guides.build(dispatch_guide_params)

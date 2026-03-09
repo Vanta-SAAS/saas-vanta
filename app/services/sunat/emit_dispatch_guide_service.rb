@@ -14,20 +14,15 @@ module Sunat
       settings = @guide.enterprise.settings
       client = ApiClient.new(api_key: settings.sunat_api_key)
 
-      @sunat_result = if @guide.grr?
+      @sunat_result = if retry_emission?
+        client.retry_dispatch_guide(@guide.sunat_uuid)
+      elsif @guide.grr?
         client.create_dispatch_guide_remitente(@guide)
       else
         client.create_dispatch_guide_transportista(@guide)
       end
 
       sunat_status = @sunat_result["status"] || "CREATED"
-
-      if sunat_status == "REJECTED"
-        description = @sunat_result["cdr_description"] || "Documento rechazado por SUNAT"
-        add_error("SUNAT rechazo el documento: #{description}")
-        set_as_invalid!
-        return
-      end
 
       @guide.update!(
         sunat_uuid: @sunat_result["uuid"] || @sunat_result["id"],
@@ -41,10 +36,21 @@ module Sunat
         sunat_hash: @sunat_result["hash"],
         sunat_qr_image: @sunat_result["qr_image"],
         sunat_response_data: @sunat_result,
-        status: :emitted
+        status: sunat_status == "REJECTED" ? :draft : :emitted
       )
 
+      if sunat_status == "REJECTED"
+        description = @sunat_result["cdr_description"] || "Documento rechazado por SUNAT"
+        add_error("SUNAT rechazo el documento: #{description}")
+        set_as_invalid!
+        return
+      end
+
       save_next_document_info!
+    rescue Sunat::ApiClient::ServerErrorWithDocument => e
+      save_document_from_error(e.document_data)
+      add_error(e.message)
+      set_as_invalid!
     rescue Sunat::ApiClient::Error => e
       add_error(e.message)
       set_as_invalid!
@@ -55,6 +61,10 @@ module Sunat
 
     private
 
+    def retry_emission?
+      @guide.sunat_uuid.present? && @guide.sunat_status.in?(%w[ERROR REJECTED])
+    end
+
     def validate_prerequisites!
       unless @guide.draft?
         add_error("La guia debe estar en borrador para emitir")
@@ -62,7 +72,7 @@ module Sunat
         return
       end
 
-      if @guide.sunat_uuid.present?
+      if @guide.sunat_uuid.present? && !retry_emission?
         add_error("Esta guia ya tiene un documento emitido")
         set_as_invalid!
         return
@@ -85,6 +95,18 @@ module Sunat
         add_error("La guia debe tener al menos un item")
         set_as_invalid!
       end
+    end
+
+    def save_document_from_error(document_data)
+      @guide.update!(
+        sunat_uuid: document_data["uuid"] || document_data["id"],
+        sunat_status: document_data["status"] || "ERROR",
+        sunat_document_type: @guide.grr? ? "09" : "31",
+        sunat_series: document_data["series"],
+        sunat_number: document_data["correlative"] || document_data["number"]
+      )
+    rescue ActiveRecord::RecordInvalid
+      # No perder el error original si falla el guardado
     end
 
     def save_next_document_info!
