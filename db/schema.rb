@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_08_222744) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_09_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -220,6 +220,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_08_222744) do
     t.string "secondary_color"
     t.string "sunat_api_key"
     t.boolean "sunat_certificate_uploaded", default: false, null: false
+    t.string "sunat_client_id"
+    t.string "sunat_client_secret"
     t.integer "sunat_next_boleta_number"
     t.string "sunat_next_boleta_series"
     t.integer "sunat_next_factura_number"

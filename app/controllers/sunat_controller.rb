@@ -94,6 +94,30 @@ class SunatController < ApplicationController
     redirect_to sunat_path, alert: e.message
   end
 
+  def update_sunat_rest_credentials
+    authorize current_enterprise, :manage?
+    settings = current_enterprise.settings
+
+    unless settings&.sunat_api_key.present?
+      redirect_to sunat_path, alert: "Debe registrar la empresa primero."
+      return
+    end
+
+    client = Sunat::ApiClient.new(api_key: settings.sunat_api_key)
+    client.update_client(
+      sunat_client_id: params[:sunat_client_id],
+      sunat_client_secret: params[:sunat_client_secret]
+    )
+
+    settings.update!(
+      sunat_client_id: params[:sunat_client_id],
+      sunat_client_secret: params[:sunat_client_secret]
+    )
+    redirect_to sunat_path, notice: "Credenciales API REST de SUNAT actualizadas."
+  rescue Sunat::ApiClient::Error => e
+    redirect_to sunat_path, alert: e.message
+  end
+
   private
 
   def require_enterprise_selected

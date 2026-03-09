@@ -8,6 +8,17 @@ module Sunat
     class NotFoundError < Error; end
     class ConflictError < Error; end
 
+    # Error que incluye datos del documento creado por el microservicio
+    # Se usa cuando SUNAT falla (502) pero el documento ya fue persistido con correlativo
+    class ServerErrorWithDocument < Error
+      attr_reader :document_data
+
+      def initialize(message, document_data)
+        super(message)
+        @document_data = document_data
+      end
+    end
+
     def initialize(api_key: nil)
       @api_key = api_key
     end
@@ -228,6 +239,13 @@ module Sunat
     rescue Faraday::ConnectionFailed
       raise Error, "No se pudo conectar al servicio de facturacion. Verifique que este activo."
     rescue Faraday::ServerError => e
+      body = e.response&.dig(:body)
+      if body.is_a?(Hash) && (body["uuid"] || body["id"]).present?
+        raise ServerErrorWithDocument.new(
+          "Error en SUNAT: #{extract_error_message(e)}",
+          body
+        )
+      end
       raise Error, "Error en SUNAT: #{extract_error_message(e)}"
     rescue Faraday::Error => e
       raise Error, "Error al comunicarse con el servicio SUNAT: #{e.message}"

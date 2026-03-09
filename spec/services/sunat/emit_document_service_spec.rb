@@ -111,6 +111,38 @@ RSpec.describe Sunat::EmitDocumentService, type: :service do
       end
     end
 
+    context "when microservice returns 502 with document data" do
+      before do
+        settings.update!(sunat_api_key: "some_key", sunat_certificate_uploaded: true)
+      end
+
+      it "saves the document UUID for future retry" do
+        sale = create_confirmed_sale(customer_ruc)
+        service = described_class.new(sale: sale)
+
+        document_data = {
+          "uuid" => "doc-uuid-from-502",
+          "status" => "ERROR",
+          "series" => "F001",
+          "correlative" => 7
+        }
+
+        client = instance_double(Sunat::ApiClient)
+        allow(Sunat::ApiClient).to receive(:new).and_return(client)
+        allow(client).to receive(:create_invoice).and_raise(
+          Sunat::ApiClient::ServerErrorWithDocument.new("Error en SUNAT: SOAP Fault", document_data)
+        )
+
+        service.call
+
+        expect(service).not_to be_valid
+        expect(sale.reload.sunat_uuid).to eq("doc-uuid-from-502")
+        expect(sale.sunat_status).to eq("ERROR")
+        expect(sale.sunat_series).to eq("F001")
+        expect(sale.sunat_number).to eq(7)
+      end
+    end
+
     context "when billing service is unavailable" do
       before do
         settings.update!(sunat_api_key: "some_key", sunat_certificate_uploaded: true)
@@ -144,14 +176,72 @@ RSpec.describe Sunat::EmitDocumentService, type: :service do
       expect(service.errors_message).to include("debe estar confirmada")
     end
 
-    it "fails when sale already has an emitted document" do
+    it "fails when sale already has a successfully emitted document" do
       sale = create_confirmed_sale(customer_ruc)
-      sale.update!(sunat_uuid: "existing-uuid")
+      sale.update!(sunat_uuid: "existing-uuid", sunat_status: "ACCEPTED")
       service = described_class.new(sale: sale)
       service.call
 
       expect(service).not_to be_valid
       expect(service.errors_message).to include("ya tiene un comprobante emitido")
+    end
+
+    it "allows retry when sale has a rejected document" do
+      settings.update!(sunat_api_key: "some_key", sunat_certificate_uploaded: true)
+      sale = create_confirmed_sale(customer_ruc)
+      sale.update!(sunat_uuid: "existing-uuid", sunat_status: "REJECTED")
+
+      retry_response = {
+        "uuid" => "existing-uuid",
+        "status" => "ACCEPTED",
+        "series" => "F001",
+        "correlative" => 5,
+        "xml_signed" => "<xml>signed</xml>",
+        "cdr_code" => "0",
+        "cdr_description" => "La Factura fue aceptada",
+        "hash" => "abc123",
+        "qr_image" => "base64qr",
+        "next_document_series" => "F001",
+        "next_document_number" => 6
+      }
+
+      client = instance_double(Sunat::ApiClient)
+      allow(Sunat::ApiClient).to receive(:new).and_return(client)
+      allow(client).to receive(:retry_document).with("existing-uuid").and_return(retry_response)
+
+      service = described_class.new(sale: sale)
+      service.call
+
+      expect(service).to be_valid
+      expect(sale.reload.sunat_status).to eq("ACCEPTED")
+    end
+
+    it "allows retry when sale has an errored document" do
+      settings.update!(sunat_api_key: "some_key", sunat_certificate_uploaded: true)
+      sale = create_confirmed_sale(customer_ruc)
+      sale.update!(sunat_uuid: "existing-uuid", sunat_status: "ERROR")
+
+      retry_response = {
+        "uuid" => "existing-uuid",
+        "status" => "ACCEPTED",
+        "series" => "F001",
+        "correlative" => 5,
+        "xml_signed" => "<xml>signed</xml>",
+        "cdr_code" => "0",
+        "cdr_description" => "La Factura fue aceptada",
+        "hash" => "abc123",
+        "qr_image" => "base64qr"
+      }
+
+      client = instance_double(Sunat::ApiClient)
+      allow(Sunat::ApiClient).to receive(:new).and_return(client)
+      allow(client).to receive(:retry_document).with("existing-uuid").and_return(retry_response)
+
+      service = described_class.new(sale: sale)
+      service.call
+
+      expect(service).to be_valid
+      expect(sale.reload.sunat_status).to eq("ACCEPTED")
     end
 
     it "fails when enterprise is not registered with SUNAT" do

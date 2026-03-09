@@ -14,7 +14,9 @@ module Sunat
       settings = @sale.enterprise.settings
       client = ApiClient.new(api_key: settings.sunat_api_key)
 
-      @sunat_result = if factura?
+      @sunat_result = if retry_emission?
+        client.retry_document(@sale.sunat_uuid)
+      elsif factura?
         client.create_invoice(@sale)
       else
         client.create_receipt(@sale)
@@ -44,6 +46,10 @@ module Sunat
       end
 
       save_next_document_info!
+    rescue Sunat::ApiClient::ServerErrorWithDocument => e
+      save_document_from_error(e.document_data)
+      add_error(e.message)
+      set_as_invalid!
     rescue Sunat::ApiClient::Error => e
       add_error(e.message)
       set_as_invalid!
@@ -54,6 +60,10 @@ module Sunat
 
     private
 
+    def retry_emission?
+      @sale.sunat_uuid.present? && @sale.sunat_status.in?(%w[ERROR REJECTED])
+    end
+
     def validate_prerequisites!
       unless @sale.confirmed?
         add_error("La venta debe estar confirmada para emitir comprobante")
@@ -61,7 +71,7 @@ module Sunat
         return
       end
 
-      if @sale.sunat_uuid.present?
+      if @sale.sunat_uuid.present? && !retry_emission?
         add_error("Esta venta ya tiene un comprobante emitido")
         set_as_invalid!
         return
@@ -95,6 +105,18 @@ module Sunat
 
     def factura?
       @sale.customer.ruc?
+    end
+
+    def save_document_from_error(document_data)
+      @sale.update!(
+        sunat_uuid: document_data["uuid"] || document_data["id"],
+        sunat_status: document_data["status"] || "ERROR",
+        sunat_document_type: factura? ? "01" : "03",
+        sunat_series: document_data["series"],
+        sunat_number: document_data["correlative"] || document_data["number"]
+      )
+    rescue ActiveRecord::RecordInvalid
+      # No perder el error original si falla el guardado
     end
 
     def save_next_document_info!

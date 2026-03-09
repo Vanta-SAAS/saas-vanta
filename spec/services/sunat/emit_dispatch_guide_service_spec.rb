@@ -102,13 +102,89 @@ RSpec.describe Sunat::EmitDispatchGuideService do
       end
     end
 
-    context 'when guide already has SUNAT UUID' do
-      before { guide.update_column(:sunat_uuid, "existing-uuid") }
+    context 'when guide already has SUNAT UUID with ACCEPTED status' do
+      before do
+        guide.update_columns(sunat_uuid: "existing-uuid", sunat_status: "ACCEPTED", status: "emitted")
+      end
 
       it 'adds error' do
         subject.call
         expect(subject).not_to be_valid
-        expect(subject.errors_message).to include("Esta guia ya tiene un documento emitido")
+        expect(subject.errors_message).to include("La guia debe estar en borrador para emitir")
+      end
+    end
+
+    context 'when guide has a rejected document' do
+      before do
+        guide.update_columns(sunat_uuid: "rejected-uuid", sunat_status: "REJECTED")
+        client = instance_double(Sunat::ApiClient)
+        allow(Sunat::ApiClient).to receive(:new).and_return(client)
+        allow(client).to receive(:retry_dispatch_guide).with("rejected-uuid").and_return(api_response)
+      end
+
+      it 'retries using the existing document UUID' do
+        subject.call
+        expect(subject).to be_valid
+        expect(guide.reload.sunat_status).to eq("ACCEPTED")
+        expect(guide.status).to eq("emitted")
+      end
+    end
+
+    context 'when guide has an errored document' do
+      before do
+        guide.update_columns(sunat_uuid: "errored-uuid", sunat_status: "ERROR")
+        client = instance_double(Sunat::ApiClient)
+        allow(Sunat::ApiClient).to receive(:new).and_return(client)
+        allow(client).to receive(:retry_dispatch_guide).with("errored-uuid").and_return(api_response)
+      end
+
+      it 'retries using the existing document UUID' do
+        subject.call
+        expect(subject).to be_valid
+        expect(guide.reload.sunat_status).to eq("ACCEPTED")
+      end
+    end
+
+    context 'when SUNAT rejects the document' do
+      before do
+        rejected_response = api_response.merge("status" => "REJECTED", "cdr_description" => "Documento rechazado")
+        client = instance_double(Sunat::ApiClient)
+        allow(Sunat::ApiClient).to receive(:new).and_return(client)
+        allow(client).to receive(:create_dispatch_guide_remitente).and_return(rejected_response)
+      end
+
+      it 'saves the UUID for future retry' do
+        subject.call
+        expect(subject).not_to be_valid
+        guide.reload
+        expect(guide.sunat_uuid).to be_present
+        expect(guide.sunat_status).to eq("REJECTED")
+        expect(guide.status).to eq("draft")
+      end
+    end
+
+    context 'when microservice returns 502 with document data' do
+      before do
+        document_data = {
+          "uuid" => "doc-from-502",
+          "status" => "ERROR",
+          "series" => "T001",
+          "correlative" => 3
+        }
+        client = instance_double(Sunat::ApiClient)
+        allow(Sunat::ApiClient).to receive(:new).and_return(client)
+        allow(client).to receive(:create_dispatch_guide_remitente).and_raise(
+          Sunat::ApiClient::ServerErrorWithDocument.new("Error en SUNAT", document_data)
+        )
+      end
+
+      it 'saves the document UUID for future retry' do
+        subject.call
+        expect(subject).not_to be_valid
+        guide.reload
+        expect(guide.sunat_uuid).to eq("doc-from-502")
+        expect(guide.sunat_status).to eq("ERROR")
+        expect(guide.status).to eq("draft")
       end
     end
 
