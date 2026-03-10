@@ -3,4 +3,6 @@ import "@hotwired/turbo-rails"
 import "controllers"
 import "channels"
 import "hotwire_combobox"
+import "chartkick"
+import "Chart.bundle"
 

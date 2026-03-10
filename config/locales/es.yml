@@ -98,6 +98,22 @@ es:
         present: "debe estar en blanco"
         inclusion: "no esta incluido en la lista"
         record_invalid: "%{errors}"
+  statuses:
+    customer_quotes:
+      pending: "Pendiente"
+      accepted: "Aceptada"
+      rejected: "Rechazada"
+      expired: "Expirada"
+    sales:
+      pending: "Pendiente"
+      confirmed: "Confirmada"
+      cancelled: "Cancelada"
+    purchase_orders:
+      draft: "Borrador"
+      pending: "Pendiente"
+      confirmed: "Confirmada"
+      received: "Recibida"
+      cancelled: "Cancelada"
   errors:
     format: "%{attribute} %{message}"
     messages:

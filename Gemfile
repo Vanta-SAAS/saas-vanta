@@ -71,6 +71,10 @@ gem "faraday-multipart", "~> 1.1"
 # QR code generation
 gem "rqrcode", "~> 3.2"
 
+# Charts & date grouping
+gem "chartkick", "~> 5.2", ">= 5.2.1"
+gem "groupdate", "~> 6.7"
+
 # HTTP stubbing & recording
 gem "vcr", "~> 6.4"
 gem "webmock", "~> 3.24"
