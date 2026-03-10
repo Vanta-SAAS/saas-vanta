@@ -223,7 +223,6 @@ RSpec.describe Sunat::EmitCreditNoteService, type: :service do
       payload = api_client.send(:build_credit_note_payload, credit_note)
 
       expect(payload[:reference_document_id]).to eq("original-doc-uuid")
-      expect(payload[:series]).to eq("FC01")
       expect(payload[:reason_code]).to eq("anulacion_de_la_operacion")
       expect(payload[:description]).to eq("Anulacion de la venta")
       expect(payload[:items]).to be_an(Array)

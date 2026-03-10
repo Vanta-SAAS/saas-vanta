@@ -198,16 +198,10 @@ module Sunat
 
     def build_credit_note_payload(credit_note)
       sale = credit_note.sale
-      settings = credit_note.enterprise.settings
-      series = if sale.sunat_document_type == "01"
-        settings.sunat_series_nota_credito_factura
-      else
-        settings.sunat_series_nota_credito_boleta
-      end
+      sale_doc = sale.current_sunat_document
 
       {
-        reference_document_id: sale.sunat_uuid,
-        series: series,
+        reference_document_id: sale_doc&.sunat_uuid,
         reason_code: credit_note.reason_code,
         description: credit_note.description,
         items: credit_note.items.map do |item|
