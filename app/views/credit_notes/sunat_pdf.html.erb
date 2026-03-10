@@ -1,0 +1,125 @@
+<% content_for :title, @credit_note.sunat_formatted_number || @credit_note.code %>
+
+<% content_for :head do %>
+  <%= render "shared/documents/pdf_styles" %>
+  <style>
+    .sunat-meta {
+      margin-top: 16px;
+      padding: 12px 16px;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      background-color: #F9FAFB;
+      font-size: 11px;
+      color: #6B7280;
+    }
+    .sunat-meta .meta-row { margin-bottom: 4px; }
+    .sunat-meta .meta-label { font-weight: 600; color: #374151; }
+    .reference-box {
+      margin-top: 12px;
+      padding: 10px 16px;
+      border: 1px solid #DBEAFE;
+      border-radius: 8px;
+      background-color: #EFF6FF;
+      font-size: 11px;
+    }
+  </style>
+<% end %>
+
+<% enterprise = @credit_note.enterprise %>
+<% sale = @credit_note.sale %>
+<% customer = sale.customer %>
+<% serie_correlativo = @credit_note.sunat_formatted_number %>
+
+<div class="doc">
+  <%= render "shared/documents/pdf_header",
+    enterprise: enterprise,
+    document_title: "NOTA DE CREDITO ELECTRONICA",
+    document_code: serie_correlativo,
+    document_date: @credit_note.created_at.to_date %>
+
+  <table class="info-grid"><tr>
+    <td>
+      <div class="info-card">
+        <div class="info-card-title">Emisor</div>
+        <div class="info-row"><span class="label">Razon Social</span><span class="value"><%= enterprise.social_reason || enterprise.comercial_name %></span></div>
+        <div class="info-row"><span class="label">RUC</span><span class="value"><%= enterprise.tax_id %></span></div>
+        <% if enterprise.address.present? %>
+          <div class="info-row"><span class="label">Direccion</span><span class="value"><%= enterprise.address %></span></div>
+        <% end %>
+      </div>
+    </td>
+    <td class="spacer"></td>
+    <td>
+      <div class="info-card">
+        <div class="info-card-title">Receptor</div>
+        <div class="info-row"><span class="label">Nombre</span><span class="value"><%= customer.name %></span></div>
+        <div class="info-row">
+          <span class="label"><%= customer.ruc? ? "RUC" : "DNI" %></span>
+          <span class="value"><%= customer.tax_id %></span>
+        </div>
+        <% if customer.address.present? %>
+          <div class="info-row"><span class="label">Direccion</span><span class="value"><%= customer.address %></span></div>
+        <% end %>
+      </div>
+    </td>
+  </tr></table>
+
+  <div class="reference-box">
+    <strong>Documento de Referencia:</strong>
+    <%= sale.sunat_document_type == "01" ? "Factura" : "Boleta" %>
+    <%= sale.sunat_formatted_number %>
+    <br>
+    <strong>Motivo:</strong> <%= @credit_note.reason_label %>
+    <br>
+    <strong>Descripcion:</strong> <%= @credit_note.description %>
+  </div>
+
+  <table class="items-table">
+    <thead>
+      <tr>
+        <th style="width:40%">Descripcion</th>
+        <th class="r">Cant.</th>
+        <th class="r">P. Unit.</th>
+        <th class="r">Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @credit_note.items.each_with_index do |item, i| %>
+        <tr class="<%= i.even? ? 'even' : '' %>">
+          <td><div class="item-name"><%= item.description %></div></td>
+          <td class="r"><%= item.quantity %></td>
+          <td class="r">S/ <%= number_with_precision(item.unit_price, precision: 2, delimiter: ",") %></td>
+          <td class="r">S/ <%= number_with_precision(item.total, precision: 2, delimiter: ",") %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <%= render "shared/documents/pdf_totals",
+    subtotal: @credit_note.subtotal,
+    tax: @credit_note.tax,
+    total: @credit_note.total %>
+
+  <div class="sunat-meta">
+    <div class="meta-row">
+      <span class="meta-label">Comprobante:</span> NOTA DE CREDITO ELECTRONICA <%= serie_correlativo %>
+    </div>
+    <% if @credit_note.sunat_hash.present? %>
+      <div class="meta-row">
+        <span class="meta-label">Hash:</span> <%= @credit_note.sunat_hash %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @qr_file_path.present? %>
+    <div style="text-align: center; margin-top: 16px;">
+      <img src="file:///<%= @qr_file_path %>" style="width: 260px; height: 260px;" />
+      <p style="font-size: 10px; color: #6B7280; margin-top: 4px;">
+        Representacion impresa de la Nota de Credito Electronica
+      </p>
+    </div>
+  <% end %>
+
+  <%= render "shared/documents/pdf_footer",
+    notes: @credit_note.description %>
+</div>

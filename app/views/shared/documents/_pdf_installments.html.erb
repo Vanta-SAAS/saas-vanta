@@ -1,0 +1,26 @@
+<%# Shared PDF installments section for credit documents
+     Required locals: document (Sale, CustomerQuote, or similar with #credit?, #installments, #payment_condition) %>
+
+<% if document.credit? && document.installments.any? %>
+  <div class="installments-section">
+    <div class="installments-title">Condicion de Pago: Credito</div>
+    <table class="installments-table">
+      <thead>
+        <tr>
+          <th>Cuota</th>
+          <th class="r">Monto</th>
+          <th class="r">Vencimiento</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% document.installments.order(:installment_number).each_with_index do |installment, i| %>
+          <tr class="<%= i.even? ? 'even' : '' %>">
+            <td>Cuota <%= installment.installment_number %></td>
+            <td class="r">S/ <%= number_with_precision(installment.amount, precision: 2, delimiter: ",") %></td>
+            <td class="r"><%= l(installment.due_date, format: :long) rescue installment.due_date %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% end %>

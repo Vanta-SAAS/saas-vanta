@@ -54,6 +54,9 @@
               <% if has_boletas %>
                 <%= sidebar_link_to "Boletas", sales_path(doc_type: "boleta"), icon: "receipt", sub: true %>
               <% end %>
+              <% if has_facturas %>
+                <%= sidebar_link_to "Notas de Credito", credit_notes_path, icon: "file-minus", sub: true %>
+              <% end %>
             <% end %>
           <% else %>
             <%= sidebar_link_to "Ventas", sales_path, icon: "shopping-cart" %>

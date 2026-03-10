@@ -14,6 +14,7 @@ class Enterprise < ApplicationRecord
   has_many :vehicles, dependent: :destroy
   has_many :carriers, dependent: :destroy
   has_many :dispatch_guides, dependent: :destroy
+  has_many :credit_notes, dependent: :destroy
   has_many :enterprise_modules, dependent: :destroy
   belongs_to :ubigeo, optional: true
   has_one :settings, class_name: "EnterpriseSetting", dependent: :destroy

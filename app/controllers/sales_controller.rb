@@ -12,10 +12,10 @@ class SalesController < ApplicationController
 
     case params[:doc_type]
     when "factura"
-      sales = sales.where(sunat_document_type: "01")
+      sales = sales.joins(:sunat_documents).where(sunat_documents: { sunat_document_type: "01", voided: false })
       @doc_type_filter = "factura"
     when "boleta"
-      sales = sales.where(sunat_document_type: "03")
+      sales = sales.joins(:sunat_documents).where(sunat_documents: { sunat_document_type: "03", voided: false })
       @doc_type_filter = "boleta"
     end
 
@@ -36,10 +36,12 @@ class SalesController < ApplicationController
     @sale = current_enterprise.sales.build(
       code: Sale.generate_next_code(current_enterprise),
       issue_date: Date.current,
+      payment_condition: :cash,
       created_by: Current.user,
       seller: Current.user
     )
     @show_seller_selector = !current_user_is_seller_only?
+    @credit_enabled = current_enterprise.module_enabled?("ventas.credito_clientes")
   end
 
   def create
@@ -56,6 +58,7 @@ class SalesController < ApplicationController
     unless sale_params[:items_attributes].present?
       @sale.errors.add(:base, "Debes agregar al menos un producto")
       @show_seller_selector = !current_user_is_seller_only?
+      @credit_enabled = current_enterprise.module_enabled?("ventas.credito_clientes")
       return render :new, status: :unprocessable_entity
     end
 
@@ -63,6 +66,7 @@ class SalesController < ApplicationController
       redirect_to @sale, notice: "Venta creada exitosamente."
     else
       @show_seller_selector = !current_user_is_seller_only?
+      @credit_enabled = current_enterprise.module_enabled?("ventas.credito_clientes")
       render :new, status: :unprocessable_entity
     end
   end
@@ -70,6 +74,7 @@ class SalesController < ApplicationController
   def edit
     authorize @sale
     @show_seller_selector = !current_user_is_seller_only?
+    @credit_enabled = current_enterprise.module_enabled?("ventas.credito_clientes")
 
     unless @sale.can_edit?
       redirect_to @sale, alert: "No se puede editar una venta que no esta pendiente."
@@ -93,6 +98,7 @@ class SalesController < ApplicationController
       redirect_to @sale, notice: "Venta actualizada exitosamente."
     else
       @show_seller_selector = !current_user_is_seller_only?
+      @credit_enabled = current_enterprise.module_enabled?("ventas.credito_clientes")
       render :edit, status: :unprocessable_entity
     end
   end
@@ -235,8 +241,10 @@ class SalesController < ApplicationController
       :seller_id,
       :destination_id,
       :issue_date,
+      :payment_condition,
       :notes,
-      items_attributes: [ :id, :product_id, :quantity, :unit_price, :_destroy ]
+      items_attributes: [ :id, :product_id, :quantity, :unit_price, :_destroy ],
+      installments_attributes: [ :id, :installment_number, :amount, :due_date, :_destroy ]
     )
   end
 

@@ -1,0 +1,155 @@
+<% content_for :page_title, @credit_note.code %>
+<% add_breadcrumb "Comercial" %>
+<% add_breadcrumb "Notas de Credito", credit_notes_path %>
+<% add_breadcrumb @credit_note.code %>
+
+<div class="max-w-5xl mx-auto space-y-6">
+  <%# Header %>
+  <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+    <div class="space-y-3">
+      <div class="flex items-center gap-3">
+        <h1 class="text-xl font-semibold text-foreground font-mono"><%= @credit_note.code %></h1>
+        <span class="<%= @credit_note.status_badge_class %>"><%= @credit_note.status_label %></span>
+      </div>
+      <p class="text-sm text-muted-foreground">
+        Creada por <%= @credit_note.created_by.first_name %> el <%= l(@credit_note.created_at, format: :long) %>
+      </p>
+    </div>
+    <div class="action-bar">
+      <%= link_to "Volver", credit_notes_path, class: "btn-secondary" %>
+
+      <% if @credit_note.can_emit? && policy(@credit_note).emit_document? %>
+        <span class="action-bar-divider"></span>
+        <%= button_to "Emitir Nota de Credito", emit_document_credit_note_path(@credit_note),
+            method: :post, class: "btn-primary",
+            data: { turbo_confirm: "Se emitira una nota de credito electronica a SUNAT. Continuar?", turbo_submits_with: "Emitiendo..." } %>
+      <% end %>
+
+      <% if @credit_note.can_retry_document? && policy(@credit_note).retry_document? %>
+        <%= button_to "Reintentar Envio", retry_document_credit_note_path(@credit_note),
+            method: :post, class: "btn-secondary",
+            data: { turbo_confirm: "Reintentar el envio de la nota de credito a SUNAT?" } %>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Reference & Reason %>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div class="card">
+      <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Comprobante de Referencia</h3>
+      <p class="text-sm font-medium text-foreground">
+        <%= link_to @credit_note.sale.code, sale_path(@credit_note.sale), class: "link-primary font-mono" %>
+        <% if @credit_note.sale.sunat_formatted_number.present? %>
+          <span class="text-muted-foreground">(<%= @credit_note.sale.sunat_formatted_number %>)</span>
+        <% end %>
+      </p>
+      <p class="text-xs text-muted-foreground mt-1">
+        Cliente: <%= @credit_note.sale.customer.name %>
+      </p>
+    </div>
+
+    <div class="card">
+      <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Motivo</h3>
+      <p class="text-sm font-semibold text-foreground"><%= @credit_note.reason_label %></p>
+      <p class="text-sm text-muted-foreground mt-1"><%= @credit_note.description %></p>
+    </div>
+  </div>
+
+  <%# Items Table %>
+  <div class="card p-0">
+    <div class="px-5 py-4 border-b border-border">
+      <h3 class="text-sm font-semibold text-foreground">Items</h3>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-border">
+        <thead>
+          <tr class="bg-muted/40">
+            <th class="px-5 py-2.5 text-left text-xs font-medium text-muted-foreground uppercase w-10">#</th>
+            <th class="px-5 py-2.5 text-left text-xs font-medium text-muted-foreground uppercase">Descripcion</th>
+            <th class="px-5 py-2.5 text-right text-xs font-medium text-muted-foreground uppercase">Cantidad</th>
+            <th class="px-5 py-2.5 text-right text-xs font-medium text-muted-foreground uppercase">Precio Unit.</th>
+            <th class="px-5 py-2.5 text-right text-xs font-medium text-muted-foreground uppercase">Total</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-border">
+          <% @credit_note.items.each_with_index do |item, index| %>
+            <tr>
+              <td class="px-5 py-3 text-sm text-muted-foreground"><%= index + 1 %></td>
+              <td class="px-5 py-3 text-sm font-medium text-foreground"><%= item.description %></td>
+              <td class="px-5 py-3 text-sm text-foreground text-right tabular-nums"><%= item.quantity %></td>
+              <td class="px-5 py-3 text-sm text-foreground text-right tabular-nums">S/ <%= number_with_precision(item.unit_price, precision: 2, delimiter: ",") %></td>
+              <td class="px-5 py-3 text-sm font-medium text-foreground text-right tabular-nums">S/ <%= number_with_precision(item.total, precision: 2, delimiter: ",") %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="px-5 py-4 border-t border-border">
+      <div class="flex justify-end">
+        <dl class="space-y-1.5 text-sm w-56">
+          <div class="flex justify-between">
+            <dt class="text-muted-foreground">Subtotal</dt>
+            <dd class="font-medium text-foreground tabular-nums">S/ <%= number_with_precision(@credit_note.subtotal, precision: 2, delimiter: ",") %></dd>
+          </div>
+          <div class="flex justify-between">
+            <dt class="text-muted-foreground">IGV (<%= (PeruTax::IGV_RATE * 100).to_i %>%)</dt>
+            <dd class="font-medium text-foreground tabular-nums">S/ <%= number_with_precision(@credit_note.tax, precision: 2, delimiter: ",") %></dd>
+          </div>
+          <div class="flex justify-between border-t border-border pt-1.5">
+            <dt class="font-semibold text-foreground">Total</dt>
+            <dd class="font-bold text-foreground text-base tabular-nums">S/ <%= number_with_precision(@credit_note.total, precision: 2, delimiter: ",") %></dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <%# SUNAT Section %>
+  <% if @credit_note.sunat_uuid.present? %>
+    <div class="card">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-semibold text-foreground">Nota de Credito Electronica</h3>
+        <span class="<%= @credit_note.sunat_status_badge_class %>"><%= @credit_note.sunat_status %></span>
+      </div>
+      <dl class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+        <div>
+          <dt class="text-xs text-muted-foreground uppercase tracking-wide">Tipo</dt>
+          <dd class="font-medium text-foreground mt-0.5">Nota de Credito</dd>
+        </div>
+        <% if @credit_note.sunat_series.present? %>
+          <div>
+            <dt class="text-xs text-muted-foreground uppercase tracking-wide">Serie - Numero</dt>
+            <dd class="font-medium text-foreground mt-0.5 font-mono"><%= @credit_note.sunat_formatted_number %></dd>
+          </div>
+        <% end %>
+        <div>
+          <dt class="text-xs text-muted-foreground uppercase tracking-wide">UUID</dt>
+          <dd class="font-medium text-foreground mt-0.5 text-xs font-mono"><%= @credit_note.sunat_uuid %></dd>
+        </div>
+      </dl>
+
+      <% if @credit_note.sunat_cdr_code.present? %>
+        <div class="mt-4 p-3 bg-muted rounded-lg text-sm">
+          <span class="text-muted-foreground">Respuesta SUNAT:</span>
+          <span class="font-medium text-foreground"><%= @credit_note.sunat_cdr_code %></span>
+          <% if @credit_note.sunat_cdr_description.present? %>
+            <span class="text-muted-foreground">- <%= @credit_note.sunat_cdr_description %></span>
+          <% end %>
+        </div>
+      <% end %>
+
+      <div class="mt-4 flex flex-wrap gap-2">
+        <% if @credit_note.can_retry_document? && policy(@credit_note).retry_document? %>
+          <%= button_to "Reintentar Envio", retry_document_credit_note_path(@credit_note),
+              method: :post, class: "btn-secondary",
+              data: { turbo_confirm: "Reintentar el envio de la nota de credito a SUNAT?" } %>
+        <% end %>
+        <% if @credit_note.sunat_status == "ACCEPTED" && @credit_note.sunat_xml.present? %>
+          <%= link_to "PDF", sunat_pdf_credit_note_path(@credit_note), class: "btn-primary", data: { turbo: false } %>
+          <%= link_to "XML", sunat_xml_credit_note_path(@credit_note), class: "btn-secondary", data: { turbo: false } %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

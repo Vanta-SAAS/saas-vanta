@@ -1,16 +1,26 @@
 class Sale < ApplicationRecord
   include Documentable
+  include SunatDocumentable
 
   belongs_to :customer
   belongs_to :seller, class_name: "User"
   belongs_to :sourceable, polymorphic: true, optional: true
 
   has_many :items, class_name: "SaleItem", dependent: :destroy
+  has_many :installments, class_name: "SaleInstallment", dependent: :destroy
   has_many :purchase_orders, as: :sourceable
   has_many :dispatch_guides, as: :sourceable
+  has_many :credit_notes, dependent: :destroy
   accepts_nested_attributes_for :items, allow_destroy: true, reject_if: :all_blank
+  accepts_nested_attributes_for :installments, allow_destroy: true, reject_if: :all_blank
 
   enum :status, { pending: "pending", confirmed: "confirmed", cancelled: "cancelled" }
+  enum :payment_condition, { cash: "cash", credit: "credit" }
+
+  validates :payment_condition, presence: true
+  validate :validate_installments_for_credit
+  validate :validate_no_installments_for_cash
+  validate :validate_credit_limit, if: -> { credit? && customer.present? }
 
   def self.generate_next_code(enterprise)
     current_year = Date.current.year
@@ -39,35 +49,26 @@ class Sale < ApplicationRecord
   end
 
   def can_emit_document?
-    confirmed? && sunat_uuid.blank? && enterprise.settings&.sunat_api_key.present? && enterprise.settings&.sunat_certificate_uploaded?
+    doc = current_sunat_document
+    confirmed? &&
+      (doc.nil? || doc.can_retry?) &&
+      enterprise.settings&.sunat_api_key.present? &&
+      enterprise.settings&.sunat_certificate_uploaded?
   end
 
-  def can_retry_document?
-    sunat_uuid.present? && sunat_status.in?(%w[ERROR REJECTED])
+  def can_emit_credit_note?
+    doc = current_sunat_document
+    doc.present? && doc.accepted? && !doc.voided?
   end
 
-  def sunat_status_badge_class
-    case sunat_status
-    when "ACCEPTED" then "badge-success"
-    when "REJECTED" then "badge-destructive"
-    when "ERROR" then "badge-destructive"
-    when "SIGNED", "CREATED" then "badge-secondary"
-    else "badge-secondary"
-    end
+  def has_accepted_credit_note?
+    sunat_documents.where(voided: true).exists?
   end
 
-  def sunat_formatted_number
-    return nil unless sunat_series.present? && sunat_number.present?
-
-    "#{sunat_series}-#{sunat_number.to_s.rjust(8, '0')}"
-  end
-
-  def sunat_document_type_label
-    case sunat_document_type
-    when "01" then "Factura"
-    when "03" then "Boleta"
-    else sunat_document_type
-    end
+  def can_create_dispatch_guide?
+    confirmed? && has_goods? && !dispatch_guides.exists? &&
+      enterprise.settings&.sunat_api_key.present? &&
+      enterprise.settings&.sunat_certificate_uploaded?
   end
 
   def has_goods?
@@ -148,6 +149,40 @@ class Sale < ApplicationRecord
   end
 
   private
+
+  def validate_installments_for_credit
+    return unless credit?
+
+    cuotas = installments.reject(&:marked_for_destruction?)
+    if cuotas.empty?
+      errors.add(:base, "Las ventas a crédito requieren al menos una cuota")
+    elsif total.present? && total.positive? && cuotas.sum(&:amount) != total
+      errors.add(:base, "Las cuotas deben sumar el total del documento (S/ #{total})")
+    end
+  end
+
+  def validate_no_installments_for_cash
+    return unless cash?
+
+    if installments.reject(&:marked_for_destruction?).any?
+      errors.add(:base, "No se permiten cuotas en ventas al contado")
+    end
+  end
+
+  def validate_credit_limit
+    return unless customer.credit_limit.positive?
+
+    available = customer.available_credit
+    # Si estamos editando, sumar las cuotas anteriores de esta venta
+    if persisted?
+      own_pending = installments.where(status: "pending").sum(:amount)
+      available += own_pending
+    end
+
+    if total.present? && total > available
+      errors.add(:base, "El monto excede el crédito disponible del cliente (S/ #{available.round(2)})")
+    end
+  end
 
   def update_product_stock!
     items.includes(:product).find_each do |item|

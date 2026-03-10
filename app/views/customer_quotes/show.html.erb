@@ -141,6 +141,37 @@
     </div>
   </div>
 
+  <% if @customer_quote.credit? %>
+    <div class="card">
+      <div class="flex items-center gap-3 mb-4">
+        <h3 class="text-sm font-semibold text-foreground">Condicion de Pago</h3>
+        <span class="badge-info">Credito</span>
+      </div>
+      <% if @customer_quote.installments.any? %>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-border">
+            <thead>
+              <tr class="bg-muted/40">
+                <th class="px-5 py-2.5 text-left text-xs font-medium text-muted-foreground uppercase">Cuota</th>
+                <th class="px-5 py-2.5 text-right text-xs font-medium text-muted-foreground uppercase">Monto</th>
+                <th class="px-5 py-2.5 text-left text-xs font-medium text-muted-foreground uppercase">Vencimiento</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border">
+              <% @customer_quote.installments.order(:installment_number).each do |installment| %>
+                <tr>
+                  <td class="px-5 py-3 text-sm text-foreground">Cuota <%= installment.installment_number %></td>
+                  <td class="px-5 py-3 text-sm font-medium text-foreground text-right tabular-nums">S/ <%= number_with_precision(installment.amount, precision: 2, delimiter: ",") %></td>
+                  <td class="px-5 py-3 text-sm text-foreground"><%= l(installment.due_date, format: :long) rescue installment.due_date %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
   <% if @customer_quote.notes.present? %>
     <div class="card">
       <h3 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Notas</h3>

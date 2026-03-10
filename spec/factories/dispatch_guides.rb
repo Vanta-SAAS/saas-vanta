@@ -38,11 +38,17 @@ FactoryBot.define do
 
     trait :emitted do
       status { "emitted" }
-      sunat_uuid { SecureRandom.uuid }
-      sunat_status { "ACCEPTED" }
-      sunat_document_type { "09" }
-      sunat_series { "T001" }
-      sunat_number { Faker::Number.number(digits: 4) }
+
+      after(:create) do |guide|
+        create(:sunat_document,
+          documentable: guide,
+          sunat_uuid: SecureRandom.uuid,
+          sunat_status: "ACCEPTED",
+          sunat_document_type: "09",
+          sunat_series: "T001",
+          sunat_number: Faker::Number.number(digits: 4)
+        )
+      end
     end
   end
 end

@@ -94,26 +94,28 @@
     </div>
   </div>
 
-  <div class="card">
-    <h3 class="text-sm font-semibold text-foreground">Condiciones Comerciales</h3>
-    <p class="mt-1 text-sm text-muted-foreground">Configuracion de credito y pagos.</p>
+  <% if current_enterprise.module_enabled?("ventas.credito_clientes") %>
+    <div class="card">
+      <h3 class="text-sm font-semibold text-foreground">Condiciones Comerciales</h3>
+      <p class="mt-1 text-sm text-muted-foreground">Configuracion de credito y pagos.</p>
 
-    <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+      <div class="mt-6 grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
 
-      <div class="sm:col-span-3">
-        <%= f.label :credit_limit, "Limite de Credito (S/)", class: "form-label" %>
-        <%= f.number_field :credit_limit, class: "form-input", step: "0.01", min: 0, placeholder: "0.00" %>
-        <p class="mt-1 text-xs text-muted-foreground">Monto maximo de credito permitido. 0 = sin credito</p>
+        <div class="sm:col-span-3">
+          <%= f.label :credit_limit, "Limite de Credito (S/)", class: "form-label" %>
+          <%= f.number_field :credit_limit, class: "form-input", step: "0.01", min: 0, placeholder: "0.00" %>
+          <p class="mt-1 text-xs text-muted-foreground">Monto maximo de credito permitido. 0 = sin credito</p>
+        </div>
+
+        <div class="sm:col-span-3">
+          <%= f.label :payment_terms, "Dias de Credito", class: "form-label" %>
+          <%= f.number_field :payment_terms, class: "form-input", step: 1, min: 0, placeholder: "0" %>
+          <p class="mt-1 text-xs text-muted-foreground">Plazo de pago en dias. 0 = solo contado</p>
+        </div>
+
       </div>
-
-      <div class="sm:col-span-3">
-        <%= f.label :payment_terms, "Dias de Credito", class: "form-label" %>
-        <%= f.number_field :payment_terms, class: "form-input", step: 1, min: 0, placeholder: "0" %>
-        <p class="mt-1 text-xs text-muted-foreground">Plazo de pago en dias. 0 = solo contado</p>
-      </div>
-
     </div>
-  </div>
+  <% end %>
 
   <div class="flex justify-end gap-3">
     <%= link_to "Cancelar", customers_path, class: "btn-secondary" %>

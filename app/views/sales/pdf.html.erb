@@ -79,6 +79,9 @@
     tax: @sale.tax,
     total: @sale.total %>
 
+  <%= render "shared/documents/pdf_installments",
+    document: @sale %>
+
   <%= render "shared/documents/pdf_footer",
     notes: @sale.notes %>
 </div>

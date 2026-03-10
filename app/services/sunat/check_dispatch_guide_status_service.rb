@@ -8,7 +8,9 @@ module Sunat
     end
 
     def call
-      unless @guide.sunat_uuid.present?
+      doc = @guide.current_sunat_document
+
+      unless doc&.sunat_uuid.present?
         add_error("Esta guia no tiene un documento emitido")
         set_as_invalid!
         return
@@ -17,14 +19,14 @@ module Sunat
       settings = @guide.enterprise.settings
       client = ApiClient.new(api_key: settings.sunat_api_key)
 
-      @status_result = client.get_dispatch_guide_status(@guide.sunat_uuid)
+      @status_result = client.get_dispatch_guide_status(doc.sunat_uuid)
       new_status = @status_result["status"]
 
-      @guide.update!(sunat_status: new_status) if new_status.present?
+      doc.update!(sunat_status: new_status) if new_status.present?
 
-      if new_status == "ACCEPTED" && @guide.sunat_xml.blank?
-        detail = client.get_dispatch_guide(@guide.sunat_uuid)
-        @guide.update!(
+      if new_status == "ACCEPTED" && doc.sunat_xml.blank?
+        detail = client.get_dispatch_guide(doc.sunat_uuid)
+        doc.update!(
           sunat_xml: detail["xml_signed"],
           sunat_cdr_code: detail["cdr_code"],
           sunat_cdr_description: detail["cdr_description"],

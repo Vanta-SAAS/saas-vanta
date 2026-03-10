@@ -264,15 +264,15 @@
     <%# ---- Configured state: Series & credentials ---- %>
     <% if @settings.sunat_api_key.present? %>
 
-      <%# ---- Series configuration (unified card) ---- %>
+      <%# ---- Series configuration (compact table) ---- %>
       <div class="card">
         <h3 class="text-sm font-semibold text-foreground">Series y Correlativos</h3>
-        <p class="mt-1 text-sm text-muted-foreground mb-6">
+        <p class="mt-1 text-sm text-muted-foreground mb-5">
           Configure la serie y correlativo para cada tipo de comprobante electronico.
         </p>
 
         <% unless @enterprise.ubigeo.present? %>
-          <div class="alert-warning mb-6">
+          <div class="alert-warning mb-5">
             <p class="text-sm">
               La empresa no tiene ubigeo asignado. Configurelo en
               <%= link_to "Editar Empresa", edit_enterprise_path(@enterprise), class: "underline font-medium" %>.
@@ -280,183 +280,188 @@
           </div>
         <% end %>
 
-        <%= form_with model: @settings, url: update_settings_sunat_path, method: :patch, class: "space-y-0", data: { turbo_confirm: sunat_confirm } do |f| %>
-          <div class="divide-y divide-border -mx-5">
-            <%# Factura %>
-            <div class="px-5 py-4">
-              <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-                <div class="sm:w-40 flex-shrink-0">
-                  <p class="text-sm font-medium text-foreground">Factura</p>
-                  <p class="text-xs text-muted-foreground">Clientes con RUC</p>
-                </div>
-                <div class="flex-1 grid grid-cols-2 gap-4">
-                  <div>
-                    <%= f.label :sunat_series_factura, "Serie", class: "form-label" %>
-                    <%= f.text_field :sunat_series_factura, class: "form-input font-mono", placeholder: "F001", maxlength: 4 %>
-                  </div>
-                  <div>
-                    <%= f.label :sunat_next_factura_number, "Correlativo", class: "form-label" %>
-                    <%= f.number_field :sunat_next_factura_number, class: "form-input tabular-nums", placeholder: "1", min: 1 %>
-                  </div>
-                </div>
-              </div>
-            </div>
+        <%= form_with model: @settings, url: update_settings_sunat_path, method: :patch, data: { turbo_confirm: sunat_confirm } do |f| %>
+          <div class="overflow-x-auto -mx-5">
+            <table class="w-full">
+              <thead>
+                <tr class="bg-muted/40">
+                  <th class="px-5 py-2.5 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide">Comprobante</th>
+                  <th class="px-5 py-2.5 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide w-28">Serie</th>
+                  <th class="px-5 py-2.5 text-left text-xs font-medium text-muted-foreground uppercase tracking-wide w-32">Correlativo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <%# --- Grupo: Factura (RUC) --- %>
+                <tr>
+                  <td colspan="3" class="px-5 pt-4 pb-1.5">
+                    <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Comprobantes de Venta — RUC</p>
+                  </td>
+                </tr>
+                <tr class="border-b border-border/50">
+                  <td class="px-5 py-2.5 pl-8">
+                    <p class="text-sm font-medium text-foreground">Factura</p>
+                  </td>
+                  <td class="px-5 py-2.5">
+                    <%= f.text_field :sunat_series_factura, class: "form-input font-mono text-sm w-full", placeholder: "F001", maxlength: 4 %>
+                  </td>
+                  <td class="px-5 py-2.5">
+                    <%= f.number_field :sunat_next_factura_number, class: "form-input tabular-nums text-sm w-full", placeholder: "1", min: 1 %>
+                  </td>
+                </tr>
+                <tr class="border-b border-border">
+                  <td class="px-5 py-2.5 pl-8">
+                    <p class="text-sm text-muted-foreground">Nota de Credito</p>
+                  </td>
+                  <td class="px-5 py-2.5">
+                    <%= f.text_field :sunat_series_nota_credito_factura, class: "form-input font-mono text-sm w-full", placeholder: "FC01", maxlength: 4 %>
+                  </td>
+                  <td class="px-5 py-2.5">
+                    <%= f.number_field :sunat_next_nota_credito_factura_number, class: "form-input tabular-nums text-sm w-full", placeholder: "1", min: 1 %>
+                  </td>
+                </tr>
 
-            <%# Boleta %>
-            <div class="px-5 py-4">
-              <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-                <div class="sm:w-40 flex-shrink-0">
-                  <p class="text-sm font-medium text-foreground">Boleta</p>
-                  <p class="text-xs text-muted-foreground">Clientes con DNI</p>
-                </div>
-                <div class="flex-1 grid grid-cols-2 gap-4">
-                  <div>
-                    <%= f.label :sunat_series_boleta, "Serie", class: "form-label" %>
-                    <%= f.text_field :sunat_series_boleta, class: "form-input font-mono", placeholder: "B001", maxlength: 4 %>
-                  </div>
-                  <div>
-                    <%= f.label :sunat_next_boleta_number, "Correlativo", class: "form-label" %>
-                    <%= f.number_field :sunat_next_boleta_number, class: "form-input tabular-nums", placeholder: "1", min: 1 %>
-                  </div>
-                </div>
-              </div>
-            </div>
+                <%# --- Grupo: Boleta (DNI) --- %>
+                <tr>
+                  <td colspan="3" class="px-5 pt-4 pb-1.5">
+                    <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Comprobantes de Venta — DNI</p>
+                  </td>
+                </tr>
+                <tr class="border-b border-border/50">
+                  <td class="px-5 py-2.5 pl-8">
+                    <p class="text-sm font-medium text-foreground">Boleta</p>
+                  </td>
+                  <td class="px-5 py-2.5">
+                    <%= f.text_field :sunat_series_boleta, class: "form-input font-mono text-sm w-full", placeholder: "B001", maxlength: 4 %>
+                  </td>
+                  <td class="px-5 py-2.5">
+                    <%= f.number_field :sunat_next_boleta_number, class: "form-input tabular-nums text-sm w-full", placeholder: "1", min: 1 %>
+                  </td>
+                </tr>
+                <tr class="border-b border-border">
+                  <td class="px-5 py-2.5 pl-8">
+                    <p class="text-sm text-muted-foreground">Nota de Credito</p>
+                  </td>
+                  <td class="px-5 py-2.5">
+                    <%= f.text_field :sunat_series_nota_credito_boleta, class: "form-input font-mono text-sm w-full", placeholder: "BC01", maxlength: 4 %>
+                  </td>
+                  <td class="px-5 py-2.5">
+                    <%= f.number_field :sunat_next_nota_credito_boleta_number, class: "form-input tabular-nums text-sm w-full", placeholder: "1", min: 1 %>
+                  </td>
+                </tr>
 
-            <%# GRR %>
-            <div class="px-5 py-4">
-              <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-                <div class="sm:w-40 flex-shrink-0">
-                  <p class="text-sm font-medium text-foreground">Guia Remitente</p>
-                  <p class="text-xs text-muted-foreground">GRR</p>
-                </div>
-                <div class="flex-1 grid grid-cols-2 gap-4">
-                  <div>
-                    <%= f.label :sunat_series_grr, "Serie", class: "form-label" %>
-                    <%= f.text_field :sunat_series_grr, class: "form-input font-mono", placeholder: "T001", maxlength: 4 %>
-                  </div>
-                  <div>
-                    <%= f.label :sunat_next_grr_number, "Correlativo", class: "form-label" %>
-                    <%= f.number_field :sunat_next_grr_number, class: "form-input tabular-nums", placeholder: "1", min: 1 %>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <%# GRT %>
-            <div class="px-5 py-4">
-              <div class="flex flex-col sm:flex-row sm:items-center gap-4">
-                <div class="sm:w-40 flex-shrink-0">
-                  <p class="text-sm font-medium text-foreground">Guia Transportista</p>
-                  <p class="text-xs text-muted-foreground">GRT</p>
-                </div>
-                <div class="flex-1 grid grid-cols-2 gap-4">
-                  <div>
-                    <%= f.label :sunat_series_grt, "Serie", class: "form-label" %>
-                    <%= f.text_field :sunat_series_grt, class: "form-input font-mono", placeholder: "V001", maxlength: 4 %>
-                  </div>
-                  <div>
-                    <%= f.label :sunat_next_grt_number, "Correlativo", class: "form-label" %>
-                    <%= f.number_field :sunat_next_grt_number, class: "form-input tabular-nums", placeholder: "1", min: 1 %>
-                  </div>
-                </div>
-              </div>
-            </div>
+                <%# --- Grupo: Guias de Remision --- %>
+                <tr>
+                  <td colspan="3" class="px-5 pt-4 pb-1.5">
+                    <p class="text-xs font-medium text-muted-foreground uppercase tracking-wide">Guias de Remision</p>
+                  </td>
+                </tr>
+                <tr class="border-b border-border/50">
+                  <td class="px-5 py-2.5 pl-8">
+                    <p class="text-sm font-medium text-foreground">Remitente</p>
+                    <p class="text-xs text-muted-foreground">GRR</p>
+                  </td>
+                  <td class="px-5 py-2.5">
+                    <%= f.text_field :sunat_series_grr, class: "form-input font-mono text-sm w-full", placeholder: "T001", maxlength: 4 %>
+                  </td>
+                  <td class="px-5 py-2.5">
+                    <%= f.number_field :sunat_next_grr_number, class: "form-input tabular-nums text-sm w-full", placeholder: "1", min: 1 %>
+                  </td>
+                </tr>
+                <tr>
+                  <td class="px-5 py-2.5 pl-8">
+                    <p class="text-sm font-medium text-foreground">Transportista</p>
+                    <p class="text-xs text-muted-foreground">GRT</p>
+                  </td>
+                  <td class="px-5 py-2.5">
+                    <%= f.text_field :sunat_series_grt, class: "form-input font-mono text-sm w-full", placeholder: "V001", maxlength: 4 %>
+                  </td>
+                  <td class="px-5 py-2.5">
+                    <%= f.number_field :sunat_next_grt_number, class: "form-input tabular-nums text-sm w-full", placeholder: "1", min: 1 %>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
 
-          <div class="flex justify-end pt-5">
+          <div class="flex justify-end pt-4">
             <%= f.submit "Guardar Series", class: "btn-primary cursor-pointer" %>
           </div>
         <% end %>
       </div>
 
-      <%# ---- Credentials & Certificate ---- %>
-      <div class="card">
-        <h3 class="text-sm font-semibold text-foreground mb-6">Credenciales y Certificado</h3>
+      <%# ---- Credentials & Certificate (side-by-side) ---- %>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <%# SOL Credentials %>
+        <div class="card">
+          <h4 class="text-sm font-semibold text-foreground mb-1">Credenciales SOL</h4>
+          <p class="text-xs text-muted-foreground mb-4">Usuario y clave SOL de SUNAT.</p>
 
-        <div class="divide-y divide-border -mx-5">
-          <%# SOL Credentials %>
-          <div class="px-5 py-4">
-            <h4 class="text-sm font-medium text-foreground mb-1">Credenciales SOL</h4>
-            <p class="text-xs text-muted-foreground mb-4">Actualice su usuario y clave SOL de SUNAT.</p>
+          <%= form_with url: update_sol_credentials_sunat_path, method: :patch, class: "space-y-4", data: { turbo_confirm: sunat_confirm } do |f| %>
+            <div>
+              <%= f.label :sol_user, "Usuario SOL", class: "form-label" %>
+              <%= f.text_field :sol_user, value: @settings.sunat_sol_user, class: "form-input", required: true, placeholder: "MODDATOS" %>
+            </div>
+            <div>
+              <%= f.label :sol_password, "Clave SOL", class: "form-label" %>
+              <%= f.password_field :sol_password, class: "form-input", required: true %>
+            </div>
+            <div class="flex justify-end">
+              <%= f.submit "Actualizar", class: "btn-secondary cursor-pointer" %>
+            </div>
+          <% end %>
+        </div>
 
-            <%= form_with url: update_sol_credentials_sunat_path, method: :patch, class: "space-y-4", data: { turbo_confirm: sunat_confirm } do |f| %>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <%= f.label :sol_user, "Usuario SOL", class: "form-label" %>
-                  <%= f.text_field :sol_user, value: @settings.sunat_sol_user, class: "form-input", required: true, placeholder: "MODDATOS" %>
-                </div>
-                <div>
-                  <%= f.label :sol_password, "Clave SOL", class: "form-label" %>
-                  <%= f.password_field :sol_password, class: "form-input", required: true %>
-                </div>
-              </div>
-              <div class="flex justify-end">
-                <%= f.submit "Actualizar Credenciales", class: "btn-secondary cursor-pointer" %>
-              </div>
-            <% end %>
-          </div>
-
-          <%# SUNAT REST API Credentials (for dispatch guides) %>
-          <div class="px-5 py-4">
-            <h4 class="text-sm font-medium text-foreground mb-1">Credenciales API REST SUNAT</h4>
-            <p class="text-xs text-muted-foreground mb-4">
-              Requeridas para emitir Guias de Remision. Obtenga estas credenciales desde el Portal SOL de SUNAT
-              en <strong class="text-foreground">Menu SOL &rarr; Empresa &rarr; Gestión Credenciales de API SUNAT</strong>.
-            </p>
-
+        <%# SUNAT REST API Credentials %>
+        <div class="card">
+          <div class="flex items-start justify-between mb-1">
+            <h4 class="text-sm font-semibold text-foreground">Credenciales API REST</h4>
             <% if @settings.sunat_client_id.present? %>
-              <div class="flex items-center gap-2 mb-4">
-                <span class="inline-flex items-center justify-center h-5 w-5 rounded-full bg-green-100 dark:bg-green-900/30">
-                  <svg class="w-3 h-3 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                </span>
-                <span class="text-xs text-green-700 dark:text-green-400 font-medium">Credenciales configuradas</span>
-              </div>
-            <% end %>
-
-            <%= form_with url: update_sunat_rest_credentials_sunat_path, method: :patch, class: "space-y-4", data: { turbo_confirm: sunat_confirm } do |f| %>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <%= f.label :sunat_client_id, "Client ID", class: "form-label" %>
-                  <%= f.text_field :sunat_client_id, value: @settings.sunat_client_id, class: "form-input font-mono", required: true %>
-                </div>
-                <div>
-                  <%= f.label :sunat_client_secret, "Client Secret", class: "form-label" %>
-                  <%= f.password_field :sunat_client_secret, class: "form-input", required: true %>
-                </div>
-              </div>
-              <div class="flex justify-end">
-                <%= f.submit "Actualizar Credenciales REST", class: "btn-secondary cursor-pointer" %>
-              </div>
+              <span class="badge-success">Configurado</span>
             <% end %>
           </div>
+          <p class="text-xs text-muted-foreground mb-4">
+            Para Guias de Remision. Desde <strong class="text-foreground">Menu SOL &rarr; Empresa &rarr; API REST</strong>.
+          </p>
 
-          <%# Certificate %>
-          <% if @settings.sunat_certificate_uploaded? %>
-            <div class="px-5 py-4">
-              <h4 class="text-sm font-medium text-foreground mb-1">Certificado Digital</h4>
-              <p class="text-xs text-muted-foreground mb-4">Actualice su certificado digital (.pfx o .p12) si es necesario.</p>
-
-              <%= form_with url: upload_certificate_sunat_path, method: :post, multipart: true, class: "space-y-4", data: { turbo_confirm: sunat_confirm } do |f| %>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <%= f.label :certificate, "Certificado (.pfx o .p12)", class: "form-label" %>
-                    <%= f.file_field :certificate, class: "block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 file:cursor-pointer", required: true, accept: ".pfx,.p12" %>
-                  </div>
-                  <div>
-                    <%= f.label :certificate_password, "Clave del certificado", class: "form-label" %>
-                    <%= f.password_field :certificate_password, class: "form-input", required: true %>
-                  </div>
-                </div>
-                <div class="flex justify-end">
-                  <%= f.submit "Actualizar Certificado", class: "btn-secondary cursor-pointer" %>
-                </div>
-              <% end %>
+          <%= form_with url: update_sunat_rest_credentials_sunat_path, method: :patch, class: "space-y-4", data: { turbo_confirm: sunat_confirm } do |f| %>
+            <div>
+              <%= f.label :sunat_client_id, "Client ID", class: "form-label" %>
+              <%= f.text_field :sunat_client_id, value: @settings.sunat_client_id, class: "form-input font-mono", required: true %>
+            </div>
+            <div>
+              <%= f.label :sunat_client_secret, "Client Secret", class: "form-label" %>
+              <%= f.password_field :sunat_client_secret, class: "form-input", required: true %>
+            </div>
+            <div class="flex justify-end">
+              <%= f.submit "Actualizar", class: "btn-secondary cursor-pointer" %>
             </div>
           <% end %>
         </div>
       </div>
+
+      <%# Certificate (full width below credentials) %>
+      <% if @settings.sunat_certificate_uploaded? %>
+        <div class="card">
+          <h4 class="text-sm font-semibold text-foreground mb-1">Certificado Digital</h4>
+          <p class="text-xs text-muted-foreground mb-4">Actualice su certificado digital (.pfx o .p12) si es necesario.</p>
+
+          <%= form_with url: upload_certificate_sunat_path, method: :post, multipart: true, class: "space-y-4", data: { turbo_confirm: sunat_confirm } do |f| %>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <%= f.label :certificate, "Certificado (.pfx o .p12)", class: "form-label" %>
+                <%= f.file_field :certificate, class: "block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 file:cursor-pointer", required: true, accept: ".pfx,.p12" %>
+              </div>
+              <div>
+                <%= f.label :certificate_password, "Clave del certificado", class: "form-label" %>
+                <%= f.password_field :certificate_password, class: "form-input", required: true %>
+              </div>
+            </div>
+            <div class="flex justify-end">
+              <%= f.submit "Actualizar Certificado", class: "btn-secondary cursor-pointer" %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
 
     <% end %>
   <% end %>

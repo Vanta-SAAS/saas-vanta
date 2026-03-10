@@ -1,0 +1,9 @@
+<% content_for :page_title, "Nueva Nota de Credito" %>
+
+<% add_breadcrumb "Comercial" %>
+<% add_breadcrumb "Notas de Credito", credit_notes_path %>
+<% add_breadcrumb "Nueva" %>
+
+<div class="max-w-5xl mx-auto">
+  <%= render "form", credit_note: @credit_note, sale: @sale %>
+</div>

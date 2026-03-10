@@ -64,6 +64,15 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :credit_notes, only: [ :index, :new, :create, :show ] do
+    member do
+      post :emit_document
+      post :retry_document
+      get :sunat_pdf
+      get :sunat_xml
+    end
+  end
+
   resource :sunat, only: [ :show ], controller: "sunat" do
     post :register
     post :upload_certificate

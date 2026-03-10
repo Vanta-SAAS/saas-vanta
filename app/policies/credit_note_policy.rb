@@ -1,0 +1,21 @@
+class CreditNotePolicy < ApplicationPolicy
+  def index?
+    platform_super_admin? || belongs_to_enterprise?
+  end
+
+  def show?
+    platform_super_admin? || belongs_to_enterprise?
+  end
+
+  def create?
+    platform_super_admin? || enterprise_admin?
+  end
+
+  def emit_document?
+    platform_super_admin? || enterprise_admin?
+  end
+
+  def retry_document?
+    platform_super_admin? || enterprise_admin?
+  end
+end

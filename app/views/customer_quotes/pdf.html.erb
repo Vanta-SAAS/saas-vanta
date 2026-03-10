@@ -82,6 +82,9 @@
     tax: @customer_quote.tax,
     total: @customer_quote.total %>
 
+  <%= render "shared/documents/pdf_installments",
+    document: @customer_quote %>
+
   <%= render "shared/documents/pdf_footer",
     notes: @customer_quote.notes %>
 </div>

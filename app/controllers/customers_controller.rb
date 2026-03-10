@@ -30,7 +30,16 @@ class CustomersController < ApplicationController
     respond_to do |format|
       format.turbo_stream
       format.json do
-        render json: @customers.map { |c| { id: c.id, display: c.combobox_display, ubigeo_id: c.ubigeo_id } }
+        render json: @customers.map { |c|
+          {
+            id: c.id,
+            display: c.combobox_display,
+            ubigeo_id: c.ubigeo_id,
+            credit_limit: c.credit_limit.to_f,
+            payment_terms: c.payment_terms,
+            available_credit: c.available_credit.to_f
+          }
+        }
       end
     end
   end
@@ -45,7 +54,10 @@ class CustomersController < ApplicationController
           id: @customer.id,
           name: @customer.name,
           ubigeo_id: @customer.ubigeo_id,
-          ubigeo_display: @customer.ubigeo&.combobox_display
+          ubigeo_display: @customer.ubigeo&.combobox_display,
+          credit_limit: @customer.credit_limit.to_f,
+          payment_terms: @customer.payment_terms,
+          available_credit: @customer.available_credit.to_f
         }
       end
     end
@@ -75,9 +87,15 @@ class CustomersController < ApplicationController
     authorize @customer
 
     if @customer.update(customer_params)
-      redirect_to @customer, notice: "Cliente actualizado exitosamente."
+      respond_to do |format|
+        format.html { redirect_to @customer, notice: "Cliente actualizado exitosamente." }
+        format.json { render json: { id: @customer.id, credit_limit: @customer.credit_limit.to_f, payment_terms: @customer.payment_terms, available_credit: @customer.available_credit.to_f } }
+      end
     else
-      render :edit, status: :unprocessable_entity
+      respond_to do |format|
+        format.html { render :edit, status: :unprocessable_entity }
+        format.json { render json: { errors: @customer.errors.full_messages }, status: :unprocessable_entity }
+      end
     end
   end
 

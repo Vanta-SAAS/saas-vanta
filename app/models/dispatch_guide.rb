@@ -1,4 +1,6 @@
 class DispatchGuide < ApplicationRecord
+  include SunatDocumentable
+
   belongs_to :enterprise
   belongs_to :created_by, class_name: "User"
   belongs_to :departure_ubigeo, class_name: "Ubigeo", optional: true
@@ -58,44 +60,17 @@ class DispatchGuide < ApplicationRecord
   end
 
   def can_emit_document?
-    draft? && sunat_uuid.blank? &&
+    doc = current_sunat_document
+    draft? && (doc.nil? || doc.can_retry?) &&
       enterprise.settings&.sunat_api_key.present? &&
       enterprise.settings&.sunat_certificate_uploaded? &&
       items.any?
-  end
-
-  def can_retry_document?
-    sunat_uuid.present? && sunat_status.in?(%w[ERROR REJECTED])
   end
 
   def cancel!
     return false unless can_cancel?
 
     update!(status: :cancelled)
-  end
-
-  # SUNAT display helpers
-  def sunat_formatted_number
-    return nil unless sunat_series.present? && sunat_number.present?
-
-    "#{sunat_series}-#{sunat_number.to_s.rjust(8, '0')}"
-  end
-
-  def sunat_document_type_label
-    case sunat_document_type
-    when "09" then "Guia Remitente"
-    when "31" then "Guia Transportista"
-    else sunat_document_type
-    end
-  end
-
-  def sunat_status_badge_class
-    case sunat_status
-    when "ACCEPTED" then "badge-success"
-    when "REJECTED", "ERROR" then "badge-destructive"
-    when "SIGNED", "CREATED" then "badge-secondary"
-    else "badge-secondary"
-    end
   end
 
   def status_badge_class

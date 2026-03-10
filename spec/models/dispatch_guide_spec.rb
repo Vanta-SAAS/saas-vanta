@@ -119,30 +119,37 @@ RSpec.describe DispatchGuide, type: :model do
     end
 
     it '#can_retry_document? returns true for ERROR status' do
-      guide = build(:dispatch_guide, sunat_uuid: "abc", sunat_status: "ERROR")
+      guide = create(:dispatch_guide)
+      create(:sunat_document, documentable: guide, sunat_uuid: "abc", sunat_status: "ERROR")
       expect(guide.can_retry_document?).to be true
     end
 
     it '#can_retry_document? returns false for ACCEPTED status' do
-      guide = build(:dispatch_guide, sunat_uuid: "abc", sunat_status: "ACCEPTED")
+      guide = create(:dispatch_guide)
+      create(:sunat_document, documentable: guide, sunat_uuid: "abc", sunat_status: "ACCEPTED")
       expect(guide.can_retry_document?).to be false
     end
   end
 
   describe 'SUNAT display helpers' do
     it '#sunat_formatted_number formats with zero-padded number' do
-      guide = build(:dispatch_guide, sunat_series: "T001", sunat_number: 42)
+      guide = create(:dispatch_guide)
+      create(:sunat_document, documentable: guide, sunat_series: "T001", sunat_number: 42)
       expect(guide.sunat_formatted_number).to eq("T001-00000042")
     end
 
-    it '#sunat_formatted_number returns nil when series blank' do
-      guide = build(:dispatch_guide, sunat_series: nil)
+    it '#sunat_formatted_number returns nil when no SUNAT document' do
+      guide = create(:dispatch_guide)
       expect(guide.sunat_formatted_number).to be_nil
     end
 
     it '#sunat_document_type_label returns correct labels' do
-      expect(build(:dispatch_guide, sunat_document_type: "09").sunat_document_type_label).to eq("Guia Remitente")
-      expect(build(:dispatch_guide, sunat_document_type: "31").sunat_document_type_label).to eq("Guia Transportista")
+      guide1 = create(:dispatch_guide)
+      create(:sunat_document, documentable: guide1, sunat_document_type: "09")
+      guide2 = create(:dispatch_guide)
+      create(:sunat_document, documentable: guide2, sunat_document_type: "31")
+      expect(guide1.sunat_document_type_label).to eq("Guia Remitente")
+      expect(guide2.sunat_document_type_label).to eq("Guia Transportista")
     end
 
     it '#status_label returns Spanish labels' do

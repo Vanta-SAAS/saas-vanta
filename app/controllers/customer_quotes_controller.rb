@@ -33,6 +33,7 @@ class CustomerQuotesController < ApplicationController
       seller: Current.user
     )
     @show_seller_selector = !current_user_is_seller_only?
+    @credit_enabled = current_enterprise.module_enabled?("ventas.credito_clientes")
   end
 
   def create
@@ -50,6 +51,7 @@ class CustomerQuotesController < ApplicationController
     unless customer_quote_params[:items_attributes].present?
       @customer_quote.errors.add(:base, "Debes agregar al menos un producto")
       @show_seller_selector = !current_user_is_seller_only?
+      @credit_enabled = current_enterprise.module_enabled?("ventas.credito_clientes")
       return render :new, status: :unprocessable_entity
     end
 
@@ -57,6 +59,7 @@ class CustomerQuotesController < ApplicationController
       redirect_to @customer_quote, notice: "Cotizacion creada exitosamente."
     else
       @show_seller_selector = !current_user_is_seller_only?
+      @credit_enabled = current_enterprise.module_enabled?("ventas.credito_clientes")
       render :new, status: :unprocessable_entity
     end
   end
@@ -64,6 +67,7 @@ class CustomerQuotesController < ApplicationController
   def edit
     authorize @customer_quote
     @show_seller_selector = !current_user_is_seller_only?
+    @credit_enabled = current_enterprise.module_enabled?("ventas.credito_clientes")
 
     unless @customer_quote.can_edit?
       redirect_to @customer_quote, alert: "No se puede editar una cotizacion que no esta pendiente."
@@ -88,6 +92,7 @@ class CustomerQuotesController < ApplicationController
       redirect_to @customer_quote, notice: "Cotizacion actualizada exitosamente."
     else
       @show_seller_selector = !current_user_is_seller_only?
+      @credit_enabled = current_enterprise.module_enabled?("ventas.credito_clientes")
       render :edit, status: :unprocessable_entity
     end
   end
@@ -181,8 +186,10 @@ class CustomerQuotesController < ApplicationController
       :destination_id,
       :issue_date,
       :expiration_date,
+      :payment_condition,
       :notes,
-      items_attributes: [ :id, :product_id, :quantity, :unit_price, :_destroy ]
+      items_attributes: [ :id, :product_id, :quantity, :unit_price, :_destroy ],
+      installments_attributes: [ :id, :installment_number, :amount, :due_date, :_destroy ]
     )
   end
 

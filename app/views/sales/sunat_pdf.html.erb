@@ -92,6 +92,9 @@
     tax: @sale.tax,
     total: @sale.total %>
 
+  <%= render "shared/documents/pdf_installments",
+    document: @sale %>
+
   <div class="sunat-meta">
     <div class="meta-row">
       <span class="meta-label">Comprobante:</span> <%= doc_type_label %> <%= serie_correlativo %>

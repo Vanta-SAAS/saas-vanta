@@ -1,0 +1,77 @@
+<% content_for :page_title, "Notas de Credito" %>
+
+<% add_breadcrumb "Comercial" %>
+<% add_breadcrumb "Notas de Credito" %>
+
+<div class="max-w-7xl mx-auto">
+  <div class="flex items-center justify-between gap-3 mb-6">
+    <div class="w-full max-w-sm">
+      <%= render "shared/table/search_bar", url: credit_notes_path, placeholder: "Buscar por codigo..." %>
+    </div>
+  </div>
+
+  <% if @credit_notes.any? %>
+    <div class="card overflow-hidden p-0">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-border">
+          <thead>
+            <tr class="bg-muted/40">
+              <th class="table-th text-left">Codigo</th>
+              <th class="table-th text-left">Venta</th>
+              <th class="table-th text-left">Motivo</th>
+              <th class="table-th text-right">Total</th>
+              <th class="table-th text-center">Estado</th>
+              <th class="table-th text-center">SUNAT</th>
+              <th class="table-th"><span class="sr-only">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-border">
+            <% @credit_notes.each do |cn| %>
+              <tr class="hover:bg-muted/30 transition-colors">
+                <td class="px-5 py-3.5 whitespace-nowrap">
+                  <span class="text-sm font-medium text-foreground font-mono"><%= cn.code %></span>
+                </td>
+                <td class="px-5 py-3.5 whitespace-nowrap">
+                  <%= link_to cn.sale.code, sale_path(cn.sale), class: "text-sm link-primary font-mono" %>
+                </td>
+                <td class="px-5 py-3.5 whitespace-nowrap">
+                  <span class="text-sm text-muted-foreground"><%= cn.reason_label.truncate(40) %></span>
+                </td>
+                <td class="px-5 py-3.5 whitespace-nowrap text-right">
+                  <span class="text-sm font-medium text-foreground tabular-nums">S/ <%= number_with_precision(cn.total, precision: 2, delimiter: ",") %></span>
+                </td>
+                <td class="px-5 py-3.5 whitespace-nowrap text-center">
+                  <span class="<%= cn.status_badge_class %>"><%= cn.status_label %></span>
+                </td>
+                <td class="px-5 py-3.5 whitespace-nowrap text-center">
+                  <% if cn.sunat_status.present? %>
+                    <span class="<%= cn.sunat_status_badge_class %>"><%= cn.sunat_status %></span>
+                  <% else %>
+                    <span class="text-xs text-muted-foreground">-</span>
+                  <% end %>
+                </td>
+                <td class="px-5 py-3.5 whitespace-nowrap text-right">
+                  <%= link_to cn, class: "table-action-btn", title: "Ver" do %>
+                    <%= app_icon("eye", class: "w-4 h-4") %>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+      <% if @pagy.pages > 1 %>
+        <div class="px-5 py-3.5 border-t border-border">
+          <%= render "shared/table/pagination", pagy: @pagy %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <%= render "shared/table/empty_state",
+      icon: :document,
+      title: "No hay notas de credito",
+      description: "Las notas de credito se crean desde una venta con comprobante emitido.",
+      show_action: false %>
+  <% end %>
+</div>

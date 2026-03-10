@@ -1,0 +1,226 @@
+<%= form_with model: credit_note,
+             class: "space-y-6",
+             local: true,
+             data: {
+               controller: "credit-note-form"
+             } do |f| %>
+
+  <%= f.hidden_field :sale_id, value: sale.id %>
+  <%= f.hidden_field :code %>
+
+  <% if credit_note.errors.any? %>
+    <div class="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+      <div class="flex gap-2">
+        <%= app_icon("alert-circle", class: "w-5 h-5 text-destructive flex-shrink-0 mt-0.5") %>
+        <div>
+          <p class="text-sm font-medium text-destructive">Se encontraron errores:</p>
+          <ul class="mt-1 text-sm text-destructive list-disc list-inside">
+            <% credit_note.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <%# Reference sale info %>
+  <div class="card">
+    <h3 class="text-sm font-semibold text-foreground mb-3">Comprobante de Referencia</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+      <div>
+        <dt class="text-xs text-muted-foreground uppercase tracking-wide">Venta</dt>
+        <dd class="font-medium text-foreground mt-0.5 font-mono"><%= sale.code %></dd>
+      </div>
+      <div>
+        <dt class="text-xs text-muted-foreground uppercase tracking-wide">Comprobante</dt>
+        <dd class="font-medium text-foreground mt-0.5 font-mono"><%= sale.sunat_formatted_number %></dd>
+      </div>
+      <div>
+        <dt class="text-xs text-muted-foreground uppercase tracking-wide">Cliente</dt>
+        <dd class="font-medium text-foreground mt-0.5"><%= sale.customer.name %></dd>
+      </div>
+    </div>
+  </div>
+
+  <%# Reason %>
+  <div class="card">
+    <h3 class="text-sm font-semibold text-foreground mb-4">Motivo de la Nota de Credito</h3>
+    <div class="space-y-4">
+      <div data-controller="custom-select">
+        <label class="form-label">Motivo <span class="text-destructive">*</span></label>
+        <%= f.hidden_field :reason_code, data: { custom_select_target: "input" } %>
+        <div class="relative">
+          <button type="button"
+                  class="form-input w-full text-left flex items-center justify-between cursor-pointer"
+                  data-action="click->custom-select#toggle"
+                  data-custom-select-target="trigger">
+            <span data-custom-select-target="label" class="text-muted-foreground">Selecciona un motivo...</span>
+            <svg class="w-4 h-4 text-muted-foreground flex-shrink-0 transition-transform" data-custom-select-target="arrow" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div class="absolute z-20 mt-1 w-full bg-card border border-border rounded-lg shadow-lg overflow-hidden hidden"
+               data-custom-select-target="dropdown">
+            <% enabled_codes = %w[anulacion_de_la_operacion] %>
+            <% CreditNote::REASON_CODES.each do |code, label| %>
+              <% enabled = enabled_codes.include?(code) %>
+              <div class="flex items-center gap-3 px-4 py-2.5 border-b border-border/50 last:border-b-0 <%= enabled ? 'cursor-pointer hover:bg-muted/30 transition-colors' : 'opacity-50 cursor-not-allowed bg-muted/10' %>"
+                   <% if enabled %>
+                     data-action="click->custom-select#select"
+                     data-value="<%= code %>"
+                     data-label="<%= label %>"
+                   <% end %>>
+                <span class="text-sm <%= enabled ? 'text-foreground' : 'text-muted-foreground' %>"><%= label %></span>
+                <% unless enabled %>
+                  <span class="badge-secondary ml-auto text-[10px]">Proximamente</span>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+      <div>
+        <label class="form-label">Descripcion <span class="text-destructive">*</span></label>
+        <%= f.text_area :description,
+            class: "form-input w-full",
+            rows: 3,
+            placeholder: "Describe el motivo de la nota de credito..." %>
+      </div>
+    </div>
+  </div>
+
+  <%# Items %>
+  <div class="card p-0">
+    <div class="px-5 py-4 border-b border-border flex items-center justify-between">
+      <h3 class="text-sm font-semibold text-foreground">Items</h3>
+      <button type="button"
+              class="btn-secondary text-xs"
+              data-action="click->credit-note-form#addItem">
+        <%= app_icon("plus", class: "w-4 h-4") %>
+        Agregar Item
+      </button>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="min-w-[640px] w-full table-fixed divide-y divide-border">
+        <thead>
+          <tr class="bg-muted/40">
+            <th class="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground uppercase w-[40%]">Descripcion</th>
+            <th class="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground uppercase w-[15%]">Cantidad</th>
+            <th class="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground uppercase w-[20%]">Precio Unit.</th>
+            <th class="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground uppercase w-[15%]">Total</th>
+            <th class="px-4 py-2.5 text-center text-xs font-medium text-muted-foreground uppercase w-[10%]"></th>
+          </tr>
+        </thead>
+        <tbody data-credit-note-form-target="itemsList">
+          <% credit_note.items.each_with_index do |item, index| %>
+            <tr class="item-row" data-credit-note-form-target="itemRow">
+              <td class="px-4 py-3">
+                <% if item.persisted? %>
+                  <%= hidden_field_tag "credit_note[items_attributes][#{index}][id]", item.id %>
+                <% end %>
+                <%= text_field_tag "credit_note[items_attributes][#{index}][description]",
+                    item.description,
+                    class: "form-input w-full text-sm",
+                    placeholder: "Descripcion del item" %>
+                <%= hidden_field_tag "credit_note[items_attributes][#{index}][item_type]", item.item_type || "product" %>
+                <%= hidden_field_tag "credit_note[items_attributes][#{index}][tax_type]", item.tax_type || "gravado" %>
+              </td>
+              <td class="px-4 py-3">
+                <%= number_field_tag "credit_note[items_attributes][#{index}][quantity]",
+                    item.quantity,
+                    class: "form-input w-full quantity-input",
+                    min: 0.01,
+                    step: "0.01",
+                    data: { action: "input->credit-note-form#calculateRowTotal" } %>
+              </td>
+              <td class="px-4 py-3">
+                <%= number_field_tag "credit_note[items_attributes][#{index}][unit_price]",
+                    item.unit_price,
+                    class: "form-input w-full unit-price-input",
+                    step: "0.01",
+                    min: 0,
+                    data: { action: "input->credit-note-form#calculateRowTotal" } %>
+              </td>
+              <td class="px-4 py-3">
+                <span class="row-total text-sm font-medium text-foreground">S/ <%= number_with_precision((item.quantity || 0) * (item.unit_price || 0), precision: 2) %></span>
+              </td>
+              <td class="px-4 py-3 text-center">
+                <% if item.persisted? %>
+                  <%= hidden_field_tag "credit_note[items_attributes][#{index}][_destroy]", "0", class: "destroy-input" %>
+                <% end %>
+                <button type="button"
+                        class="text-destructive hover:text-destructive/80"
+                        data-action="click->credit-note-form#removeItem">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <%# Template for new items %>
+    <template data-credit-note-form-target="itemTemplate">
+      <tr class="item-row" data-credit-note-form-target="itemRow">
+        <td class="px-4 py-3">
+          <input type="text" name="credit_note[items_attributes][NEW_INDEX][description]"
+                 class="form-input w-full text-sm" placeholder="Descripcion del item">
+          <input type="hidden" name="credit_note[items_attributes][NEW_INDEX][item_type]" value="product">
+          <input type="hidden" name="credit_note[items_attributes][NEW_INDEX][tax_type]" value="gravado">
+        </td>
+        <td class="px-4 py-3">
+          <input type="number" name="credit_note[items_attributes][NEW_INDEX][quantity]"
+                 class="form-input w-full quantity-input" min="0.01" step="0.01" value="1"
+                 data-action="input->credit-note-form#calculateRowTotal">
+        </td>
+        <td class="px-4 py-3">
+          <input type="number" name="credit_note[items_attributes][NEW_INDEX][unit_price]"
+                 class="form-input w-full unit-price-input" step="0.01" min="0" value="0"
+                 data-action="input->credit-note-form#calculateRowTotal">
+        </td>
+        <td class="px-4 py-3">
+          <span class="row-total text-sm font-medium text-foreground">S/ 0.00</span>
+        </td>
+        <td class="px-4 py-3 text-center">
+          <button type="button"
+                  class="text-destructive hover:text-destructive/80"
+                  data-action="click->credit-note-form#removeItem">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+        </td>
+      </tr>
+    </template>
+
+    <%# Totals %>
+    <div class="px-5 py-4 border-t border-border">
+      <div class="flex justify-end">
+        <dl class="space-y-1.5 text-sm w-56">
+          <div class="flex justify-between">
+            <dt class="text-muted-foreground">Subtotal</dt>
+            <dd class="font-medium text-foreground tabular-nums" data-credit-note-form-target="subtotalDisplay">S/ 0.00</dd>
+          </div>
+          <div class="flex justify-between">
+            <dt class="text-muted-foreground">IGV (18%)</dt>
+            <dd class="font-medium text-foreground tabular-nums" data-credit-note-form-target="taxDisplay">S/ 0.00</dd>
+          </div>
+          <div class="flex justify-between border-t border-border pt-1.5">
+            <dt class="font-semibold text-foreground">Total</dt>
+            <dd class="font-bold text-foreground text-base tabular-nums" data-credit-note-form-target="totalDisplay">S/ 0.00</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <%# Submit %>
+  <div class="flex justify-end gap-3">
+    <%= link_to "Cancelar", sale_path(sale), class: "btn-secondary" %>
+    <%= f.submit "Crear Nota de Credito", class: "btn-primary", data: { turbo_submits_with: "Creando..." } %>
+  </div>
+<% end %>

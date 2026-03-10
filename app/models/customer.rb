@@ -24,6 +24,17 @@ class Customer < ApplicationRecord
     tax_id.present? ? "#{name} (#{tax_id})" : name
   end
 
+  def outstanding_balance
+    sales.where(payment_condition: "credit", status: %w[pending confirmed])
+         .joins(:installments)
+         .where(sale_installments: { status: "pending" })
+         .sum("sale_installments.amount")
+  end
+
+  def available_credit
+    credit_limit - outstanding_balance
+  end
+
   private
 
   def validate_phone_number

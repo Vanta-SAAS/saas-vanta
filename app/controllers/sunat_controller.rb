@@ -67,6 +67,10 @@ class SunatController < ApplicationController
       api_params[:serie_grt] = update_params[:sunat_series_grt] if update_params[:sunat_series_grt].present?
       api_params[:correlativo_grr] = update_params[:sunat_next_grr_number].to_i if update_params[:sunat_next_grr_number].present?
       api_params[:correlativo_grt] = update_params[:sunat_next_grt_number].to_i if update_params[:sunat_next_grt_number].present?
+      api_params[:serie_nota_credito_factura] = update_params[:sunat_series_nota_credito_factura] if update_params[:sunat_series_nota_credito_factura].present?
+      api_params[:correlativo_nota_credito_factura] = update_params[:sunat_next_nota_credito_factura_number].to_i if update_params[:sunat_next_nota_credito_factura_number].present?
+      api_params[:serie_nota_credito_boleta] = update_params[:sunat_series_nota_credito_boleta] if update_params[:sunat_series_nota_credito_boleta].present?
+      api_params[:correlativo_nota_credito_boleta] = update_params[:sunat_next_nota_credito_boleta_number].to_i if update_params[:sunat_next_nota_credito_boleta_number].present?
       client.update_client(api_params) if api_params.present?
     end
 
@@ -130,7 +134,9 @@ class SunatController < ApplicationController
       :sunat_series_factura, :sunat_series_boleta,
       :sunat_next_factura_number, :sunat_next_boleta_number,
       :sunat_series_grr, :sunat_series_grt,
-      :sunat_next_grr_number, :sunat_next_grt_number
+      :sunat_next_grr_number, :sunat_next_grt_number,
+      :sunat_series_nota_credito_factura, :sunat_next_nota_credito_factura_number,
+      :sunat_series_nota_credito_boleta, :sunat_next_nota_credito_boleta_number
     )
   end
 end

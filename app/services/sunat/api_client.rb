@@ -1,6 +1,7 @@
 module Sunat
   class ApiClient
     BASE_URL = ENV.fetch("BILLING_BASE_URL", "http://localhost:8000/api/v1")
+    PAYMENT_CONDITION_MAP = { "cash" => "contado", "credit" => "credito" }.freeze
 
     class Error < StandardError; end
     class AuthenticationError < Error; end
@@ -92,6 +93,20 @@ module Sunat
       request { connection(authenticated: true).post("documents/#{uuid}/retry") }
     end
 
+    # --- Notas de Credito ---
+
+    def create_credit_note(credit_note)
+      request do
+        connection(authenticated: true).post("credit-notes") do |req|
+          req.body = build_credit_note_payload(credit_note)
+        end
+      end
+    end
+
+    def retry_credit_note(uuid)
+      request { connection(authenticated: true).post("credit-notes/#{uuid}/retry") }
+    end
+
     def list_documents
       request { connection(authenticated: true).get("documents") }
     end
@@ -151,12 +166,13 @@ module Sunat
     def build_document_payload(sale, series_type:)
       customer = sale.customer
 
-      {
+      payload = {
         customer_doc_type: customer.tax_id_type == "ruc" ? "ruc" : "dni",
         customer_doc_number: customer.tax_id.to_s,
         customer_name: customer.name,
         customer_address: customer.address,
         currency: "PEN",
+        payment_condition: PAYMENT_CONDITION_MAP[sale.payment_condition],
         items: sale.items.includes(:product).map do |item|
           {
             description: item.product.name,
@@ -164,6 +180,43 @@ module Sunat
             item_type: "product",
             unit_price: item.unit_price.to_f,
             tax_type: "gravado"
+          }
+        end
+      }
+
+      if sale.credit?
+        payload[:installments] = sale.installments.order(:installment_number).map do |installment|
+          {
+            amount: installment.amount.to_f,
+            due_date: installment.due_date.iso8601
+          }
+        end
+      end
+
+      payload
+    end
+
+    def build_credit_note_payload(credit_note)
+      sale = credit_note.sale
+      settings = credit_note.enterprise.settings
+      series = if sale.sunat_document_type == "01"
+        settings.sunat_series_nota_credito_factura
+      else
+        settings.sunat_series_nota_credito_boleta
+      end
+
+      {
+        reference_document_id: sale.sunat_uuid,
+        series: series,
+        reason_code: credit_note.reason_code,
+        description: credit_note.description,
+        items: credit_note.items.map do |item|
+          {
+            description: item.description,
+            quantity: item.quantity.to_f,
+            item_type: item.item_type || "product",
+            unit_price: item.unit_price.to_f,
+            tax_type: item.tax_type || "gravado"
           }
         end
       }
