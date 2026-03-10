@@ -11,13 +11,13 @@ module Sunat
       validate_prerequisites!
       return unless valid?
 
-      clear_previous_document! if re_emission?
-
       settings = @sale.enterprise.settings
       client = ApiClient.new(api_key: settings.sunat_api_key)
 
-      @sunat_result = if retry_emission?
-        client.retry_document(@sale.sunat_uuid)
+      doc = @sale.current_sunat_document
+
+      @sunat_result = if doc&.can_retry?
+        client.retry_document(doc.sunat_uuid)
       elsif factura?
         client.create_invoice(@sale)
       else
@@ -26,7 +26,9 @@ module Sunat
 
       sunat_status = @sunat_result["status"] || "CREATED"
 
-      @sale.update!(
+      # Create or update the SunatDocument record
+      sunat_doc = doc&.can_retry? ? doc : @sale.sunat_documents.build
+      sunat_doc.update!(
         sunat_uuid: @sunat_result["uuid"] || @sunat_result["id"],
         sunat_status: sunat_status,
         sunat_document_type: factura? ? "01" : "03",
@@ -62,30 +64,6 @@ module Sunat
 
     private
 
-    def retry_emission?
-      @sale.sunat_uuid.present? && @sale.sunat_status.in?(%w[ERROR REJECTED])
-    end
-
-    def re_emission?
-      @sale.sunat_uuid.present? && @sale.has_accepted_credit_note?
-    end
-
-    def clear_previous_document!
-      @sale.update!(
-        sunat_uuid: nil,
-        sunat_status: nil,
-        sunat_document_type: nil,
-        sunat_series: nil,
-        sunat_number: nil,
-        sunat_xml: nil,
-        sunat_cdr_code: nil,
-        sunat_cdr_description: nil,
-        sunat_hash: nil,
-        sunat_qr_image: nil,
-        sunat_response_data: nil
-      )
-    end
-
     def validate_prerequisites!
       unless @sale.confirmed?
         add_error("La venta debe estar confirmada para emitir comprobante")
@@ -93,7 +71,8 @@ module Sunat
         return
       end
 
-      if @sale.sunat_uuid.present? && !retry_emission? && !re_emission?
+      doc = @sale.current_sunat_document
+      if doc.present? && !doc.can_retry?
         add_error("Esta venta ya tiene un comprobante emitido")
         set_as_invalid!
         return
@@ -130,7 +109,7 @@ module Sunat
     end
 
     def save_document_from_error(document_data)
-      @sale.update!(
+      @sale.sunat_documents.create!(
         sunat_uuid: document_data["uuid"] || document_data["id"],
         sunat_status: document_data["status"] || "ERROR",
         sunat_document_type: factura? ? "01" : "03",

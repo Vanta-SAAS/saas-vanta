@@ -1,5 +1,6 @@
 class Sale < ApplicationRecord
   include Documentable
+  include SunatDocumentable
 
   belongs_to :customer
   belongs_to :seller, class_name: "User"
@@ -48,52 +49,26 @@ class Sale < ApplicationRecord
   end
 
   def can_emit_document?
+    doc = current_sunat_document
     confirmed? &&
-      (sunat_uuid.blank? || has_accepted_credit_note?) &&
+      (doc.nil? || doc.can_retry?) &&
       enterprise.settings&.sunat_api_key.present? &&
       enterprise.settings&.sunat_certificate_uploaded?
   end
 
-  def can_retry_document?
-    sunat_uuid.present? && sunat_status.in?(%w[ERROR REJECTED])
-  end
-
   def can_emit_credit_note?
-    sunat_uuid.present? && sunat_status == "ACCEPTED" && !credit_notes.exists?(sunat_status: "ACCEPTED")
+    doc = current_sunat_document
+    doc.present? && doc.accepted? && !doc.voided?
   end
 
   def has_accepted_credit_note?
-    credit_notes.exists?(sunat_status: "ACCEPTED")
+    sunat_documents.where(voided: true).exists?
   end
 
   def can_create_dispatch_guide?
     confirmed? && has_goods? && !dispatch_guides.exists? &&
       enterprise.settings&.sunat_api_key.present? &&
       enterprise.settings&.sunat_certificate_uploaded?
-  end
-
-  def sunat_status_badge_class
-    case sunat_status
-    when "ACCEPTED" then "badge-success"
-    when "REJECTED" then "badge-destructive"
-    when "ERROR" then "badge-destructive"
-    when "SIGNED", "CREATED" then "badge-secondary"
-    else "badge-secondary"
-    end
-  end
-
-  def sunat_formatted_number
-    return nil unless sunat_series.present? && sunat_number.present?
-
-    "#{sunat_series}-#{sunat_number.to_s.rjust(8, '0')}"
-  end
-
-  def sunat_document_type_label
-    case sunat_document_type
-    when "01" then "Factura"
-    when "03" then "Boleta"
-    else sunat_document_type
-    end
   end
 
   def has_goods?

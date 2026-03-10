@@ -25,7 +25,7 @@
             data: { turbo_confirm: "Se emitira una nota de credito electronica a SUNAT. Continuar?", turbo_submits_with: "Emitiendo..." } %>
       <% end %>
 
-      <% if @credit_note.can_retry? && policy(@credit_note).retry_document? %>
+      <% if @credit_note.can_retry_document? && policy(@credit_note).retry_document? %>
         <%= button_to "Reintentar Envio", retry_document_credit_note_path(@credit_note),
             method: :post, class: "btn-secondary",
             data: { turbo_confirm: "Reintentar el envio de la nota de credito a SUNAT?" } %>
@@ -140,7 +140,7 @@
       <% end %>
 
       <div class="mt-4 flex flex-wrap gap-2">
-        <% if @credit_note.can_retry? && policy(@credit_note).retry_document? %>
+        <% if @credit_note.can_retry_document? && policy(@credit_note).retry_document? %>
           <%= button_to "Reintentar Envio", retry_document_credit_note_path(@credit_note),
               method: :post, class: "btn-secondary",
               data: { turbo_confirm: "Reintentar el envio de la nota de credito a SUNAT?" } %>

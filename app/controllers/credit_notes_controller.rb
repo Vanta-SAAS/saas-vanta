@@ -26,7 +26,8 @@ class CreditNotesController < ApplicationController
     authorize CreditNote
     @sale = current_enterprise.sales.find(params[:sale_id])
 
-    unless @sale.sunat_uuid.present? && @sale.sunat_status == "ACCEPTED"
+    sale_doc = @sale.current_sunat_document
+    unless sale_doc&.sunat_uuid.present? && sale_doc&.accepted?
       redirect_to @sale, alert: "La venta debe tener un comprobante aceptado por SUNAT para emitir nota de credito."
       return
     end

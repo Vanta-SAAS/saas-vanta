@@ -22,7 +22,7 @@ default: &default
 
 development:
   <<: *default
-  url: <%= ENV.fetch("DATABASE_URL") { "postgres://postgres:postgres@localhost:5432/saas_vanta_development" } %>
+  url: <%= ENV.fetch("DATABASE_URL") { "postgres://postgres:postgres@db:5432/saas_vanta_development" } %>
 
 
 # Warning: The database defined as "test" will be erased and

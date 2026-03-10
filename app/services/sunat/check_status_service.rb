@@ -8,7 +8,9 @@ module Sunat
     end
 
     def call
-      unless @sale.sunat_uuid.present?
+      doc = @sale.current_sunat_document
+
+      unless doc&.sunat_uuid.present?
         add_error("Esta venta no tiene un comprobante emitido")
         set_as_invalid!
         return
@@ -17,14 +19,14 @@ module Sunat
       settings = @sale.enterprise.settings
       client = ApiClient.new(api_key: settings.sunat_api_key)
 
-      @status_result = client.get_document_status(@sale.sunat_uuid)
+      @status_result = client.get_document_status(doc.sunat_uuid)
       new_status = @status_result["status"]
 
-      @sale.update!(sunat_status: new_status) if new_status.present?
+      doc.update!(sunat_status: new_status) if new_status.present?
 
-      if new_status == "ACCEPTED" && @sale.sunat_xml.blank?
-        detail = client.get_document(@sale.sunat_uuid)
-        @sale.update!(
+      if new_status == "ACCEPTED" && doc.sunat_xml.blank?
+        detail = client.get_document(doc.sunat_uuid)
+        doc.update!(
           sunat_xml: detail["xml_signed"],
           sunat_cdr_code: detail["cdr_code"],
           sunat_cdr_description: detail["cdr_description"],

@@ -18,7 +18,14 @@ RSpec.describe Sunat::EmitCreditNoteService, type: :service do
     create(:sale_item, sale: sale, product: product, quantity: 2, unit_price: 100.0)
     sale.reload
     sale.save!
-    sale.update!(sunat_uuid: "original-doc-uuid", sunat_status: "ACCEPTED", sunat_document_type: "01", sunat_series: "F001", sunat_number: 1)
+    create(:sunat_document,
+      documentable: sale,
+      sunat_uuid: "original-doc-uuid",
+      sunat_status: "ACCEPTED",
+      sunat_document_type: "01",
+      sunat_series: "F001",
+      sunat_number: 1
+    )
     sale
   end
 
@@ -33,7 +40,7 @@ RSpec.describe Sunat::EmitCreditNoteService, type: :service do
   describe "#call" do
     context "validations" do
       it "fails when sale has no accepted SUNAT document" do
-        sale.update!(sunat_status: "ERROR")
+        sale.current_sunat_document.update!(sunat_status: "ERROR")
         service = described_class.new(credit_note: credit_note)
         service.call
 
@@ -94,10 +101,36 @@ RSpec.describe Sunat::EmitCreditNoteService, type: :service do
         service.call
 
         expect(service).to be_valid
-        expect(credit_note.reload.sunat_uuid).to eq("cn-uuid-123")
+        credit_note.reload
+        expect(credit_note.sunat_uuid).to eq("cn-uuid-123")
         expect(credit_note.sunat_status).to eq("ACCEPTED")
         expect(credit_note.status).to eq("emitted")
         expect(credit_note.sunat_document_type).to eq("07")
+      end
+
+      it "voids the sale's SUNAT document when credit note is accepted" do
+        response = {
+          "uuid" => "cn-uuid-void",
+          "status" => "ACCEPTED",
+          "series" => "F001",
+          "correlative" => 1,
+          "xml_signed" => "<xml>signed</xml>",
+          "cdr_code" => "0",
+          "cdr_description" => "Aceptada",
+          "hash" => "abc",
+          "qr_image" => "qr"
+        }
+
+        client = instance_double(Sunat::ApiClient)
+        allow(Sunat::ApiClient).to receive(:new).and_return(client)
+        allow(client).to receive(:create_credit_note).and_return(response)
+
+        service = described_class.new(credit_note: credit_note)
+        service.call
+
+        expect(service).to be_valid
+        sale_doc = sale.sunat_documents.find_by(sunat_uuid: "original-doc-uuid")
+        expect(sale_doc.voided).to be true
       end
     end
 
@@ -138,7 +171,8 @@ RSpec.describe Sunat::EmitCreditNoteService, type: :service do
         service.call
 
         expect(service).not_to be_valid
-        expect(credit_note.reload.sunat_uuid).to eq("cn-uuid-error")
+        credit_note.reload
+        expect(credit_note.sunat_uuid).to eq("cn-uuid-error")
         expect(credit_note.sunat_status).to eq("ERROR")
         expect(credit_note.status).to eq("error")
       end
@@ -147,7 +181,12 @@ RSpec.describe Sunat::EmitCreditNoteService, type: :service do
     context "retry" do
       before do
         settings.update!(sunat_api_key: "some_key", sunat_certificate_uploaded: true)
-        credit_note.update!(sunat_uuid: "cn-uuid-retry", sunat_status: "ERROR", status: :error)
+        credit_note.update!(status: :error)
+        create(:sunat_document,
+          documentable: credit_note,
+          sunat_uuid: "cn-uuid-retry",
+          sunat_status: "ERROR"
+        )
       end
 
       it "retries using the existing UUID" do
@@ -171,7 +210,8 @@ RSpec.describe Sunat::EmitCreditNoteService, type: :service do
         service.call
 
         expect(service).to be_valid
-        expect(credit_note.reload.sunat_status).to eq("ACCEPTED")
+        credit_note.reload
+        expect(credit_note.sunat_status).to eq("ACCEPTED")
         expect(credit_note.status).to eq("emitted")
       end
     end

@@ -48,7 +48,7 @@ RSpec.describe Sunat::EmitDispatchGuideService do
         expect(subject).to be_valid
       end
 
-      it 'updates guide with SUNAT data' do
+      it 'creates a SunatDocument with SUNAT data' do
         subject.call
         guide.reload
         expect(guide.sunat_uuid).to eq(api_response["uuid"])
@@ -57,6 +57,7 @@ RSpec.describe Sunat::EmitDispatchGuideService do
         expect(guide.sunat_series).to eq("T001")
         expect(guide.sunat_number).to eq(42)
         expect(guide.status).to eq("emitted")
+        expect(guide.sunat_documents.count).to eq(1)
       end
 
       it 'saves next document info for GRR' do
@@ -102,9 +103,10 @@ RSpec.describe Sunat::EmitDispatchGuideService do
       end
     end
 
-    context 'when guide already has SUNAT UUID with ACCEPTED status' do
+    context 'when guide already has an accepted SUNAT document' do
       before do
-        guide.update_columns(sunat_uuid: "existing-uuid", sunat_status: "ACCEPTED", status: "emitted")
+        guide.update_column(:status, "emitted")
+        create(:sunat_document, documentable: guide, sunat_uuid: "existing-uuid", sunat_status: "ACCEPTED")
       end
 
       it 'adds error' do
@@ -116,7 +118,7 @@ RSpec.describe Sunat::EmitDispatchGuideService do
 
     context 'when guide has a rejected document' do
       before do
-        guide.update_columns(sunat_uuid: "rejected-uuid", sunat_status: "REJECTED")
+        create(:sunat_document, documentable: guide, sunat_uuid: "rejected-uuid", sunat_status: "REJECTED")
         client = instance_double(Sunat::ApiClient)
         allow(Sunat::ApiClient).to receive(:new).and_return(client)
         allow(client).to receive(:retry_dispatch_guide).with("rejected-uuid").and_return(api_response)
@@ -132,7 +134,7 @@ RSpec.describe Sunat::EmitDispatchGuideService do
 
     context 'when guide has an errored document' do
       before do
-        guide.update_columns(sunat_uuid: "errored-uuid", sunat_status: "ERROR")
+        create(:sunat_document, documentable: guide, sunat_uuid: "errored-uuid", sunat_status: "ERROR")
         client = instance_double(Sunat::ApiClient)
         allow(Sunat::ApiClient).to receive(:new).and_return(client)
         allow(client).to receive(:retry_dispatch_guide).with("errored-uuid").and_return(api_response)

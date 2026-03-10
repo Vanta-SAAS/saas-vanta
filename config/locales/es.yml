@@ -97,6 +97,7 @@ es:
         greater_than: "debe ser mayor que %{count}"
         present: "debe estar en blanco"
         inclusion: "no esta incluido en la lista"
+        record_invalid: "%{errors}"
   errors:
     format: "%{attribute} %{message}"
     messages:

@@ -12,10 +12,10 @@ class SalesController < ApplicationController
 
     case params[:doc_type]
     when "factura"
-      sales = sales.where(sunat_document_type: "01")
+      sales = sales.joins(:sunat_documents).where(sunat_documents: { sunat_document_type: "01", voided: false })
       @doc_type_filter = "factura"
     when "boleta"
-      sales = sales.where(sunat_document_type: "03")
+      sales = sales.joins(:sunat_documents).where(sunat_documents: { sunat_document_type: "03", voided: false })
       @doc_type_filter = "boleta"
     end
 

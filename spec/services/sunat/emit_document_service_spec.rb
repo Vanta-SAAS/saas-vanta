@@ -56,7 +56,8 @@ RSpec.describe Sunat::EmitDocumentService, type: :service do
           service.call
 
           expect(service).to be_valid
-          expect(sale.reload.sunat_uuid).to be_present
+          sale.reload
+          expect(sale.sunat_uuid).to be_present
           expect(sale.sunat_document_type).to eq("01")
           expect(sale.sunat_series).to start_with("F")
           expect(sale.sunat_status).to eq("ACCEPTED")
@@ -136,7 +137,8 @@ RSpec.describe Sunat::EmitDocumentService, type: :service do
         service.call
 
         expect(service).not_to be_valid
-        expect(sale.reload.sunat_uuid).to eq("doc-uuid-from-502")
+        sale.reload
+        expect(sale.sunat_uuid).to eq("doc-uuid-from-502")
         expect(sale.sunat_status).to eq("ERROR")
         expect(sale.sunat_series).to eq("F001")
         expect(sale.sunat_number).to eq(7)
@@ -178,7 +180,7 @@ RSpec.describe Sunat::EmitDocumentService, type: :service do
 
     it "fails when sale already has a successfully emitted document" do
       sale = create_confirmed_sale(customer_ruc)
-      sale.update!(sunat_uuid: "existing-uuid", sunat_status: "ACCEPTED")
+      create(:sunat_document, documentable: sale, sunat_uuid: "existing-uuid", sunat_status: "ACCEPTED")
       service = described_class.new(sale: sale)
       service.call
 
@@ -189,7 +191,7 @@ RSpec.describe Sunat::EmitDocumentService, type: :service do
     it "allows retry when sale has a rejected document" do
       settings.update!(sunat_api_key: "some_key", sunat_certificate_uploaded: true)
       sale = create_confirmed_sale(customer_ruc)
-      sale.update!(sunat_uuid: "existing-uuid", sunat_status: "REJECTED")
+      create(:sunat_document, documentable: sale, sunat_uuid: "existing-uuid", sunat_status: "REJECTED")
 
       retry_response = {
         "uuid" => "existing-uuid",
@@ -219,7 +221,7 @@ RSpec.describe Sunat::EmitDocumentService, type: :service do
     it "allows retry when sale has an errored document" do
       settings.update!(sunat_api_key: "some_key", sunat_certificate_uploaded: true)
       sale = create_confirmed_sale(customer_ruc)
-      sale.update!(sunat_uuid: "existing-uuid", sunat_status: "ERROR")
+      create(:sunat_document, documentable: sale, sunat_uuid: "existing-uuid", sunat_status: "ERROR")
 
       retry_response = {
         "uuid" => "existing-uuid",

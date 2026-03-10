@@ -14,15 +14,19 @@ module Sunat
       settings = @credit_note.enterprise.settings
       client = ApiClient.new(api_key: settings.sunat_api_key)
 
-      @sunat_result = if @credit_note.can_retry?
-        client.retry_credit_note(@credit_note.sunat_uuid)
+      doc = @credit_note.current_sunat_document
+
+      @sunat_result = if doc&.can_retry?
+        client.retry_credit_note(doc.sunat_uuid)
       else
         client.create_credit_note(@credit_note)
       end
 
       sunat_status = @sunat_result["status"] || "CREATED"
 
-      @credit_note.update!(
+      # Create or update the SunatDocument record
+      sunat_doc = doc&.can_retry? ? doc : @credit_note.sunat_documents.build
+      sunat_doc.update!(
         sunat_uuid: @sunat_result["uuid"] || @sunat_result["id"],
         sunat_status: sunat_status,
         sunat_document_type: "07",
@@ -33,9 +37,16 @@ module Sunat
         sunat_cdr_description: @sunat_result["cdr_description"],
         sunat_hash: @sunat_result["hash"],
         sunat_qr_image: @sunat_result["qr_image"],
-        sunat_response_data: @sunat_result,
-        status: sunat_status == "ACCEPTED" ? :emitted : :error
+        sunat_response_data: @sunat_result
       )
+
+      @credit_note.update!(status: sunat_status == "ACCEPTED" ? :emitted : :error)
+
+      if sunat_status == "ACCEPTED"
+        # Void the sale's current SUNAT document
+        sale_doc = @credit_note.sale.current_sunat_document
+        sale_doc&.void!
+      end
 
       if sunat_status == "REJECTED"
         description = @sunat_result["cdr_description"] || "Documento rechazado por SUNAT"
@@ -60,9 +71,9 @@ module Sunat
     private
 
     def validate_prerequisites!
-      sale = @credit_note.sale
+      sale_doc = @credit_note.sale.current_sunat_document
 
-      unless sale.sunat_uuid.present? && sale.sunat_status == "ACCEPTED"
+      unless sale_doc.present? && sale_doc.accepted? && !sale_doc.voided?
         add_error("La venta debe tener un comprobante aceptado por SUNAT")
         set_as_invalid!
         return
@@ -92,13 +103,14 @@ module Sunat
       next_number = @sunat_result["next_document_number"]
       return unless next_series.present? || next_number.present?
 
+      sale_doc = @credit_note.sale.current_sunat_document || @credit_note.sale.sunat_documents.order(created_at: :desc).first
       settings = @credit_note.enterprise.settings
-      if @credit_note.sale.sunat_document_type == "01" # Factura
+      if sale_doc&.sunat_document_type == "01"
         settings.update!(
           sunat_series_nota_credito_factura: next_series,
           sunat_next_nota_credito_factura_number: next_number
         )
-      else # Boleta
+      else
         settings.update!(
           sunat_series_nota_credito_boleta: next_series,
           sunat_next_nota_credito_boleta_number: next_number
@@ -107,13 +119,13 @@ module Sunat
     end
 
     def save_document_from_error(document_data)
-      @credit_note.update!(
+      @credit_note.sunat_documents.create!(
         sunat_uuid: document_data["uuid"] || document_data["id"],
         sunat_status: document_data["status"] || "ERROR",
         sunat_series: document_data["series"],
-        sunat_number: document_data["correlative"] || document_data["number"],
-        status: :error
+        sunat_number: document_data["correlative"] || document_data["number"]
       )
+      @credit_note.update!(status: :error)
     rescue ActiveRecord::RecordInvalid
       # No perder el error original si falla el guardado
     end

@@ -18,7 +18,7 @@ class AddPaymentConditionsAndInstallments < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :sale_installments, [:sale_id, :installment_number], unique: true
+    add_index :sale_installments, [ :sale_id, :installment_number ], unique: true
 
     # Customer quote installments
     create_table :customer_quote_installments do |t|
@@ -29,7 +29,7 @@ class AddPaymentConditionsAndInstallments < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :customer_quote_installments, [:customer_quote_id, :installment_number],
+    add_index :customer_quote_installments, [ :customer_quote_id, :installment_number ],
               unique: true, name: "idx_cq_installments_on_quote_and_number"
   end
 end

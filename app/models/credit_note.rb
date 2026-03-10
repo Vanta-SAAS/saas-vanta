@@ -1,4 +1,6 @@
 class CreditNote < ApplicationRecord
+  include SunatDocumentable
+
   REASON_CODES = {
     "anulacion_de_la_operacion" => "Anulacion de la operacion",
     "anulacion_por_error_en_el_ruc" => "Anulacion por error en el RUC",
@@ -43,25 +45,8 @@ class CreditNote < ApplicationRecord
   end
 
   def can_emit?
-    pending? && items.any? && sale.sunat_uuid.present? && sale.sunat_status == "ACCEPTED"
-  end
-
-  def can_retry?
-    sunat_uuid.present? && sunat_status.in?(%w[ERROR REJECTED])
-  end
-
-  def sunat_formatted_number
-    return nil unless sunat_series.present? && sunat_number.present?
-    "#{sunat_series}-#{sunat_number.to_s.rjust(8, '0')}"
-  end
-
-  def sunat_status_badge_class
-    case sunat_status
-    when "ACCEPTED" then "badge-success"
-    when "REJECTED", "ERROR" then "badge-destructive"
-    when "SIGNED", "CREATED" then "badge-secondary"
-    else "badge-secondary"
-    end
+    doc = sale.current_sunat_document
+    pending? && items.any? && doc.present? && doc.accepted? && !doc.voided?
   end
 
   def status_badge_class

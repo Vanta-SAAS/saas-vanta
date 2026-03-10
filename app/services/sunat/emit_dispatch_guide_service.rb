@@ -14,8 +14,10 @@ module Sunat
       settings = @guide.enterprise.settings
       client = ApiClient.new(api_key: settings.sunat_api_key)
 
-      @sunat_result = if retry_emission?
-        client.retry_dispatch_guide(@guide.sunat_uuid)
+      doc = @guide.current_sunat_document
+
+      @sunat_result = if doc&.can_retry?
+        client.retry_dispatch_guide(doc.sunat_uuid)
       elsif @guide.grr?
         client.create_dispatch_guide_remitente(@guide)
       else
@@ -24,7 +26,9 @@ module Sunat
 
       sunat_status = @sunat_result["status"] || "CREATED"
 
-      @guide.update!(
+      # Create or update the SunatDocument record
+      sunat_doc = doc&.can_retry? ? doc : @guide.sunat_documents.build
+      sunat_doc.update!(
         sunat_uuid: @sunat_result["uuid"] || @sunat_result["id"],
         sunat_status: sunat_status,
         sunat_document_type: @guide.grr? ? "09" : "31",
@@ -35,9 +39,10 @@ module Sunat
         sunat_cdr_description: @sunat_result["cdr_description"],
         sunat_hash: @sunat_result["hash"],
         sunat_qr_image: @sunat_result["qr_image"],
-        sunat_response_data: @sunat_result,
-        status: sunat_status == "REJECTED" ? :draft : :emitted
+        sunat_response_data: @sunat_result
       )
+
+      @guide.update!(status: sunat_status == "REJECTED" ? :draft : :emitted)
 
       if sunat_status == "REJECTED"
         description = @sunat_result["cdr_description"] || "Documento rechazado por SUNAT"
@@ -61,10 +66,6 @@ module Sunat
 
     private
 
-    def retry_emission?
-      @guide.sunat_uuid.present? && @guide.sunat_status.in?(%w[ERROR REJECTED])
-    end
-
     def validate_prerequisites!
       unless @guide.draft?
         add_error("La guia debe estar en borrador para emitir")
@@ -72,7 +73,8 @@ module Sunat
         return
       end
 
-      if @guide.sunat_uuid.present? && !retry_emission?
+      doc = @guide.current_sunat_document
+      if doc.present? && !doc.can_retry?
         add_error("Esta guia ya tiene un documento emitido")
         set_as_invalid!
         return
@@ -98,7 +100,7 @@ module Sunat
     end
 
     def save_document_from_error(document_data)
-      @guide.update!(
+      @guide.sunat_documents.create!(
         sunat_uuid: document_data["uuid"] || document_data["id"],
         sunat_status: document_data["status"] || "ERROR",
         sunat_document_type: @guide.grr? ? "09" : "31",

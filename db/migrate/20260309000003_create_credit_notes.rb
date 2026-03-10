@@ -31,7 +31,7 @@ class CreateCreditNotes < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :credit_notes, [:enterprise_id, :code], unique: true
+    add_index :credit_notes, [ :enterprise_id, :code ], unique: true
 
     create_table :credit_note_items do |t|
       t.references :credit_note, null: false, foreign_key: true

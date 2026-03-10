@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_09_000003) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_10_034457) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -97,17 +97,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_09_000003) do
     t.bigint "sale_id", null: false
     t.string "status", default: "pending", null: false
     t.decimal "subtotal", precision: 12, scale: 2, default: "0.0"
-    t.string "sunat_cdr_code"
-    t.text "sunat_cdr_description"
-    t.string "sunat_document_type", default: "07"
-    t.string "sunat_hash"
-    t.integer "sunat_number"
-    t.text "sunat_qr_image"
-    t.jsonb "sunat_response_data"
-    t.string "sunat_series"
-    t.string "sunat_status"
-    t.string "sunat_uuid"
-    t.text "sunat_xml"
     t.decimal "tax", precision: 12, scale: 2, default: "0.0"
     t.decimal "total", precision: 12, scale: 2, default: "0.0"
     t.datetime "updated_at", null: false
@@ -228,17 +217,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_09_000003) do
     t.bigint "sourceable_id"
     t.string "sourceable_type"
     t.string "status", default: "draft", null: false
-    t.string "sunat_cdr_code"
-    t.text "sunat_cdr_description"
-    t.string "sunat_document_type"
-    t.string "sunat_hash"
-    t.integer "sunat_number"
-    t.text "sunat_qr_image"
-    t.jsonb "sunat_response_data"
-    t.string "sunat_series"
-    t.string "sunat_status"
-    t.string "sunat_uuid"
-    t.text "sunat_xml"
     t.date "transfer_date", null: false
     t.string "transfer_reason", null: false
     t.string "transport_modality", null: false
@@ -253,7 +231,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_09_000003) do
     t.index ["enterprise_id"], name: "index_dispatch_guides_on_enterprise_id"
     t.index ["sourceable_type", "sourceable_id"], name: "index_dispatch_guides_on_sourceable"
     t.index ["status"], name: "index_dispatch_guides_on_status"
-    t.index ["sunat_uuid"], name: "index_dispatch_guides_on_sunat_uuid", unique: true, where: "(sunat_uuid IS NOT NULL)"
     t.index ["vehicle_id"], name: "index_dispatch_guides_on_vehicle_id"
   end
 
@@ -467,17 +444,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_09_000003) do
     t.string "sourceable_type"
     t.string "status", default: "pending", null: false
     t.decimal "subtotal", precision: 10, scale: 2, default: "0.0"
-    t.string "sunat_cdr_code"
-    t.text "sunat_cdr_description"
-    t.string "sunat_document_type"
-    t.string "sunat_hash"
-    t.integer "sunat_number"
-    t.text "sunat_qr_image"
-    t.jsonb "sunat_response_data"
-    t.string "sunat_series"
-    t.string "sunat_status"
-    t.string "sunat_uuid"
-    t.text "sunat_xml"
     t.decimal "tax", precision: 10, scale: 2, default: "0.0"
     t.decimal "total", precision: 10, scale: 2, default: "0.0"
     t.datetime "updated_at", null: false
@@ -491,8 +457,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_09_000003) do
     t.index ["seller_id"], name: "index_sales_on_seller_id"
     t.index ["sourceable_type", "sourceable_id"], name: "index_sales_on_sourceable"
     t.index ["status"], name: "index_sales_on_status"
-    t.index ["sunat_status"], name: "index_sales_on_sunat_status"
-    t.index ["sunat_uuid"], name: "index_sales_on_sunat_uuid", unique: true, where: "(sunat_uuid IS NOT NULL)"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -517,6 +481,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_09_000003) do
     t.boolean "wants_contact", default: false
     t.index ["enterprise_id"], name: "index_suggestions_on_enterprise_id"
     t.index ["user_id"], name: "index_suggestions_on_user_id"
+  end
+
+  create_table "sunat_documents", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "documentable_id", null: false
+    t.string "documentable_type", null: false
+    t.string "sunat_cdr_code"
+    t.text "sunat_cdr_description"
+    t.string "sunat_document_type"
+    t.string "sunat_hash"
+    t.integer "sunat_number"
+    t.text "sunat_qr_image"
+    t.jsonb "sunat_response_data"
+    t.string "sunat_series"
+    t.string "sunat_status"
+    t.string "sunat_uuid"
+    t.text "sunat_xml"
+    t.datetime "updated_at", null: false
+    t.boolean "voided", default: false, null: false
+    t.index ["documentable_type", "documentable_id", "voided"], name: "idx_sunat_docs_on_documentable_and_voided"
+    t.index ["documentable_type", "documentable_id"], name: "index_sunat_documents_on_documentable"
+    t.index ["sunat_uuid"], name: "index_sunat_documents_on_sunat_uuid", unique: true, where: "(sunat_uuid IS NOT NULL)"
   end
 
   create_table "ubigeos", force: :cascade do |t|

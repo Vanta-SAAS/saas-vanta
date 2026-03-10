@@ -214,107 +214,110 @@
     </div>
   <% end %>
 
-  <%# SUNAT — comprobante + notas de credito integradas %>
-  <% if @sale.sunat_uuid.present? %>
-    <% accepted_cn = @sale.credit_notes.find_by(sunat_status: "ACCEPTED") %>
-    <div class="card <%= accepted_cn ? 'border-destructive/30' : '' %>">
-      <div class="flex items-center justify-between mb-4">
-        <div class="flex items-center gap-2">
+  <%# SUNAT — comprobante activo %>
+  <% if @sale.sunat_documents.any? %>
+    <% active_doc = @sale.current_sunat_document %>
+    <% voided_docs = @sale.sunat_documents.voided.order(created_at: :desc) %>
+
+    <% if active_doc %>
+      <div class="card">
+        <div class="flex items-center justify-between mb-4">
           <h3 class="text-sm font-semibold text-foreground">Comprobante Electronico</h3>
-          <% if accepted_cn %>
-            <span class="badge-destructive">Anulado</span>
+          <span class="<%= active_doc.status_badge_class %>"><%= active_doc.sunat_status %></span>
+        </div>
+
+        <dl class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+          <div>
+            <dt class="text-xs text-muted-foreground uppercase tracking-wide">Tipo</dt>
+            <dd class="font-medium text-foreground mt-0.5"><%= active_doc.document_type_label %></dd>
+          </div>
+          <% if active_doc.sunat_series.present? %>
+            <div>
+              <dt class="text-xs text-muted-foreground uppercase tracking-wide">Serie - Numero</dt>
+              <dd class="font-medium text-foreground mt-0.5 font-mono"><%= active_doc.formatted_number %></dd>
+            </div>
+          <% end %>
+          <div>
+            <dt class="text-xs text-muted-foreground uppercase tracking-wide">UUID</dt>
+            <dd class="font-medium text-foreground mt-0.5 text-xs font-mono"><%= active_doc.sunat_uuid %></dd>
+          </div>
+        </dl>
+
+        <% if active_doc.sunat_cdr_code.present? %>
+          <div class="mt-4 p-3 bg-muted rounded-lg text-sm">
+            <span class="text-muted-foreground">Respuesta SUNAT:</span>
+            <span class="font-medium text-foreground"><%= active_doc.sunat_cdr_code %></span>
+            <% if active_doc.sunat_cdr_description.present? %>
+              <span class="text-muted-foreground">- <%= active_doc.sunat_cdr_description %></span>
+            <% end %>
+          </div>
+        <% end %>
+
+        <div class="mt-4 flex flex-wrap gap-2">
+          <%= link_to "Consultar Estado", check_sunat_status_sale_path(@sale), class: "btn-secondary" %>
+          <% if @sale.can_retry_document? && policy(@sale).retry_document? %>
+            <%= button_to "Reintentar Envio", retry_document_sale_path(@sale),
+                method: :post, class: "btn-secondary",
+                data: { turbo_confirm: "Reintentar el envio del comprobante a SUNAT?" } %>
+          <% end %>
+          <% if active_doc.accepted? && active_doc.sunat_xml.present? %>
+            <%= link_to "Comprobante PDF", sunat_pdf_sale_path(@sale), class: "btn-primary", data: { turbo: false } %>
+            <%= link_to "XML", sunat_xml_sale_path(@sale), class: "btn-secondary", data: { turbo: false } %>
+            <% if @sale.can_emit_credit_note? && policy(CreditNote).create? %>
+              <% pending_cn = @sale.credit_notes.find_by(status: :pending) %>
+              <% if pending_cn %>
+                <%= link_to "Nota de Credito", new_credit_note_path(sale_id: @sale.id), class: "btn-secondary",
+                    data: { turbo_method: :get, turbo_confirm: "Ya existe una nota de credito pendiente (#{pending_cn.code}). Deseas crear otra?" } %>
+              <% else %>
+                <%= link_to "Nota de Credito", new_credit_note_path(sale_id: @sale.id), class: "btn-secondary" %>
+              <% end %>
+            <% end %>
           <% end %>
         </div>
-        <span class="<%= @sale.sunat_status_badge_class %>"><%= @sale.sunat_status %></span>
       </div>
+    <% end %>
 
-      <% if accepted_cn %>
-        <div class="mb-4 p-3 bg-destructive/5 border border-destructive/15 rounded-lg text-sm flex items-start gap-2">
-          <%= app_icon("alert-circle", class: "w-4 h-4 text-destructive flex-shrink-0 mt-0.5") %>
-          <div>
-            <p class="font-medium text-foreground">
-              Este comprobante fue anulado con la nota de credito
-              <%= link_to accepted_cn.sunat_formatted_number || accepted_cn.code, credit_note_path(accepted_cn), class: "link-primary font-mono" %>
-            </p>
-            <p class="text-muted-foreground mt-0.5"><%= accepted_cn.reason_label %></p>
+    <%# Historial de comprobantes anulados %>
+    <% voided_docs.each do |voided_doc| %>
+      <% related_cn = @sale.credit_notes.detect { |cn| cn.sunat_documents.active.where(sunat_status: "ACCEPTED").exists? } %>
+      <div class="card border-destructive/30">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <h3 class="text-sm font-semibold text-foreground">Comprobante Anterior</h3>
+            <span class="badge-destructive">Anulado</span>
           </div>
+          <span class="text-xs text-muted-foreground font-mono"><%= voided_doc.formatted_number %></span>
         </div>
-      <% end %>
 
-      <dl class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-        <div>
-          <dt class="text-xs text-muted-foreground uppercase tracking-wide">Tipo</dt>
-          <dd class="font-medium text-foreground mt-0.5"><%= @sale.sunat_document_type_label %></dd>
-        </div>
-        <% if @sale.sunat_series.present? %>
+        <% if related_cn %>
+          <div class="p-3 bg-destructive/5 border border-destructive/15 rounded-lg text-sm flex items-start gap-2">
+            <%= app_icon("alert-circle", class: "w-4 h-4 text-destructive flex-shrink-0 mt-0.5") %>
+            <div>
+              <p class="font-medium text-foreground">
+                Anulado con nota de credito
+                <%= link_to related_cn.sunat_formatted_number || related_cn.code, credit_note_path(related_cn), class: "link-primary font-mono" %>
+              </p>
+              <p class="text-muted-foreground mt-0.5"><%= related_cn.reason_label %></p>
+            </div>
+          </div>
+        <% end %>
+
+        <dl class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm mt-3">
+          <div>
+            <dt class="text-xs text-muted-foreground uppercase tracking-wide">Tipo</dt>
+            <dd class="font-medium text-muted-foreground mt-0.5"><%= voided_doc.document_type_label %></dd>
+          </div>
           <div>
             <dt class="text-xs text-muted-foreground uppercase tracking-wide">Serie - Numero</dt>
-            <dd class="font-medium text-foreground mt-0.5 font-mono"><%= @sale.sunat_formatted_number %></dd>
+            <dd class="font-medium text-muted-foreground mt-0.5 font-mono"><%= voided_doc.formatted_number %></dd>
           </div>
-        <% end %>
-        <div>
-          <dt class="text-xs text-muted-foreground uppercase tracking-wide">UUID</dt>
-          <dd class="font-medium text-foreground mt-0.5 text-xs font-mono"><%= @sale.sunat_uuid %></dd>
-        </div>
-      </dl>
-
-      <% if @sale.sunat_cdr_code.present? %>
-        <div class="mt-4 p-3 bg-muted rounded-lg text-sm">
-          <span class="text-muted-foreground">Respuesta SUNAT:</span>
-          <span class="font-medium text-foreground"><%= @sale.sunat_cdr_code %></span>
-          <% if @sale.sunat_cdr_description.present? %>
-            <span class="text-muted-foreground">- <%= @sale.sunat_cdr_description %></span>
-          <% end %>
-        </div>
-      <% end %>
-
-      <div class="mt-4 flex flex-wrap gap-2">
-        <%= link_to "Consultar Estado", check_sunat_status_sale_path(@sale), class: "btn-secondary" %>
-        <% if @sale.can_retry_document? && policy(@sale).retry_document? %>
-          <%= button_to "Reintentar Envio", retry_document_sale_path(@sale),
-              method: :post, class: "btn-secondary",
-              data: { turbo_confirm: "Reintentar el envio del comprobante a SUNAT?" } %>
-        <% end %>
-        <% if @sale.sunat_status == "ACCEPTED" && @sale.sunat_xml.present? %>
-          <%= link_to "Comprobante PDF", sunat_pdf_sale_path(@sale), class: "btn-primary", data: { turbo: false } %>
-          <%= link_to "XML", sunat_xml_sale_path(@sale), class: "btn-secondary", data: { turbo: false } %>
-          <% if @sale.can_emit_credit_note? && policy(CreditNote).create? %>
-            <% pending_cn = @sale.credit_notes.find_by(status: :pending) %>
-            <% if pending_cn %>
-              <%= link_to "Nota de Credito", new_credit_note_path(sale_id: @sale.id), class: "btn-secondary",
-                  data: { turbo_method: :get, turbo_confirm: "Ya existe una nota de credito pendiente (#{pending_cn.code}). Deseas crear otra?" } %>
-            <% else %>
-              <%= link_to "Nota de Credito", new_credit_note_path(sale_id: @sale.id), class: "btn-secondary" %>
-            <% end %>
-          <% end %>
-        <% end %>
+          <div>
+            <dt class="text-xs text-muted-foreground uppercase tracking-wide">UUID</dt>
+            <dd class="font-medium text-muted-foreground mt-0.5 text-xs font-mono"><%= voided_doc.sunat_uuid %></dd>
+          </div>
+        </dl>
       </div>
-
-      <%# Notas de credito integradas dentro del card SUNAT %>
-      <% if @sale.credit_notes.any? %>
-        <div class="mt-4 pt-4 border-t border-border">
-          <h4 class="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3">Notas de Credito</h4>
-          <div class="divide-y divide-border/50 rounded-lg border border-border overflow-hidden">
-            <% @sale.credit_notes.each do |cn| %>
-              <div class="flex items-center justify-between px-4 py-2.5 bg-muted/20">
-                <div class="flex items-center gap-3">
-                  <%= link_to cn.code, credit_note_path(cn), class: "text-sm link-primary font-medium font-mono" %>
-                  <span class="text-xs text-muted-foreground"><%= cn.reason_label.truncate(35) %></span>
-                </div>
-                <div class="flex items-center gap-3">
-                  <span class="text-sm font-medium text-foreground tabular-nums">S/ <%= number_with_precision(cn.total, precision: 2, delimiter: ",") %></span>
-                  <% if cn.sunat_status.present? %>
-                    <span class="<%= cn.sunat_status_badge_class %>"><%= cn.sunat_status %></span>
-                  <% else %>
-                    <span class="<%= cn.status_badge_class %>"><%= cn.status_label %></span>
-                  <% end %>
-                </div>
-              </div>
-            <% end %>
-          </div>
-        </div>
-      <% end %>
-    </div>
+    <% end %>
   <% end %>
 
   <%# Documentos relacionados — OC y Guias en un solo card %>
