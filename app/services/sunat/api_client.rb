@@ -179,6 +179,7 @@ module Sunat
             quantity: item.quantity.to_f,
             item_type: "product",
             unit_price: item.unit_price.to_f,
+            unit_price_without_tax: PeruTax.base_amount(item.unit_price.to_f),
             tax_type: "gravado"
           }
         end
@@ -205,12 +206,14 @@ module Sunat
         reason_code: credit_note.reason_code,
         description: credit_note.description,
         items: credit_note.items.map do |item|
+          tax_type = item.tax_type || "gravado"
           {
             description: item.description,
             quantity: item.quantity.to_f,
             item_type: item.item_type || "product",
             unit_price: item.unit_price.to_f,
-            tax_type: item.tax_type || "gravado"
+            unit_price_without_tax: tax_type == "gravado" ? PeruTax.base_amount(item.unit_price.to_f) : item.unit_price.to_f,
+            tax_type: tax_type
           }
         end
       }
