@@ -48,7 +48,7 @@ gem "image_processing", "~> 1.2"
 gem "awesome_print", "~> 1.9", ">= 1.9.2"
 
 # Pagination
-gem "pagy", "~> 9.3"
+gem "pagy", "~> 43.3"
 
 # Excel handling
 gem "roo", "~> 2.10"           # Read Excel/CSV files
