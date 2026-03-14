@@ -67,6 +67,10 @@
   --sidebar-hover: #F3F2EF;
   --sidebar-active-bg: #ECFDF5;
 
+  /* Special */
+  --whatsapp: #25D366;
+  --whatsapp-hover: #20ba5a;
+
   /* Radii — slightly sharper for professional feel */
   --radius: 0.5rem;
 }
@@ -114,6 +118,9 @@
   --sidebar-icon-active: #10B981;
   --sidebar-hover: #262626;
   --sidebar-active-bg: #022C22;
+
+  --whatsapp: #25D366;
+  --whatsapp-hover: #20ba5a;
 }
 
 @theme inline {
@@ -168,8 +175,8 @@
   --color-gray-950: #030712;
 
   /* Special Colors */
-  --color-whatsapp: #25D366;
-  --color-whatsapp-hover: #20ba5a;
+  --color-whatsapp: var(--whatsapp);
+  --color-whatsapp-hover: var(--whatsapp-hover);
 
   /* Typography */
   --font-sans: 'Inter', system-ui, sans-serif;
@@ -1495,4 +1502,120 @@ li.hw-combobox__option,
 
 .async-combobox .hw-combobox__main__wrapper {
   width: 100% !important;
+}
+
+/* ============================================
+   SUPPORT WIDGET — Floating WhatsApp
+   ============================================ */
+
+.support-widget {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.support-widget-trigger {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background-color: var(--whatsapp);
+  color: #FFFFFF;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(37, 211, 102, 0.3);
+  transition: background-color 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+
+.support-widget-trigger:hover {
+  background-color: var(--whatsapp-hover);
+  transform: scale(1.05);
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.4);
+}
+
+.support-widget-trigger:active {
+  transform: scale(0.97);
+}
+
+.support-widget-panel {
+  width: 280px;
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  animation: support-widget-in 0.15s ease-out;
+}
+
+@keyframes support-widget-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.support-widget-panel-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.support-widget-panel-icon {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 0.5rem;
+  background-color: var(--primary-muted);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.support-widget-wa-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 0 1rem 1rem;
+  padding: 0.625rem 1rem;
+  border-radius: 0.5rem;
+  background-color: var(--whatsapp);
+  color: #FFFFFF;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.15s;
+}
+
+.support-widget-wa-btn:hover {
+  background-color: var(--whatsapp-hover);
+}
+
+@media (max-width: 768px) {
+  .support-widget {
+    bottom: 1rem;
+    right: 1rem;
+  }
+
+  .support-widget-trigger {
+    width: 48px;
+    height: 48px;
+  }
+
+  .support-widget-panel {
+    width: calc(100vw - 2rem);
+    max-width: 320px;
+  }
 }
