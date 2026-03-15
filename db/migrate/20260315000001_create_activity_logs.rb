@@ -17,7 +17,7 @@ class CreateActivityLogs < ActiveRecord::Migration[8.0]
     end
 
     add_index :activity_logs, :performed_at
-    add_index :activity_logs, [:record_type, :record_id]
-    add_index :activity_logs, [:controller_name, :action_name]
+    add_index :activity_logs, [ :record_type, :record_id ]
+    add_index :activity_logs, [ :controller_name, :action_name ]
   end
 end
