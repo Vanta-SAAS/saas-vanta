@@ -3,7 +3,7 @@ class RegistrationsController < ApplicationController
   allow_unauthenticated_access
   before_action :redirect_if_authenticated, only: %i[ new create ]
 
-  rate_limit to: 5, within: 3.minutes, only: :create, with: -> { redirect_to new_registration_path, alert: "Demasiados intentos. Intenta de nuevo mas tarde." }
+  rate_limit_authentication only: :create
 
   def new
   end
