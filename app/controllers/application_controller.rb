@@ -2,7 +2,11 @@ class ApplicationController < ActionController::Base
   include Authentication
   include Authorization
   include ModuleAccess
+  include Trackable
+  include RateLimitable
   include Pagy::Backend
+
+  rate_limit_general
 
   # Only allow modern browsers supporting webp images, web push, badges, import maps, CSS nesting, and CSS :has.
   allow_browser versions: :modern

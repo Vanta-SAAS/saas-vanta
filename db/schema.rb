@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_10_034457) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_15_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -40,6 +40,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_10_034457) do
     t.bigint "blob_id", null: false
     t.string "variation_digest", null: false
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "activity_logs", force: :cascade do |t|
+    t.string "action_name", null: false
+    t.string "controller_name", null: false
+    t.datetime "created_at", null: false
+    t.bigint "enterprise_id"
+    t.string "http_method", null: false
+    t.string "ip_address"
+    t.string "path", null: false
+    t.datetime "performed_at", null: false
+    t.bigint "record_id"
+    t.string "record_type"
+    t.jsonb "request_params", default: {}
+    t.datetime "updated_at", null: false
+    t.bigint "user_id"
+    t.index ["controller_name", "action_name"], name: "index_activity_logs_on_controller_name_and_action_name"
+    t.index ["enterprise_id"], name: "index_activity_logs_on_enterprise_id"
+    t.index ["performed_at"], name: "index_activity_logs_on_performed_at"
+    t.index ["record_type", "record_id"], name: "index_activity_logs_on_record_type_and_record_id"
+    t.index ["user_id"], name: "index_activity_logs_on_user_id"
   end
 
   create_table "bulk_imports", force: :cascade do |t|
@@ -582,6 +603,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_10_034457) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "activity_logs", "enterprises"
+  add_foreign_key "activity_logs", "users"
   add_foreign_key "bulk_imports", "enterprises"
   add_foreign_key "bulk_imports", "users"
   add_foreign_key "carriers", "enterprises"
