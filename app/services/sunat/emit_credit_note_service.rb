@@ -123,7 +123,8 @@ module Sunat
         sunat_uuid: document_data["uuid"] || document_data["id"],
         sunat_status: document_data["status"] || "ERROR",
         sunat_series: document_data["series"],
-        sunat_number: document_data["correlative"] || document_data["number"]
+        sunat_number: document_data["correlative"] || document_data["number"],
+        sunat_cdr_description: document_data["cdr_description"]
       )
       @credit_note.update!(status: :error)
     rescue ActiveRecord::RecordInvalid

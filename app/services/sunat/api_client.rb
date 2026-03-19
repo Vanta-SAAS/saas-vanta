@@ -290,9 +290,9 @@ module Sunat
       raise Error, "No se pudo conectar al servicio de facturacion. Verifique que este activo."
     rescue Faraday::ServerError => e
       body = e.response&.dig(:body)
-      if body.is_a?(Hash) && (body["uuid"] || body["id"]).present?
+      if body.is_a?(Hash) && body["id"].present?
         raise ServerErrorWithDocument.new(
-          "Error en SUNAT: #{extract_error_message(e)}",
+          body["cdr_description"] || "Error al enviar documento a SUNAT",
           body
         )
       end

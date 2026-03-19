@@ -114,7 +114,8 @@ module Sunat
         sunat_status: document_data["status"] || "ERROR",
         sunat_document_type: factura? ? "01" : "03",
         sunat_series: document_data["series"],
-        sunat_number: document_data["correlative"] || document_data["number"]
+        sunat_number: document_data["correlative"] || document_data["number"],
+        sunat_cdr_description: document_data["cdr_description"]
       )
     rescue ActiveRecord::RecordInvalid
       # No perder el error original si falla el guardado
