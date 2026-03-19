@@ -112,36 +112,105 @@ RSpec.describe Sunat::EmitDocumentService, type: :service do
       end
     end
 
-    context "when microservice returns 502 with document data" do
+    context "when microservice returns 502 with document data (WebMock)" do
       before do
         settings.update!(sunat_api_key: "some_key", sunat_certificate_uploaded: true)
       end
 
-      it "saves the document UUID for future retry" do
+      let(:document_id) { SecureRandom.uuid }
+      let(:error_body) do
+        {
+          "id" => document_id,
+          "document_type" => "01",
+          "series" => "F001",
+          "correlative" => 7,
+          "status" => "ERROR",
+          "total_amount" => "200.00",
+          "xml_signed" => nil,
+          "cdr_code" => nil,
+          "cdr_description" => "SUNAT no disponible"
+        }
+      end
+
+      it "saves the document id from the 502 body for future retry" do
         sale = create_confirmed_sale(customer_ruc)
         service = described_class.new(sale: sale)
+        billing_url = "#{Sunat::ApiClient::BASE_URL}/invoices"
 
-        document_data = {
-          "uuid" => "doc-uuid-from-502",
-          "status" => "ERROR",
-          "series" => "F001",
-          "correlative" => 7
-        }
+        VCR.turned_off do
+          WebMock.stub_request(:post, billing_url)
+            .to_return(
+              status: 502,
+              headers: { "Content-Type" => "application/json" },
+              body: error_body.to_json
+            )
 
-        client = instance_double(Sunat::ApiClient)
-        allow(Sunat::ApiClient).to receive(:new).and_return(client)
-        allow(client).to receive(:create_invoice).and_raise(
-          Sunat::ApiClient::ServerErrorWithDocument.new("Error en SUNAT: SOAP Fault", document_data)
-        )
-
-        service.call
+          service.call
+        end
 
         expect(service).not_to be_valid
         sale.reload
-        expect(sale.sunat_uuid).to eq("doc-uuid-from-502")
-        expect(sale.sunat_status).to eq("ERROR")
-        expect(sale.sunat_series).to eq("F001")
-        expect(sale.sunat_number).to eq(7)
+        expect(sale.sunat_documents.count).to eq(1)
+
+        sunat_doc = sale.current_sunat_document
+        expect(sunat_doc.sunat_uuid).to eq(document_id)
+        expect(sunat_doc.sunat_status).to eq("ERROR")
+        expect(sunat_doc.sunat_series).to eq("F001")
+        expect(sunat_doc.sunat_number).to eq(7)
+        expect(sunat_doc.can_retry?).to be true
+      end
+
+      it "uses retry endpoint on second emission attempt after 502" do
+        sale = create_confirmed_sale(customer_ruc)
+        billing_url = "#{Sunat::ApiClient::BASE_URL}/invoices"
+
+        # First call: 502 with document data
+        VCR.turned_off do
+          WebMock.stub_request(:post, billing_url)
+            .to_return(
+              status: 502,
+              headers: { "Content-Type" => "application/json" },
+              body: error_body.to_json
+            )
+
+          service1 = described_class.new(sale: sale)
+          service1.call
+        end
+
+        sale.reload
+        sunat_doc = sale.current_sunat_document
+        expect(sunat_doc.sunat_uuid).to eq(document_id)
+        expect(sunat_doc.can_retry?).to be true
+
+        # Second call: retry succeeds
+        retry_url = "#{Sunat::ApiClient::BASE_URL}/documents/#{document_id}/retry"
+        retry_response = {
+          "id" => document_id,
+          "status" => "ACCEPTED",
+          "series" => "F001",
+          "correlative" => 7,
+          "xml_signed" => "<xml>signed</xml>",
+          "cdr_code" => "0",
+          "cdr_description" => "La Factura fue aceptada",
+          "hash" => "abc123",
+          "qr_image" => "base64qr"
+        }
+
+        VCR.turned_off do
+          WebMock.stub_request(:post, retry_url)
+            .to_return(
+              status: 200,
+              headers: { "Content-Type" => "application/json" },
+              body: retry_response.to_json
+            )
+
+          service2 = described_class.new(sale: sale)
+          service2.call
+        end
+
+        expect(sale.reload.sunat_status).to eq("ACCEPTED")
+        expect(sale.sunat_documents.count).to eq(1)
+        expect(sale.current_sunat_document.sunat_uuid).to eq(document_id)
       end
     end
 
