@@ -14,9 +14,23 @@ module LineItemCalculable
     product.capacity_label || product.unit.upcase
   end
 
+  # Montos de linea alineados con el microservicio de facturacion:
+  # base_unit sin redondear, line_ext y line_igv con redondeo a 2 decimales.
+  def line_amounts
+    PeruTax.line_amounts(unit_price: unit_price, quantity: quantity)
+  end
+
+  def line_ext
+    line_amounts[:line_ext]
+  end
+
+  def line_igv
+    line_amounts[:line_igv]
+  end
+
   private
 
   def calculate_total
-    self.total = (quantity || 0) * (unit_price || 0)
+    self.total = line_amounts[:line_total]
   end
 end
