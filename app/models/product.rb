@@ -11,6 +11,7 @@ class Product < ApplicationRecord
 
   # Defaults
   before_validation :set_default_unit
+  before_validation :set_default_source_type
 
   validates :units_per_package, numericality: { greater_than: 0 }, allow_nil: true
 
@@ -89,5 +90,9 @@ class Product < ApplicationRecord
 
   def set_default_unit
     self.unit ||= "un"
+  end
+
+  def set_default_source_type
+    self.source_type ||= "other" if service?
   end
 end
