@@ -16,10 +16,17 @@ module Documentable
   private
 
   def calculate_totals
-    self.total = items.reject(&:marked_for_destruction?).sum { |item|
-      (item.quantity || 0) * (item.unit_price || 0)
-    }
-    self.subtotal = PeruTax.base_amount(total)
-    self.tax = PeruTax.extract_igv(total)
+    active_items = items.reject(&:marked_for_destruction?)
+
+    line_amounts = active_items.map do |item|
+      PeruTax.line_amounts(
+        unit_price: item.unit_price || 0,
+        quantity: item.quantity || 0
+      )
+    end
+
+    self.subtotal = line_amounts.sum(BigDecimal("0")) { |l| l[:line_ext] }
+    self.tax = line_amounts.sum(BigDecimal("0")) { |l| l[:line_igv] }
+    self.total = subtotal + tax
   end
 end
