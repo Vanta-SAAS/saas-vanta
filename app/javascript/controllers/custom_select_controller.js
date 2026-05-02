@@ -26,6 +26,7 @@ export default class extends Controller {
     this.labelTarget.classList.add("text-foreground")
     this.dropdownTarget.classList.add("hidden")
     this.arrowTarget.classList.remove("rotate-180")
+    this.dispatch("change", { detail: { value, label } })
   }
 
   close(event) {
