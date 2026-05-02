@@ -15,6 +15,12 @@ class CreditNote < ApplicationRecord
     "correccion_del_monto_neto_pendiente_de_pago" => "Correccion del monto neto pendiente de pago"
   }.freeze
 
+  VOIDING_REASON_CODES = %w[
+    anulacion_de_la_operacion
+    anulacion_por_error_en_el_ruc
+    devolucion_total
+  ].freeze
+
   belongs_to :enterprise
   belongs_to :sale
   belongs_to :created_by, class_name: "User"
@@ -42,6 +48,10 @@ class CreditNote < ApplicationRecord
 
   def reason_label
     REASON_CODES[reason_code] || reason_code
+  end
+
+  def voids_reference?
+    VOIDING_REASON_CODES.include?(reason_code)
   end
 
   def can_emit?

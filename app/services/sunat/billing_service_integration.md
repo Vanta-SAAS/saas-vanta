@@ -211,13 +211,43 @@ Authorization: Bearer <api_key>
   "item_type": "product", "unit_price": 118.00,
   "unit_price_without_tax": 100.00, "tax_type": "gravado" }] }
 
+# Credit Notes (Notas de Crédito) — Disminución en el valor (corrección parcial)
+# Útil cuando se facturó un monto incorrecto y se necesita acreditar la diferencia
+# (p. ej. IGV duplicado, error de monto, ajuste por sobrefacturación).
+POST /api/v1/credit-notes
+Authorization: Bearer <api_key>
+{ "reference_document_id": "uuid-of-the-original-invoice",
+  "reason_code": "disminucion_en_el_valor",
+  "description": "Ajuste por exceso de IGV facturado en el documento original",
+  "items": [{ "description": "Ajuste por exceso facturado", "quantity": 1,
+  "item_type": "service", "unit_price": 18.00,
+  "unit_price_without_tax": 15.2542372881355932, "tax_type": "gravado" }] }
+
 # series is OPTIONAL — auto-resolved from client config based on the referenced document type
 #   (factura → serie_nota_credito_factura e.g. FC01, boleta → serie_nota_credito_boleta e.g. BC01).
 #   Can be overridden by sending "series" explicitly.
 # Customer info and currency are inherited from the referenced document.
 # Credit notes can reference a subset of items — you don't need to include all items from the original document.
-# A single invoice/boleta can have multiple credit notes.
+# A single invoice/boleta can have multiple credit notes (e.g. anulación parcial + ajuste posterior).
 ```
+
+**Estructura de request idéntica para los 13 motivos:** El endpoint `POST /api/v1/credit-notes` acepta el mismo schema (`CreditNoteCreate`) sin importar el `reason_code`. Solo cambia el valor del `reason_code` y qué montos/items pones en `items[]`. No hay campos adicionales obligatorios para motivos específicos. Toda la diferencia es **semántica** — el contenido de `items[]` debe representar el monto que estás acreditando según el motivo:
+
+| `reason_code` | Qué poner en `items[]` |
+|---|---|
+| `anulacion_de_la_operacion` (01) | Todos los items del documento original (anulación total) |
+| `anulacion_por_error_en_el_ruc` (02) | Todos los items (anulación total, se reemitirá con RUC correcto) |
+| `correccion_por_error_en_la_descripcion` (03) | Items con la nueva descripción y mismos montos |
+| `descuento_global` (04) | Un único item con el monto del descuento aplicado al total |
+| `descuento_por_item` (05) | Un item por cada producto/servicio con su descuento puntual |
+| `devolucion_total` (06) | Todos los items del documento original |
+| `devolucion_por_item` (07) | Solo los items específicos devueltos (subset) |
+| `bonificacion` (08) | Items que representan la bonificación otorgada |
+| `disminucion_en_el_valor` (09) | Items que representan **solo la diferencia** a acreditar (parcial) |
+| `otros_conceptos` (10) | Items que representan el ajuste, según justificación libre |
+| `correccion_del_monto_neto_pendiente_de_pago` (13) | Items que reflejan el ajuste sobre cuotas pendientes |
+
+**Caso de uso típico — Doble IGV facturado:** Si una factura original cobró S/ 236.00 (incluyendo IGV duplicado) cuando debió cobrar S/ 200.00 (S/ 169.49 base + S/ 30.51 IGV), se emite una NC con motivo `disminucion_en_el_valor` por la diferencia de S/ 36.00 (`unit_price: 36.00`, `unit_price_without_tax: 30.5084745762711864`). El cliente puede emitir múltiples NCs sobre la misma factura para corregir el excedente sin necesidad de anular la operación completa.
 
 ### Payment Conditions (Condición de Venta)
 
