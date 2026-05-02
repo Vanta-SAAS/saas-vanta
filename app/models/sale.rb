@@ -62,7 +62,7 @@ class Sale < ApplicationRecord
   end
 
   def has_accepted_credit_note?
-    sunat_documents.where(voided: true).exists?
+    credit_notes.where(status: :emitted).exists?
   end
 
   def can_create_dispatch_guide?

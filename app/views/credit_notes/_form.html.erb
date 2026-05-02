@@ -62,7 +62,7 @@
           </button>
           <div class="absolute z-20 mt-1 w-full bg-card border border-border rounded-lg shadow-lg overflow-hidden hidden"
                data-custom-select-target="dropdown">
-            <% enabled_codes = %w[anulacion_de_la_operacion] %>
+            <% enabled_codes = %w[anulacion_de_la_operacion disminucion_en_el_valor] %>
             <% CreditNote::REASON_CODES.each do |code, label| %>
               <% enabled = enabled_codes.include?(code) %>
               <div class="flex items-center gap-3 px-4 py-2.5 border-b border-border/50 last:border-b-0 <%= enabled ? 'cursor-pointer hover:bg-muted/30 transition-colors' : 'opacity-50 cursor-not-allowed bg-muted/10' %>"

@@ -132,6 +132,34 @@ RSpec.describe Sunat::EmitCreditNoteService, type: :service do
         sale_doc = sale.sunat_documents.find_by(sunat_uuid: "original-doc-uuid")
         expect(sale_doc.voided).to be true
       end
+
+      it "does not void the sale's SUNAT document for partial credit notes (disminucion_en_el_valor)" do
+        credit_note.update!(reason_code: "disminucion_en_el_valor")
+
+        response = {
+          "uuid" => "cn-uuid-partial",
+          "status" => "ACCEPTED",
+          "series" => "F001",
+          "correlative" => 1,
+          "xml_signed" => "<xml>signed</xml>",
+          "cdr_code" => "0",
+          "cdr_description" => "Aceptada",
+          "hash" => "abc",
+          "qr_image" => "qr"
+        }
+
+        client = instance_double(Sunat::ApiClient)
+        allow(Sunat::ApiClient).to receive(:new).and_return(client)
+        allow(client).to receive(:create_credit_note).and_return(response)
+
+        service = described_class.new(credit_note: credit_note)
+        service.call
+
+        expect(service).to be_valid
+        sale_doc = sale.sunat_documents.find_by(sunat_uuid: "original-doc-uuid")
+        expect(sale_doc.voided).to be false
+        expect(sale.reload.can_emit_credit_note?).to be true
+      end
     end
 
     context "when microservice returns an error" do
