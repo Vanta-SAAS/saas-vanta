@@ -214,11 +214,13 @@ Authorization: Bearer <api_key>
 # Credit Notes (Notas de Crédito) — Disminución en el valor (corrección parcial)
 # Útil cuando se facturó un monto incorrecto y se necesita acreditar la diferencia
 # (p. ej. IGV duplicado, error de monto, ajuste por sobrefacturación).
+# Opcional: issue_date para imputar la NC a una fecha anterior (p. ej. mes anterior).
 POST /api/v1/credit-notes
 Authorization: Bearer <api_key>
 { "reference_document_id": "uuid-of-the-original-invoice",
   "reason_code": "disminucion_en_el_valor",
   "description": "Ajuste por exceso de IGV facturado en el documento original",
+  "issue_date": "2026-04-30",
   "items": [{ "description": "Ajuste por exceso facturado", "quantity": 1,
   "item_type": "service", "unit_price": 18.00,
   "unit_price_without_tax": 15.2542372881355932, "tax_type": "gravado" }] }
@@ -248,6 +250,20 @@ Authorization: Bearer <api_key>
 | `correccion_del_monto_neto_pendiente_de_pago` (13) | Items que reflejan el ajuste sobre cuotas pendientes |
 
 **Caso de uso típico — Doble IGV facturado:** Si una factura original cobró S/ 236.00 (incluyendo IGV duplicado) cuando debió cobrar S/ 200.00 (S/ 169.49 base + S/ 30.51 IGV), se emite una NC con motivo `disminucion_en_el_valor` por la diferencia de S/ 36.00 (`unit_price: 36.00`, `unit_price_without_tax: 30.5084745762711864`). El cliente puede emitir múltiples NCs sobre la misma factura para corregir el excedente sin necesidad de anular la operación completa.
+
+**Items: una sola línea con el monto total (motivos 04, 09, 10):** UBL 2.1 / SUNAT exige al menos una `<cac:CreditNoteLine>`, pero **no obliga a copiar los items originales**. Para los motivos `descuento_global` (04), `disminucion_en_el_valor` (09) y `otros_conceptos` (10), envía **un único item** en `items[]` con el monto total a acreditar. Para `devolucion_total` (06) o `anulacion_de_la_operacion` (01) sí mandas todos los items originales.
+
+### Fecha de emisión opcional (`issue_date`)
+
+Por defecto, la fecha de emisión (`IssueDate` del XML y `issue_date` del documento en BD) se setea a "hoy" en zona horaria Perú (UTC-5). El campo `issue_date` (formato `YYYY-MM-DD`) en `POST /api/v1/credit-notes` permite **retroactivar la fecha**, útil para imputar la NC al periodo tributario anterior cuando el bug que motivó la corrección ocurrió en ese periodo.
+
+**Reglas de validación (aplicadas en `CreditNoteCreate.validate_issue_date`):**
+- No puede ser **futura** (`issue_date > today` → `422 Unprocessable Entity`).
+- No puede estar a **más de 7 días en el pasado** (`today - issue_date > 7` → `422`). Esto refleja la **Resolución 300-2014/SUNAT** y modificatorias: el plazo máximo para enviar un comprobante a SUNAT es 7 días calendario desde su `IssueDate`. Si retroactivas más allá, SUNAT rechaza.
+
+**Ejemplo:** Hoy es 2026-05-02 y necesitas que la NC compense en el periodo de abril (porque la factura con doble IGV se emitió y declaró en abril). Envía `"issue_date": "2026-04-30"` — el microservicio lo acepta (2 días, dentro del plazo SUNAT) y la NC queda imputada a abril.
+
+**⚠️ Implicancia tributaria:** Si el PDT/PLE del periodo anterior ya fue declarado, retroactivar una NC implica una **rectificatoria del PDT**. Coordina con tu contador antes de retroactivar.
 
 ### Payment Conditions (Condición de Venta)
 

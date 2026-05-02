@@ -142,6 +142,7 @@ class CreditNotesController < ApplicationController
       :code,
       :reason_code,
       :description,
+      :issue_date,
       items_attributes: [ :id, :description, :quantity, :unit_price, :item_type, :tax_type, :_destroy ]
     )
   end

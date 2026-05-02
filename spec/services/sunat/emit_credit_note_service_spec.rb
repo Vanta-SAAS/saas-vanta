@@ -260,5 +260,18 @@ RSpec.describe Sunat::EmitCreditNoteService, type: :service do
       expect(payload[:items].first[:item_type]).to eq("product")
       expect(payload[:items].first[:tax_type]).to eq("gravado")
     end
+
+    it "omits issue_date when blank" do
+      api_client = Sunat::ApiClient.new(api_key: "test_key")
+      payload = api_client.send(:build_credit_note_payload, credit_note)
+      expect(payload).not_to have_key(:issue_date)
+    end
+
+    it "includes issue_date in ISO format when present" do
+      credit_note.update!(issue_date: Date.current - 2.days)
+      api_client = Sunat::ApiClient.new(api_key: "test_key")
+      payload = api_client.send(:build_credit_note_payload, credit_note)
+      expect(payload[:issue_date]).to eq((Date.current - 2.days).iso8601)
+    end
   end
 end

@@ -277,6 +277,57 @@
       </div>
     <% end %>
 
+    <%# Notas de Credito asociadas %>
+    <% sale_credit_notes = @sale.credit_notes.includes(:sunat_documents).order(created_at: :desc) %>
+    <% if sale_credit_notes.any? %>
+      <div class="card p-0">
+        <div class="px-5 py-4 border-b border-border">
+          <h3 class="text-sm font-semibold text-foreground">Notas de Credito</h3>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-border">
+            <thead>
+              <tr class="bg-muted/40">
+                <th class="px-5 py-2.5 text-left text-xs font-medium text-muted-foreground uppercase">Codigo / Comprobante</th>
+                <th class="px-5 py-2.5 text-left text-xs font-medium text-muted-foreground uppercase">Motivo</th>
+                <th class="px-5 py-2.5 text-left text-xs font-medium text-muted-foreground uppercase">Estado</th>
+                <th class="px-5 py-2.5 text-right text-xs font-medium text-muted-foreground uppercase">Total</th>
+                <th class="px-5 py-2.5 text-right text-xs font-medium text-muted-foreground uppercase"></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border">
+              <% sale_credit_notes.each do |cn| %>
+                <tr>
+                  <td class="px-5 py-3 text-sm">
+                    <%= link_to cn.code, credit_note_path(cn), class: "link-primary font-mono" %>
+                    <% if cn.sunat_formatted_number.present? %>
+                      <div class="text-xs text-muted-foreground font-mono mt-0.5"><%= cn.sunat_formatted_number %></div>
+                    <% end %>
+                  </td>
+                  <td class="px-5 py-3 text-sm text-foreground"><%= cn.reason_label %></td>
+                  <td class="px-5 py-3 text-sm">
+                    <span class="<%= cn.status_badge_class %>"><%= cn.status_label %></span>
+                  </td>
+                  <td class="px-5 py-3 text-sm text-foreground text-right tabular-nums">
+                    S/ <%= number_with_precision(cn.total, precision: 2, delimiter: ",") %>
+                  </td>
+                  <td class="px-5 py-3 text-sm text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <% if cn.sunat_status == "ACCEPTED" && cn.sunat_xml.present? %>
+                        <%= link_to "PDF", sunat_pdf_credit_note_path(cn), class: "btn-secondary text-xs", data: { turbo: false } %>
+                        <%= link_to "XML", sunat_xml_credit_note_path(cn), class: "btn-secondary text-xs", data: { turbo: false } %>
+                      <% end %>
+                      <%= link_to "Ver", credit_note_path(cn), class: "btn-secondary text-xs" %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    <% end %>
+
     <%# Historial de comprobantes anulados %>
     <% voided_docs.each do |voided_doc| %>
       <% related_cn = @sale.credit_notes.detect { |cn| cn.sunat_documents.active.where(sunat_status: "ACCEPTED").exists? } %>

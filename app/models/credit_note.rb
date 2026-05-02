@@ -21,6 +21,8 @@ class CreditNote < ApplicationRecord
     devolucion_total
   ].freeze
 
+  ISSUE_DATE_MAX_BACKDATE_DAYS = 7
+
   belongs_to :enterprise
   belongs_to :sale
   belongs_to :created_by, class_name: "User"
@@ -33,6 +35,7 @@ class CreditNote < ApplicationRecord
   validates :code, presence: true, uniqueness: { scope: :enterprise_id }
   validates :reason_code, presence: true, inclusion: { in: REASON_CODES.keys }
   validates :description, presence: true
+  validate :validate_issue_date
 
   before_save :calculate_totals
 
@@ -73,6 +76,17 @@ class CreditNote < ApplicationRecord
   end
 
   private
+
+  def validate_issue_date
+    return if issue_date.blank?
+
+    today = Date.current
+    if issue_date > today
+      errors.add(:issue_date, "no puede ser una fecha futura")
+    elsif (today - issue_date).to_i > ISSUE_DATE_MAX_BACKDATE_DAYS
+      errors.add(:issue_date, "no puede ser mayor a #{ISSUE_DATE_MAX_BACKDATE_DAYS} dias en el pasado (regla SUNAT)")
+    end
+  end
 
   def calculate_totals
     self.total = items.reject(&:marked_for_destruction?).sum { |item|
