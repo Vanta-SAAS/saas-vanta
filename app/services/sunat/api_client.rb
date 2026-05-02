@@ -201,7 +201,7 @@ module Sunat
       sale = credit_note.sale
       sale_doc = sale.current_sunat_document
 
-      {
+      payload = {
         reference_document_id: sale_doc&.sunat_uuid,
         reason_code: credit_note.reason_code,
         description: credit_note.description,
@@ -217,6 +217,9 @@ module Sunat
           }
         end
       }
+
+      payload[:issue_date] = credit_note.issue_date.iso8601 if credit_note.issue_date.present?
+      payload
     end
 
     def build_dispatch_guide_payload(guide)

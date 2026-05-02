@@ -1,3 +1,6 @@
+<% issue_date_max = Date.current %>
+<% issue_date_min = Date.current - CreditNote::ISSUE_DATE_MAX_BACKDATE_DAYS.days %>
+
 <%= form_with model: credit_note,
              class: "space-y-6",
              local: true,
@@ -47,9 +50,10 @@
   <div class="card">
     <h3 class="text-sm font-semibold text-foreground mb-4">Motivo de la Nota de Credito</h3>
     <div class="space-y-4">
-      <div data-controller="custom-select">
+      <div data-controller="custom-select"
+           data-action="custom-select:change->credit-note-form#onReasonChange">
         <label class="form-label">Motivo <span class="text-destructive">*</span></label>
-        <%= f.hidden_field :reason_code, data: { custom_select_target: "input" } %>
+        <%= f.hidden_field :reason_code, data: { custom_select_target: "input", credit_note_form_target: "reasonInput" } %>
         <div class="relative">
           <button type="button"
                   class="form-input w-full text-left flex items-center justify-between cursor-pointer"
@@ -86,6 +90,17 @@
             class: "form-input w-full",
             rows: 3,
             placeholder: "Describe el motivo de la nota de credito..." %>
+      </div>
+      <div>
+        <label class="form-label">Fecha de emision (opcional)</label>
+        <%= f.date_field :issue_date,
+            class: "form-input w-full max-w-xs",
+            min: issue_date_min.iso8601,
+            max: issue_date_max.iso8601 %>
+        <p class="text-xs text-muted-foreground mt-1">
+          Solo si necesitas imputar la NC a un periodo anterior. Maximo <%= CreditNote::ISSUE_DATE_MAX_BACKDATE_DAYS %> dias atras (regla SUNAT).
+          Si lo dejas vacio, se usa la fecha de hoy.
+        </p>
       </div>
     </div>
   </div>
