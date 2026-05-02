@@ -42,8 +42,7 @@ module Sunat
 
       @credit_note.update!(status: sunat_status == "ACCEPTED" ? :emitted : :error)
 
-      if sunat_status == "ACCEPTED"
-        # Void the sale's current SUNAT document
+      if sunat_status == "ACCEPTED" && @credit_note.voids_reference?
         sale_doc = @credit_note.sale.current_sunat_document
         sale_doc&.void!
       end
