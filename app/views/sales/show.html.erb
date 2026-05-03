@@ -265,11 +265,12 @@
             <%= link_to "XML", sunat_xml_sale_path(@sale), class: "btn-secondary", data: { turbo: false } %>
             <% if @sale.can_emit_credit_note? && policy(CreditNote).create? %>
               <% pending_cn = @sale.credit_notes.find_by(status: :pending) %>
+              <% nc_path = new_credit_note_path(sale_id: @sale.id, sunat_document_id: active_doc.id) %>
               <% if pending_cn %>
-                <%= link_to "Nota de Credito", new_credit_note_path(sale_id: @sale.id), class: "btn-secondary",
+                <%= link_to "Nota de Credito", nc_path, class: "btn-secondary",
                     data: { turbo_method: :get, turbo_confirm: "Ya existe una nota de credito pendiente (#{pending_cn.code}). Deseas crear otra?" } %>
               <% else %>
-                <%= link_to "Nota de Credito", new_credit_note_path(sale_id: @sale.id), class: "btn-secondary" %>
+                <%= link_to "Nota de Credito", nc_path, class: "btn-secondary" %>
               <% end %>
             <% end %>
           <% end %>
@@ -330,7 +331,7 @@
 
     <%# Historial de comprobantes anulados %>
     <% voided_docs.each do |voided_doc| %>
-      <% related_cn = @sale.credit_notes.detect { |cn| cn.sunat_documents.active.where(sunat_status: "ACCEPTED").exists? } %>
+      <% related_cn = sale_credit_notes.detect { |cn| cn.referenced_sunat_document_id == voided_doc.id && cn.voids_reference? } %>
       <div class="card border-destructive/30">
         <div class="flex items-center justify-between mb-4">
           <div class="flex items-center gap-2">
@@ -367,6 +368,15 @@
             <dd class="font-medium text-muted-foreground mt-0.5 text-xs font-mono"><%= voided_doc.sunat_uuid %></dd>
           </div>
         </dl>
+
+        <% if voided_doc.accepted? && policy(CreditNote).create? %>
+          <div class="mt-4 flex flex-wrap gap-2">
+            <%= link_to "Nota de Credito",
+                new_credit_note_path(sale_id: @sale.id, sunat_document_id: voided_doc.id),
+                class: "btn-secondary",
+                data: { turbo_confirm: "Vas a emitir una nota de credito sobre el comprobante anulado #{voided_doc.formatted_number}. Continuar?" } %>
+          </div>
+        <% end %>
       </div>
     <% end %>
   <% end %>
