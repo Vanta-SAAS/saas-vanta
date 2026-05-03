@@ -160,6 +160,50 @@ RSpec.describe Sunat::EmitCreditNoteService, type: :service do
         expect(sale_doc.voided).to be false
         expect(sale.reload.can_emit_credit_note?).to be true
       end
+
+      it "emits NC against an explicitly referenced voided document (anulacion parcial + ajuste posterior)" do
+        original_doc = sale.sunat_documents.find_by(sunat_uuid: "original-doc-uuid")
+        original_doc.void!
+        new_active_doc = create(:sunat_document,
+          documentable: sale,
+          sunat_uuid: "rectified-doc-uuid",
+          sunat_status: "ACCEPTED",
+          sunat_document_type: "01",
+          sunat_series: "F001",
+          sunat_number: 2
+        )
+
+        credit_note.update!(
+          reason_code: "disminucion_en_el_valor",
+          referenced_sunat_document: original_doc
+        )
+
+        response = {
+          "uuid" => "cn-uuid-against-voided",
+          "status" => "ACCEPTED",
+          "series" => "FC01",
+          "correlative" => 5,
+          "xml_signed" => "<xml>signed</xml>",
+          "cdr_code" => "0",
+          "cdr_description" => "Aceptada",
+          "hash" => "abc",
+          "qr_image" => "qr"
+        }
+
+        payload = Sunat::ApiClient.new(api_key: "test").send(:build_credit_note_payload, credit_note)
+        expect(payload[:reference_document_id]).to eq("original-doc-uuid")
+
+        client = instance_double(Sunat::ApiClient)
+        allow(Sunat::ApiClient).to receive(:new).and_return(client)
+        allow(client).to receive(:create_credit_note).and_return(response)
+
+        service = described_class.new(credit_note: credit_note)
+        service.call
+
+        expect(service).to be_valid
+        expect(new_active_doc.reload.voided).to be false
+        expect(original_doc.reload.voided).to be true
+      end
     end
 
     context "when microservice returns an error" do

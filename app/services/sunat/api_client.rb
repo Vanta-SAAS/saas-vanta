@@ -198,11 +198,10 @@ module Sunat
     end
 
     def build_credit_note_payload(credit_note)
-      sale = credit_note.sale
-      sale_doc = sale.current_sunat_document
+      ref_doc = credit_note.reference_sunat_document
 
       payload = {
-        reference_document_id: sale_doc&.sunat_uuid,
+        reference_document_id: ref_doc&.sunat_uuid,
         reason_code: credit_note.reason_code,
         description: credit_note.description,
         items: credit_note.items.map do |item|

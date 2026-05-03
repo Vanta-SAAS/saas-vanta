@@ -26,14 +26,15 @@ class CreditNotesController < ApplicationController
     authorize CreditNote
     @sale = current_enterprise.sales.find(params[:sale_id])
 
-    sale_doc = @sale.current_sunat_document
-    unless sale_doc&.sunat_uuid.present? && sale_doc&.accepted?
+    ref_doc = resolve_reference_document(@sale, params[:sunat_document_id])
+    unless ref_doc&.sunat_uuid.present? && ref_doc&.accepted?
       redirect_to @sale, alert: "La venta debe tener un comprobante aceptado por SUNAT para emitir nota de credito."
       return
     end
 
     @credit_note = current_enterprise.credit_notes.build(
       sale: @sale,
+      referenced_sunat_document: ref_doc,
       code: CreditNote.generate_next_code(current_enterprise),
       created_by: Current.user,
       status: :pending
@@ -143,7 +144,16 @@ class CreditNotesController < ApplicationController
       :reason_code,
       :description,
       :issue_date,
+      :referenced_sunat_document_id,
       items_attributes: [ :id, :description, :quantity, :unit_price, :item_type, :tax_type, :_destroy ]
     )
+  end
+
+  def resolve_reference_document(sale, sunat_document_id)
+    if sunat_document_id.present?
+      sale.sunat_documents.where(sunat_document_type: %w[01 03]).find_by(id: sunat_document_id)
+    else
+      sale.current_sunat_document
+    end
   end
 end

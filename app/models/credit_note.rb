@@ -26,6 +26,7 @@ class CreditNote < ApplicationRecord
   belongs_to :enterprise
   belongs_to :sale
   belongs_to :created_by, class_name: "User"
+  belongs_to :referenced_sunat_document, class_name: "SunatDocument", optional: true
 
   has_many :items, class_name: "CreditNoteItem", dependent: :destroy
   accepts_nested_attributes_for :items, allow_destroy: true, reject_if: :all_blank
@@ -36,6 +37,7 @@ class CreditNote < ApplicationRecord
   validates :reason_code, presence: true, inclusion: { in: REASON_CODES.keys }
   validates :description, presence: true
   validate :validate_issue_date
+  validate :validate_referenced_sunat_document
 
   before_save :calculate_totals
 
@@ -57,9 +59,13 @@ class CreditNote < ApplicationRecord
     VOIDING_REASON_CODES.include?(reason_code)
   end
 
+  def reference_sunat_document
+    referenced_sunat_document || sale.current_sunat_document
+  end
+
   def can_emit?
-    doc = sale.current_sunat_document
-    pending? && items.any? && doc.present? && doc.accepted? && !doc.voided?
+    doc = reference_sunat_document
+    pending? && items.any? && doc.present? && doc.accepted?
   end
 
   def status_badge_class
@@ -76,6 +82,19 @@ class CreditNote < ApplicationRecord
   end
 
   private
+
+  def validate_referenced_sunat_document
+    return if referenced_sunat_document.blank?
+
+    if sale.present? && referenced_sunat_document.documentable_id != sale.id
+      errors.add(:referenced_sunat_document, "no pertenece a la venta")
+      return
+    end
+
+    unless referenced_sunat_document.sunat_document_type.in?(%w[01 03])
+      errors.add(:referenced_sunat_document, "debe ser una factura o boleta")
+    end
+  end
 
   def validate_issue_date
     return if issue_date.blank?

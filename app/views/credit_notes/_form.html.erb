@@ -1,5 +1,6 @@
 <% issue_date_max = Date.current %>
 <% issue_date_min = Date.current - CreditNote::ISSUE_DATE_MAX_BACKDATE_DAYS.days %>
+<% reference_doc = credit_note.referenced_sunat_document || sale.current_sunat_document %>
 
 <%= form_with model: credit_note,
              class: "space-y-6",
@@ -10,6 +11,7 @@
 
   <%= f.hidden_field :sale_id, value: sale.id %>
   <%= f.hidden_field :code %>
+  <%= f.hidden_field :referenced_sunat_document_id, value: reference_doc&.id %>
 
   <% if credit_note.errors.any? %>
     <div class="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
@@ -37,7 +39,12 @@
       </div>
       <div>
         <dt class="text-xs text-muted-foreground uppercase tracking-wide">Comprobante</dt>
-        <dd class="font-medium text-foreground mt-0.5 font-mono"><%= sale.sunat_formatted_number %></dd>
+        <dd class="font-medium text-foreground mt-0.5 font-mono">
+          <%= reference_doc&.formatted_number %>
+          <% if reference_doc&.voided? %>
+            <span class="badge-secondary ml-1 text-[10px]">Anulado</span>
+          <% end %>
+        </dd>
       </div>
       <div>
         <dt class="text-xs text-muted-foreground uppercase tracking-wide">Cliente</dt>
