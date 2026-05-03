@@ -43,8 +43,7 @@ module Sunat
       @credit_note.update!(status: sunat_status == "ACCEPTED" ? :emitted : :error)
 
       if sunat_status == "ACCEPTED" && @credit_note.voids_reference?
-        sale_doc = @credit_note.sale.current_sunat_document
-        sale_doc&.void!
+        @credit_note.reference_sunat_document&.void!
       end
 
       if sunat_status == "REJECTED"
@@ -70,9 +69,9 @@ module Sunat
     private
 
     def validate_prerequisites!
-      sale_doc = @credit_note.sale.current_sunat_document
+      ref_doc = @credit_note.reference_sunat_document
 
-      unless sale_doc.present? && sale_doc.accepted? && !sale_doc.voided?
+      unless ref_doc.present? && ref_doc.accepted?
         add_error("La venta debe tener un comprobante aceptado por SUNAT")
         set_as_invalid!
         return
@@ -102,9 +101,9 @@ module Sunat
       next_number = @sunat_result["next_document_number"]
       return unless next_series.present? || next_number.present?
 
-      sale_doc = @credit_note.sale.current_sunat_document || @credit_note.sale.sunat_documents.order(created_at: :desc).first
+      ref_doc = @credit_note.reference_sunat_document || @credit_note.sale.sunat_documents.order(created_at: :desc).first
       settings = @credit_note.enterprise.settings
-      if sale_doc&.sunat_document_type == "01"
+      if ref_doc&.sunat_document_type == "01"
         settings.update!(
           sunat_series_nota_credito_factura: next_series,
           sunat_next_nota_credito_factura_number: next_number

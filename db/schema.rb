@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_02_180902) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_02_190000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -116,6 +116,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_02_180902) do
     t.bigint "enterprise_id", null: false
     t.date "issue_date"
     t.string "reason_code", null: false
+    t.bigint "referenced_sunat_document_id"
     t.bigint "sale_id", null: false
     t.string "status", default: "pending", null: false
     t.decimal "subtotal", precision: 12, scale: 2, default: "0.0"
@@ -125,6 +126,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_02_180902) do
     t.index ["created_by_id"], name: "index_credit_notes_on_created_by_id"
     t.index ["enterprise_id", "code"], name: "index_credit_notes_on_enterprise_id_and_code", unique: true
     t.index ["enterprise_id"], name: "index_credit_notes_on_enterprise_id"
+    t.index ["referenced_sunat_document_id"], name: "index_credit_notes_on_referenced_sunat_document_id"
     t.index ["sale_id"], name: "index_credit_notes_on_sale_id"
   end
 
@@ -612,6 +614,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_02_180902) do
   add_foreign_key "credit_note_items", "credit_notes"
   add_foreign_key "credit_notes", "enterprises"
   add_foreign_key "credit_notes", "sales"
+  add_foreign_key "credit_notes", "sunat_documents", column: "referenced_sunat_document_id"
   add_foreign_key "credit_notes", "users", column: "created_by_id"
   add_foreign_key "customer_quote_installments", "customer_quotes"
   add_foreign_key "customer_quote_items", "customer_quotes"
